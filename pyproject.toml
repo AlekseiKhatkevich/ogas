@@ -9,3 +9,8 @@ dependencies = [
     "faststream[kafka]>=0.5.39",
     "sqlalchemy>=2.0.40",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+]
