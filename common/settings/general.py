@@ -1,11 +1,10 @@
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from common.settings.postgres import PostgresSettings
 
 __all__ = (
     'general_settings',
 )
-
-from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from common.settings.postgres import PostgresSettings
 
 
 class GeneralSettings(

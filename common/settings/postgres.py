@@ -3,5 +3,5 @@ from pydantic_settings import BaseSettings
 
 
 class PostgresSettings(BaseSettings):
-    PG_DSN: PostgresDsn = Field(repr=False)
+    POSTGRES_DSN: PostgresDsn = Field(repr=False, description='Урл БД Postgres,')
 
