@@ -14,4 +14,5 @@ class GeneralSettings(
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8')
 
 
+# noinspection PyArgumentList
 general_settings = GeneralSettings()
