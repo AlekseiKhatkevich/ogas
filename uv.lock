@@ -36,6 +36,35 @@ wheels = [
 ]
 
 [[package]]
+name = "alembic-postgresql-enum"
+version = "1.7.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "alembic" },
+    { name = "sqlalchemy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f9/45/d3a66a8c7604baba5b498727539539120897fd8f931a6c89aa68ff0d7cb3/alembic_postgresql_enum-1.7.0.tar.gz", hash = "sha256:1a12a2b25f3f49440f419821888530496511573875438b6e9a08cbcb8a6f006f", size = 15637, upload-time = "2025-02-20T08:22:36.285Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7d/9a/05d3f24be838af98f52e2a961f1f78f8575091198542a2add5cff7d62ef8/alembic_postgresql_enum-1.7.0-py3-none-any.whl", hash = "sha256:2a64260f3f1ed96f1bf984f55cb838e5d915693b8478b7b6ffea13cc09184ae0", size = 23516, upload-time = "2025-02-20T08:22:34.239Z" },
+]
+
+[[package]]
+name = "alembic-utils"
+version = "0.8.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "alembic" },
+    { name = "flupy" },
+    { name = "parse" },
+    { name = "sqlalchemy" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ec/7a/eae622a97ba1721fd7e420c60060a74852b800ac1fecbaa2e67a35941d6d/alembic_utils-0.8.8.tar.gz", hash = "sha256:99de5d13194f26536bc0322f0c1660020a305015700d8447ccfc20e7d1494e5b", size = 21638, upload-time = "2025-04-10T18:58:13.212Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/dd/01/d55bd80997df2ec1ff2fd40cd3eeadec93c4b3c5492df3c6852b29f9e393/alembic_utils-0.8.8-py3-none-any.whl", hash = "sha256:2c2545dc545833c5deb63bce2c3cde01c1807bf99da5efab2497bc8d817cb86e", size = 31044, upload-time = "2025-04-10T18:58:12.247Z" },
+]
+
+[[package]]
 name = "annotated-types"
 version = "0.7.0"
 source = { registry = "https://pypi.org/simple" }
@@ -122,6 +151,15 @@ wheels = [
 kafka = [
     { name = "aiokafka" },
 ]
+
+[[package]]
+name = "flupy"
+version = "1.2.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/13/ce/18f6d9969416d8c9e0728f042091717606f2cd46d570aff6533ce587e71f/flupy-1.2.1.tar.gz", hash = "sha256:42aab3b4b3eb1984a4616c40d8f049ecdee546eaad9467470731d456dbff7fa4", size = 12346, upload-time = "2024-09-06T19:32:59.179Z" }
 
 [[package]]
 name = "greenlet"
@@ -212,6 +250,8 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "alembic" },
+    { name = "alembic-postgresql-enum" },
+    { name = "alembic-utils" },
     { name = "asyncpg" },
     { name = "faststream", extra = ["kafka"] },
     { name = "pydantic-settings" },
@@ -227,6 +267,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "alembic", specifier = ">=1.15.2" },
+    { name = "alembic-postgresql-enum", specifier = ">=1.7.0" },
+    { name = "alembic-utils", specifier = ">=0.8.8" },
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "faststream", extras = ["kafka"], specifier = ">=0.5.39" },
     { name = "pydantic-settings", specifier = ">=2.9.1" },
@@ -244,6 +286,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f", size = 165727, upload-time = "2025-04-19T11:48:59.673Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/20/12/38679034af332785aac8774540895e234f4d07f7545804097de4b666afd8/packaging-25.0-py3-none-any.whl", hash = "sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484", size = 66469, upload-time = "2025-04-19T11:48:57.875Z" },
+]
+
+[[package]]
+name = "parse"
+version = "1.20.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/4f/78/d9b09ba24bb36ef8b83b71be547e118d46214735b6dfb39e4bfde0e9b9dd/parse-1.20.2.tar.gz", hash = "sha256:b41d604d16503c79d81af5165155c0b20f6c8d6c559efa66b4b695c3e5a0a0ce", size = 29391, upload-time = "2024-06-11T04:41:57.34Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d0/31/ba45bf0b2aa7898d81cbbfac0e88c267befb59ad91a19e36e1bc5578ddb1/parse-1.20.2-py2.py3-none-any.whl", hash = "sha256:967095588cb802add9177d0c0b6133b5ba33b1ea9007ca800e526f42a85af558", size = 20126, upload-time = "2024-06-11T04:41:55.057Z" },
 ]
 
 [[package]]

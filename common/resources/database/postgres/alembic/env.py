@@ -1,3 +1,5 @@
+import alembic_postgresql_enum  # do not remove !
+
 import asyncio
 from logging.config import fileConfig
 
@@ -45,13 +47,13 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    # url = config.get_main_option("sqlalchemy.url")
     url = settings.POSTGRES_DSN.unicode_string()
     context.configure(
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_server_default=True,
     )
 
     with context.begin_transaction():
