@@ -1,5 +1,5 @@
-from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import ENUM
+from sqlalchemy.orm import Mapped, mapped_column
 
 from common.enums.product import ProductUnit
 from common.resources.database.postgres import Base
