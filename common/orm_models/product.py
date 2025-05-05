@@ -4,6 +4,10 @@ from sqlalchemy.orm import Mapped, mapped_column
 from common.enums.product import ProductUnit
 from common.resources.database.postgres import Base
 
+__all__ = (
+    'ProductORM',
+)
+
 
 class ProductORM(Base):
     """
