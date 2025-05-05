@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from pydantic import AfterValidator, BeforeValidator, Field, PositiveInt, PostgresDsn
+from pydantic import AfterValidator, Field, PositiveInt, PostgresDsn
 from pydantic_settings import BaseSettings
 
 

@@ -1,7 +1,14 @@
+from contextlib import aclosing, asynccontextmanager
 from functools import cached_property
+from typing import AsyncGenerator
 
 import pydantic_core
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 
 from common import settings
 
@@ -21,8 +28,20 @@ class Database:
             echo=settings.POSTGRES_ECHO,
             max_overflow=settings.POSTGRES_POOL_OVERFLOW,
             pool_pre_ping=settings.POSTGRES_POOL_PRE_PING,
+            pool_timeout=5,
+            pool_size=settings.POSTGRES_POOL_SIZE,
             **self._kwargs,
         )
+
+    @cached_property
+    def async_sessionmaker(self) -> async_sessionmaker:
+        return async_sessionmaker(self.engine, expire_on_commit=False,)
+
+    @property
+    @asynccontextmanager
+    async def async_session(self) -> AsyncGenerator[AsyncSession]:
+        async with aclosing(self.async_sessionmaker()) as async_session:
+            yield async_session
 
 
 db = Database()
