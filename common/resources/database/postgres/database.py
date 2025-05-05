@@ -3,6 +3,7 @@ from functools import cached_property
 from typing import AsyncGenerator
 
 import pydantic_core
+import ulid
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -30,17 +31,20 @@ class Database:
             pool_pre_ping=settings.POSTGRES_POOL_PRE_PING,
             pool_timeout=5,
             pool_size=settings.POSTGRES_POOL_SIZE,
+            connect_args={
+                'prepared_statement_name_func': lambda: f'__asyncpg_{ulid.ULID()}__',
+            },
             **self._kwargs,
         )
 
     @cached_property
-    def async_sessionmaker(self) -> async_sessionmaker:
+    def _async_sessionmaker(self) -> async_sessionmaker:
         return async_sessionmaker(self.engine, expire_on_commit=False,)
 
     @property
     @asynccontextmanager
     async def async_session(self) -> AsyncGenerator[AsyncSession]:
-        async with aclosing(self.async_sessionmaker()) as async_session:
+        async with aclosing(self._async_sessionmaker()) as async_session:
             yield async_session
 
 
