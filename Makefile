@@ -4,8 +4,8 @@ SHELL := /bin/bash
 
 #all: install_packages_dev
 
-down := -1
-up := head
+postgres_downgrade_db: down = -1
+postgres_upgrade_db: up = head
 
 help:
 	@cat README.md
