@@ -1,21 +1,16 @@
-import alembic_postgresql_enum  # do not remove !
-from alembic.operations import ops
-from alembic.autogenerate import rewriter
 import asyncio
 from logging.config import fileConfig
 
-from sqlalchemy import Column, pool
+import alembic_postgresql_enum  # do not remove !
+from alembic import context
+from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from alembic import context
-
 from common import settings
+from common.orm_models import *  # Do not remove !!!
 from common.resources.database.postgres import Base
-
-from sqlalchemy.sql.sqltypes import Boolean, Enum, Integer, String
-
-from common.orm_models import *   # Do not remove !!!
+from common.resources.database.postgres.alembic.utils.rewriters import writer
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -36,46 +31,6 @@ target_metadata = Base.metadata
 # can be acquired:
 # my_important_option = config.get_main_option("my_important_option")
 # ... etc.
-
-
-writer = rewriter.Rewriter()
-
-
-@writer.rewrites(ops.CreateTableOp)
-def order_columns(context, revision, op):
-
-    """
-    https://www.cybertec-postgresql.com/en/type-alignment-padding-bytes-no-space-waste-in-postgresql/
-    """
-    # special_names = {"id": -100, "created_at": 1001, "updated_at": 1002}
-    #  номер -кол-во байт (alignment)
-    # column_type_weights = {
-    #     String: 1,
-    #     Boolean: 4,
-    #     Enum: 1,
-    #     Integer: 4,
-    # }
-    columns_with_weights = []
-    for col in op.columns:
-        if isinstance(col, Column):
-            print(f'Col is isinstance Column')
-            print(f'Col type is {col.type}')
-            if isinstance(col.type, (String, Enum,)):
-                weight = 1
-            elif isinstance(col.type, (Boolean, Integer,)):
-                weight = 4
-            else:
-                weight = -999
-            print(f'weight is {weight}')
-            columns_with_weights.append((weight, col.copy()))
-
-    print(f'Columns with weight {columns_with_weights}')
-    columns = [
-        col for idx, col in sorted(columns_with_weights, key=lambda entry: entry[0], reverse=True)
-    ]
-    print(f'Sorted columns {columns}')
-    return ops.CreateTableOp(
-        op.table_name, columns, schema=op.schema, **op.kw)
 
 
 extra_common_kwargs = dict(

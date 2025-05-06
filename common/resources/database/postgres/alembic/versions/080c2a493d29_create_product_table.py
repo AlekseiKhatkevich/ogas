@@ -1,8 +1,8 @@
-"""Add product table
+"""Create Product table
 
-Revision ID: 3b71ca806938
+Revision ID: 080c2a493d29
 Revises: 
-Create Date: 2025-05-05 16:13:08.303908
+Create Date: 2025-05-06 15:02:30.247969
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '3b71ca806938'
+revision: str = '080c2a493d29'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -26,7 +26,7 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.TEXT(), nullable=False),
     sa.Column('unit', postgresql.ENUM('BOX', 'PACKET', 'PLASTIC_BOTTLE', 'GLASS_BOTTLE', 'PALLET', 'IN_BULK', 'CONTAINER', 'CISTERN', 'WITHOUT_PACKAGE', name='productunit', create_type=False), nullable=False),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_product'))
+    sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
 
