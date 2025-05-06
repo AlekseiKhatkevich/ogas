@@ -46,7 +46,7 @@ def order_columns(context: 'MigrationContext', revision: tuple, op: ops.CreateTa
             else:
                 raise NotImplementedError(f'Please add column type {col.type} as it is unknown for now.')
 
-            columns_with_weights.append((weight, col.copy()))
+            columns_with_weights.append((weight, col.copy(),))
 
     columns = [
         col for _, col in sorted(columns_with_weights, key=lambda entry: entry[0], reverse=True)

@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase
 
 
+
 class Base(AsyncAttrs, DeclarativeBase):
     metadata = MetaData(naming_convention={
         'ix': 'ix_%(column_0_label)s',
@@ -18,4 +19,5 @@ class Base(AsyncAttrs, DeclarativeBase):
         datetime.datetime: TIMESTAMP(timezone=True),
         datetime.time: TIME(timezone=True),
         str: TEXT,
+        # ulid.ULID: ULID,  # pgx_ulid
     }
