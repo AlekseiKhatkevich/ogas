@@ -1,3 +1,5 @@
+import enum
+
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -19,7 +21,7 @@ class ProductORM(Base):
     name: Mapped[str]
     # category
     # standart
-    unit: Mapped[ENUM] = mapped_column(ENUM(ProductUnit, validate_strings=True))
+    unit: Mapped[enum.Enum] = mapped_column(ENUM(ProductUnit, validate_strings=True))
 
     def __repr__(self):
         return f'1 {self.unit} of {self.name}'
