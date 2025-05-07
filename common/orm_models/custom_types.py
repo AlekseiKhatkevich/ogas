@@ -3,6 +3,7 @@ from sqlalchemy.types import UserDefinedType
 
 
 class ULID(UserDefinedType):
+    """Для типа ULID (аналог UUID)."""
     cache_ok = True
 
     def get_col_spec(self, **kw):

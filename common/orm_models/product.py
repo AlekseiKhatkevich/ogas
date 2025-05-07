@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
 from common.enums.product import ProductUnit
+from common.orm_models.mixins import TimestampMixin
 from common.resources.database.postgres import Base
 
 __all__ = (
@@ -12,7 +13,7 @@ __all__ = (
 )
 
 
-class ProductORM(Base):
+class ProductORM(TimestampMixin, Base):
     """
     Продукт.
     """
