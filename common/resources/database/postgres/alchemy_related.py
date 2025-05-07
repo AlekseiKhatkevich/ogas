@@ -2,7 +2,7 @@ import datetime
 
 import ulid
 from sqlalchemy import MetaData, TEXT
-from sqlalchemy.dialects.postgresql import TIME, TIMESTAMP
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, declared_attr
 
@@ -18,10 +18,11 @@ class Base(AsyncAttrs, DeclarativeBase):
         'pk': 'pk_%(table_name)s',
     })
     type_annotation_map = {
-        datetime.datetime: TIMESTAMP(timezone=True),
-        datetime.time: TIME(timezone=True),
+        datetime.datetime: postgresql.TIMESTAMP(timezone=True),
+        datetime.time: postgresql.TIME(timezone=True),
         str: TEXT,
         ulid.ULID: ULID_TYPE_FIELD,  # pgx_ulid
+        list[str]: postgresql.ARRAY[TEXT]
     }
 
     # noinspection PyNestedDecorators

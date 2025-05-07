@@ -11,11 +11,13 @@ class TimestampMixin:
     created_at: Mapped[datetime.datetime] = mapped_column(
         server_default=func.Now(),
         nullable=False,
+        comment='Время создания.',
     )
     updated_at: Mapped[datetime.datetime] = mapped_column(
         nullable=True,
         onupdate=func.Now(),
         server_onupdate=FetchedValue(),
+        comment='Время обновления.',
     )
     __mapper_args__ = {'eager_defaults': True}
 
@@ -33,5 +35,6 @@ class ActiveMixin:
         return Column(
             Boolean,
             nullable=False,
-            server_default=true() if cls.default_is_active else false()
+            server_default=true() if cls.default_is_active else false(),
+            comment='Признак активности.'
         )
