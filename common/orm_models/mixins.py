@@ -24,16 +24,7 @@ class ActiveMixin:
     """
     Для добавления поля is_active.
     """
-
-    def __init_subclass__(cls, default_is_active:bool = True, **kwargs) -> None:
-        super().__init_subclass__(**kwargs)
-        cls.default_is_active = default_is_active
-
-    default_is_active: bool
-    # is_active: Mapped[bool] = mapped_column(
-    #     default=True,
-    #     nullable=False,
-    # )
+    default_is_active: bool = True
 
     # noinspection PyNestedDecorators
     @declared_attr
@@ -41,7 +32,6 @@ class ActiveMixin:
     def is_active(cls):
         return Column(
             Boolean,
-            # default=cls.default_is_active,
             nullable=False,
             server_default=true() if cls.default_is_active else false()
         )

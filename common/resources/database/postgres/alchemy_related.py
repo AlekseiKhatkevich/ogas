@@ -4,7 +4,7 @@ import ulid
 from sqlalchemy import MetaData, TEXT
 from sqlalchemy.dialects.postgresql import TIME, TIMESTAMP
 from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase, declared_attr
 
 from common.orm_models.custom_types import ULID as ULID_TYPE_FIELD
 
@@ -23,3 +23,9 @@ class Base(AsyncAttrs, DeclarativeBase):
         str: TEXT,
         ulid.ULID: ULID_TYPE_FIELD,  # pgx_ulid
     }
+
+    # noinspection PyNestedDecorators
+    @declared_attr.directive
+    @classmethod
+    def __tablename__(cls) -> str:
+        return cls.__name__.rstrip('ORM').lower()

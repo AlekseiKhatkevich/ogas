@@ -24,3 +24,11 @@ install_packages_prod: ## Устанавливает все пакеты кро�
 
 install_packages_dev: ## Устанавливает все пакеты в том числе и dev зависимостей
 	uv sync --frozen
+
+postgres_migrations_check: ## Проверка не примененных изменений в Постгресе.
+	@uv run alembic check && \
+	echo "Command succeeded" || \
+	{ exit 1; }
+
+print:
+	@cat $(MAKEFILE_LIST) | sed 's/^/    /'  # Indent each line for better readability

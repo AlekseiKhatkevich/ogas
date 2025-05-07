@@ -1,4 +1,5 @@
 import enum
+
 import sqlalchemy as sa
 import ulid
 from sqlalchemy.dialects.postgresql import ENUM
