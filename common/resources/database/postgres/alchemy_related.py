@@ -1,10 +1,12 @@
 import datetime
 
+import ulid
 from sqlalchemy import MetaData, TEXT
 from sqlalchemy.dialects.postgresql import TIME, TIMESTAMP
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase
 
+from common.orm_models.custom_types import ULID as ULID_TYPE_FIELD
 
 
 class Base(AsyncAttrs, DeclarativeBase):
@@ -13,11 +15,11 @@ class Base(AsyncAttrs, DeclarativeBase):
         'uq': 'uq_%(table_name)s_%(column_0_name)s',
         'ck': 'ck_%(table_name)s_%(constraint_name)s',
         'fk': 'fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s',
-        'pk': 'pk_%(table_name)s'
+        'pk': 'pk_%(table_name)s',
     })
     type_annotation_map = {
         datetime.datetime: TIMESTAMP(timezone=True),
         datetime.time: TIME(timezone=True),
         str: TEXT,
-        # ulid.ULID: ULID,  # pgx_ulid
+        ulid.ULID: ULID_TYPE_FIELD,  # pgx_ulid
     }
