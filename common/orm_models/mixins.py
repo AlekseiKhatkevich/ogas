@@ -15,9 +15,9 @@ class TimestampMixin:
     updated_at: Mapped[datetime.datetime] = mapped_column(
         nullable=True,
         onupdate=func.Now(),
-        # server_default=func.Now(),
         server_onupdate=FetchedValue(),
     )
+    __mapper_args__ = {'eager_defaults': True}
 
 
 class ActiveMixin:
