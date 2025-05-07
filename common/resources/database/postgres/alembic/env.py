@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from common import settings
 from common.orm_models import *  # Do not remove !!!
+from common.orm_models.custom_types import ULID
 from common.resources.database.postgres import Base
 from common.resources.database.postgres.alembic.utils.rewriters import writer
 
@@ -36,6 +37,7 @@ target_metadata = Base.metadata
 extra_common_kwargs = dict(
         compare_server_default=True,
         process_revision_directives=writer,
+        user_module_prefix="common.orm_models.custom_types.",
     )
 
 
@@ -65,6 +67,11 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection: Connection) -> None:
+    #  Регистрация кастомных типов, чтобы не получать
+    #  SAWarning: Did not recognize type 'ulid' of column 'id'
+    #  https://github.com/sqlalchemy/alembic/discussions/1324
+    connection.dialect.ischema_names['ulid'] = ULID
+
     context.configure(
         connection=connection,
         target_metadata=target_metadata,

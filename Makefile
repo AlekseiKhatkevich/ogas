@@ -26,9 +26,7 @@ install_packages_dev: ## Устанавливает все пакеты в то�
 	uv sync --frozen
 
 postgres_migrations_check: ## Проверка не примененных изменений в Постгресе.
-	@uv run alembic check && \
-	echo "Command succeeded" || \
-	{ exit 1; }
+	@uv run alembic check || exit 1
 
-print:
-	@cat $(MAKEFILE_LIST) | sed 's/^/    /'  # Indent each line for better readability
+print: ##  Вывод содержимого Makefile в консоль
+	@cat $(MAKEFILE_LIST) | sed 's/^/    /'
