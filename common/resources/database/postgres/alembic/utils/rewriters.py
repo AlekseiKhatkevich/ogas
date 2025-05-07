@@ -3,7 +3,15 @@ from typing import TYPE_CHECKING
 from alembic.autogenerate import rewriter
 from alembic.operations import ops
 from sqlalchemy import Column
-from sqlalchemy.sql.sqltypes import Boolean, Enum, Integer, String, UUID
+from sqlalchemy.sql.sqltypes import (
+    ARRAY,
+    Boolean,
+    Enum,
+    Integer,
+    String,
+    UUID,
+    TIMESTAMP,
+)
 
 from common.orm_models.custom_types import ULID
 
@@ -14,7 +22,9 @@ writer = rewriter.Rewriter()
 
 one_byte_alignment_types = (String, Enum,)
 four_byte_alignment_types = (Boolean, Integer,)
-sixteen_byte_alignment_types = (ULID, UUID, )
+eight_byte_alignment_types = (TIMESTAMP,)
+sixteen_byte_alignment_types = (ULID, UUID,)
+twentyfour_byte_alignment_types = (ARRAY,)  # Array 24b + summ of all subtypes
 
 
 @writer.rewrites(ops.CreateTableOp)
@@ -46,8 +56,12 @@ def order_columns(context: 'MigrationContext', revision: tuple, op: ops.CreateTa
                 weight = 1
             elif isinstance(col.type, four_byte_alignment_types):
                 weight = 4
+            elif isinstance(col.type, eight_byte_alignment_types):
+                weight = 8
             elif isinstance(col.type, sixteen_byte_alignment_types):
                 weight = 16
+            elif isinstance(col.type, twentyfour_byte_alignment_types):
+                weight = 24
             else:
                 raise NotImplementedError(f'Please add column type {col.type} as it is unknown for now.')
 

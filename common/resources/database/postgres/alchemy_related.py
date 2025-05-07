@@ -4,6 +4,7 @@ import ulid
 from sqlalchemy import MetaData, TEXT
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import DeclarativeBase, declared_attr
 
 from common.orm_models.custom_types import ULID as ULID_TYPE_FIELD
@@ -22,7 +23,7 @@ class Base(AsyncAttrs, DeclarativeBase):
         datetime.time: postgresql.TIME(timezone=True),
         str: TEXT,
         ulid.ULID: ULID_TYPE_FIELD,  # pgx_ulid
-        list[str]: postgresql.ARRAY[TEXT]
+        list[str]: MutableList.as_mutable(postgresql.ARRAY(TEXT))
     }
 
     # noinspection PyNestedDecorators
