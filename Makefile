@@ -7,8 +7,8 @@ SHELL := /bin/bash
 postgres_downgrade_db: down = -1
 postgres_upgrade_db: up = head
 
-help:
-	@cat README.md
+help:  ## help as usual
+	uvx --no-cache --no-progress --from rich-cli rich README.md --theme monokai --hyperlinks --pager
 
 postgres_migration:  ## Создает файл миграции с изменениями в моделях
 	uv run alembic revision --autogenerate -m "$(message)"
