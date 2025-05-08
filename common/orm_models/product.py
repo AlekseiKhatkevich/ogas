@@ -1,13 +1,12 @@
 import enum
 
-import sqlalchemy as sa
-import ulid
 from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column
 
 from common.enums.product import ProductUnit
 from common.orm_models.mixins import TimestampMixin
 from common.resources.database.postgres import Base
+from common.resources.database.postgres.alchemy_related import ULID_PK
 
 __all__ = (
     'ProductORM',
@@ -20,10 +19,7 @@ class ProductORM(TimestampMixin, Base):
     """
     __tablename__ = 'product'
 
-    id: Mapped[ulid.ULID] = mapped_column(
-        primary_key=True,
-        server_default=sa.func.gen_monotonic_ulid(),
-    )
+    id: Mapped[ULID_PK]
     name: Mapped[str] = mapped_column(
         comment='Наименование продукта.',
     )

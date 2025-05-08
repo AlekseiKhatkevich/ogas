@@ -1,6 +1,3 @@
-from sqlalchemy import TEXT
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import Mapped, mapped_column
 
 from common.orm_models.mixins import ActiveMixin, TimestampMixin
@@ -13,7 +10,7 @@ __all__ = (
 
 class StandardORM(TimestampMixin, ActiveMixin, Base):
     """
-    Стандарт продукта
+    Стандарт продукта.
     """
     code: Mapped[str] = mapped_column(
         primary_key=True,
@@ -23,7 +20,6 @@ class StandardORM(TimestampMixin, ActiveMixin, Base):
         comment='Краткое описание стандарта.',
     )
     oks_code: Mapped[list[str]] = mapped_column(
-        # MutableList.as_mutable(ARRAY(TEXT)),
         comment='Код ОКС.'
     )
 

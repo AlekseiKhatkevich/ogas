@@ -13,8 +13,7 @@ class TimestampMixin:
         nullable=False,
         comment='Время создания.',
     )
-    updated_at: Mapped[datetime.datetime] = mapped_column(
-        nullable=True,
+    updated_at: Mapped[datetime.datetime | None] = mapped_column(
         onupdate=func.Now(),
         server_onupdate=FetchedValue(),
         comment='Время обновления.',

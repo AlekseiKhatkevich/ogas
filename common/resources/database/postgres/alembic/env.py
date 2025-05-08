@@ -12,6 +12,7 @@ from common.orm_models import *  # Do not remove !!!
 from common.orm_models.custom_types import ULID
 from common.resources.database.postgres import Base
 from common.resources.database.postgres.alembic.utils.rewriters import writer
+from common.utils import get_all_subclasses
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -41,6 +42,19 @@ extra_common_kwargs = dict(
     )
 
 
+def check_all_column_comments() -> None:
+    """
+    Проверяем чтобы все поля имели комменты.
+    """
+    for subclass in get_all_subclasses(Base):
+        # noinspection PyTypeChecker
+        for column in subclass.__table__.columns:
+            if column.comment is None:
+                raise AttributeError(
+                    f'Comment in column "{column.name}" in model {subclass.__name__} is not defined.'
+                )
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -51,7 +65,6 @@ def run_migrations_offline() -> None:
 
     Calls to context.execute() here emit the given string to the
     script output.
-
     """
     url = settings.POSTGRES_DSN.unicode_string()
     context.configure(
@@ -71,6 +84,7 @@ def do_run_migrations(connection: Connection) -> None:
     #  SAWarning: Did not recognize type 'ulid' of column 'id'
     #  https://github.com/sqlalchemy/alembic/discussions/1324
     connection.dialect.ischema_names['ulid'] = ULID
+    check_all_column_comments()
 
     context.configure(
         connection=connection,

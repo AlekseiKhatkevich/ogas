@@ -1,13 +1,22 @@
 import datetime
 
 import ulid
-from sqlalchemy import MetaData, TEXT
+from sqlalchemy import MetaData, TEXT, func
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.ext.mutable import MutableList
-from sqlalchemy.orm import DeclarativeBase, declared_attr
+from sqlalchemy.orm import DeclarativeBase, declared_attr, mapped_column
+from typing_extensions import Annotated
 
 from common.orm_models.custom_types import ULID as ULID_TYPE_FIELD
+
+ULID_PK = Annotated[
+    ulid.ULID,
+    mapped_column(
+        primary_key=True,
+        server_default=func.gen_monotonic_ulid(),
+        comment='Primary key :: ULID.',
+    ),]
 
 
 class Base(AsyncAttrs, DeclarativeBase):
@@ -23,7 +32,7 @@ class Base(AsyncAttrs, DeclarativeBase):
         datetime.time: postgresql.TIME(timezone=True),
         str: TEXT,
         ulid.ULID: ULID_TYPE_FIELD,  # pgx_ulid
-        list[str]: MutableList.as_mutable(postgresql.ARRAY(TEXT))
+        list[str]: MutableList.as_mutable(postgresql.ARRAY(TEXT)),
     }
 
     # noinspection PyNestedDecorators
