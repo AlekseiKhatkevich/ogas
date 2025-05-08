@@ -33,7 +33,7 @@ class ProductORM(TimestampMixin, Base):
         ForeignKey('standard.code'),
         comment='Код стандарта, например ГОСТ ХХ-ХХХ',
     )
-    standard: Mapped['StandardORM'] = relationship(back_populates='products')
+    standard: Mapped['StandardORM'] = relationship(back_populates='products', innerjoin=True)
 
     def __repr__(self):
         return f'1 {self.unit} of {self.name} acc. {self.standard_code}.'

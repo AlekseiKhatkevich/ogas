@@ -25,4 +25,4 @@ class StandardORM(TimestampMixin, ActiveMixin, Base):
     products: Mapped[list['ProductORM']] = relationship(back_populates='standard')
 
     def __repr__(self) -> str:
-        return self.code
+        return f'{self.__class__.__name__}({self.code})'
