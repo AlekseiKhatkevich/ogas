@@ -7,8 +7,19 @@ SHELL := /bin/bash
 postgres_downgrade_db: down = -1
 postgres_upgrade_db: up = head
 
+OS := $(shell uname)
+
+ENVIRONMENT ?= DEVELOPMENT
+ENVIRONMENT := $(ENVIRONMENT)
+ifeq ($(ENVIRONMENT),PRODUCTION)
+    NO_CACHE_FLAG = --no-cache
+else
+    NO_CACHE_FLAG =
+endif
+
+
 help:  ## help as usual
-	uvx --no-cache --no-progress --from rich-cli rich README.md --theme monokai --hyperlinks --pager
+	uvx $(NO_CACHE_FLAG) --no-progress --from rich-cli rich README.md --theme monokai --hyperlinks --pager
 
 postgres_migration:  ## Создает файл миграции с изменениями в моделях
 	uv run alembic revision --autogenerate -m "$(message)"

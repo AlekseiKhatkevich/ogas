@@ -38,13 +38,13 @@ class Database:
         )
 
     @cached_property
-    def _async_sessionmaker(self) -> async_sessionmaker:
+    def async_sessionmaker(self) -> async_sessionmaker:
         return async_sessionmaker(self.engine, expire_on_commit=False,)
 
     @property
     @asynccontextmanager
     async def async_session(self) -> AsyncGenerator[AsyncSession]:
-        async with aclosing(self._async_sessionmaker()) as async_session:
+        async with aclosing(self.async_sessionmaker()) as async_session:
             yield async_session
 
 

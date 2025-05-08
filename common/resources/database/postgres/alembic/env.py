@@ -51,7 +51,7 @@ def check_all_column_comments() -> None:
         for column in subclass.__table__.columns:
             if column.comment is None:
                 raise AttributeError(
-                    f'Comment in column "{column.name}" in model {subclass.__name__} is not defined.'
+                    f'Comment on column "{column.name}" in model "{subclass.__name__}" is not defined.'
                 )
 
 

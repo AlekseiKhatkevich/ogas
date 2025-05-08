@@ -1,7 +1,8 @@
 import enum
 
+from sqlalchemy import ForeignKey
 from sqlalchemy.dialects.postgresql import ENUM
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.enums.product import ProductUnit
 from common.orm_models.mixins import TimestampMixin
@@ -24,11 +25,15 @@ class ProductORM(TimestampMixin, Base):
         comment='Наименование продукта.',
     )
     # category
-    # standart
     unit: Mapped[enum.Enum] = mapped_column(
         ENUM(ProductUnit, validate_strings=True),
         comment='Категория продукта',
     )
+    standard_code: Mapped[str] = mapped_column(
+        ForeignKey('standard.code'),
+        comment='Код стандарта, например ГОСТ ХХ-ХХХ',
+    )
+    standard: Mapped['StandardORM'] = relationship(back_populates='products')
 
     def __repr__(self):
-        return f'1 {self.unit} of {self.name}'
+        return f'1 {self.unit} of {self.name} acc. {self.standard_code}.'
