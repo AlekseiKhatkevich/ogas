@@ -30,6 +30,7 @@ class CategoryORM(TimestampMixin, Base):
     products: Mapped[list['ProductORM']] = relationship(
         secondary='category_association_table',
         back_populates='categories',
+        passive_deletes=True,
     )
 
     def __repr__(self):

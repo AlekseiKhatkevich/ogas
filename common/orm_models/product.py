@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, TEXT, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.enums.product import ProductUnit
@@ -19,19 +19,29 @@ class ProductORM(TimestampMixin, Base):
 
     id: Mapped[ULID_PK]
     name: Mapped[str] = mapped_column(
+        # TEXT(collation="C"),
         comment='Наименование продукта.',
     )
     unit: Mapped[ProductUnit] = mapped_column(
-        comment='Категория продукта',
+        comment='Фасовка продукта.',
     )
     standard_code: Mapped[str] = mapped_column(
-        ForeignKey('standard.code', ondelete='RESTRICT',),
+        ForeignKey('standard.code', ondelete='RESTRICT', ),
         comment='Код стандарта, например ГОСТ ХХ-ХХХ',
     )
-    standard: Mapped['StandardORM'] = relationship(back_populates='products', innerjoin=True,)
+    standard: Mapped['StandardORM'] = relationship(
+        back_populates='products',
+        innerjoin=True,
+        passive_deletes=True,
+    )
     categories: Mapped[list['CategoryORM']] = relationship(
         secondary='category_association_table',
         back_populates='products',
+        cascade='all, delete',
+    )
+
+    __table_args__ = (
+        UniqueConstraint('name', 'unit', 'standard_code',),
     )
 
     def __repr__(self):
