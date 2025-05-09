@@ -33,7 +33,7 @@ postgres_downgrade_db: ## Откатывает 1 миграцию назад о�
 install_packages_prod: ## Устанавливает все пакеты кроме dev зависимостей
 	uv sync --no-dev --frozen --no-cache
 
-install_packages_dev: ## Устанавливает все пакеты в том числе и dev зависимостей
+install_packages_dev: ## Устанавливает все пакеты в том числе и dev зависимости
 	uv sync --frozen
 
 postgres_migrations_check: ## Проверка не примененных изменений в Постгресе

@@ -1,4 +1,6 @@
 import datetime
+import enum
+import typing
 
 import ulid
 from sqlalchemy import MetaData, TEXT, func
@@ -33,6 +35,8 @@ class Base(AsyncAttrs, DeclarativeBase):
         str: TEXT,
         ulid.ULID: ULID_TYPE_FIELD,  # pgx_ulid
         list[str]: MutableList.as_mutable(postgresql.ARRAY(TEXT)),
+        enum.Enum: postgresql.ENUM(validate_strings=True),
+        typing.Literal: postgresql.ENUM(validate_strings=True),
     }
 
     # noinspection PyNestedDecorators

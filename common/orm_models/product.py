@@ -1,7 +1,4 @@
-import enum
-
 from sqlalchemy import ForeignKey
-from sqlalchemy.dialects.postgresql import ENUM
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.enums.product import ProductUnit
@@ -24,9 +21,9 @@ class ProductORM(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(
         comment='Наименование продукта.',
     )
+    # CASCADE везде добавить!
     # category
-    unit: Mapped[enum.Enum] = mapped_column(
-        ENUM(ProductUnit, validate_strings=True),
+    unit: Mapped[ProductUnit] = mapped_column(
         comment='Категория продукта',
     )
     standard_code: Mapped[str] = mapped_column(

@@ -1,4 +1,4 @@
-from sqlalchemy import Computed, VARCHAR
+from sqlalchemy import Computed, VARCHAR, Table, Column, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from common.orm_models.mixins import TimestampMixin
@@ -6,12 +6,13 @@ from common.resources.database.postgres import Base
 
 __all__ = (
     'CategoryORM',
+    'category_association_table',
 )
 
 
 class CategoryORM(TimestampMixin, Base):
     """
-    Категория продукта (напитки, одежда, итд)
+    Категория продукта (напитки, одежда, итд).
     """
     code: Mapped[str] = mapped_column(
         VARCHAR(length=12),
@@ -20,7 +21,7 @@ class CategoryORM(TimestampMixin, Base):
     )
     name: Mapped[str] = mapped_column(
         comment='Наименование категории продукта.',
-    )#№ несколько категорий на 1 продукт
+    )
     main_prefix: Mapped[str] = mapped_column(
         VARCHAR(length=2),
         Computed('code::varchar(2)'),
@@ -29,3 +30,19 @@ class CategoryORM(TimestampMixin, Base):
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.code})'
+
+
+category_association_table = Table(
+    'category_association_table',
+    Base.metadata,
+    Column(
+        'product_id',
+        ForeignKey('product.id', ondelete='CASCADE', ),
+        primary_key=True,
+    ),
+    Column(
+        "category_code",
+        ForeignKey('category.code', ondelete='CASCADE',),
+        primary_key=True,
+    ),
+)
