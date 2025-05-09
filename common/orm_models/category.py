@@ -1,5 +1,5 @@
 from sqlalchemy import Computed, VARCHAR, Table, Column, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.orm_models.mixins import TimestampMixin
 from common.resources.database.postgres import Base
@@ -26,6 +26,10 @@ class CategoryORM(TimestampMixin, Base):
         VARCHAR(length=2),
         Computed('code::varchar(2)'),
         comment='Главный префикс кода (главная категория).',
+    )
+    products: Mapped[list['ProductORM']] = relationship(
+        secondary='category_association_table',
+        back_populates='categories',
     )
 
     def __repr__(self):

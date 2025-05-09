@@ -21,16 +21,18 @@ class ProductORM(TimestampMixin, Base):
     name: Mapped[str] = mapped_column(
         comment='Наименование продукта.',
     )
-    # CASCADE везде добавить!
-    # category
     unit: Mapped[ProductUnit] = mapped_column(
         comment='Категория продукта',
     )
     standard_code: Mapped[str] = mapped_column(
-        ForeignKey('standard.code'),
+        ForeignKey('standard.code', ondelete='RESTRICT',),
         comment='Код стандарта, например ГОСТ ХХ-ХХХ',
     )
-    standard: Mapped['StandardORM'] = relationship(back_populates='products', innerjoin=True)
+    standard: Mapped['StandardORM'] = relationship(back_populates='products', innerjoin=True,)
+    categories: Mapped[list['CategoryORM']] = relationship(
+        secondary='category_association_table',
+        back_populates='products',
+    )
 
     def __repr__(self):
         return f'1 {self.unit} of {self.name} acc. {self.standard_code}.'
