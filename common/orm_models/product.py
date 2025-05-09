@@ -1,4 +1,4 @@
-from sqlalchemy import ForeignKey, TEXT, UniqueConstraint
+from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.enums.product import ProductUnit
@@ -19,7 +19,6 @@ class ProductORM(TimestampMixin, Base):
 
     id: Mapped[ULID_PK]
     name: Mapped[str] = mapped_column(
-        # TEXT(collation="C"),
         comment='Наименование продукта.',
     )
     unit: Mapped[ProductUnit] = mapped_column(
