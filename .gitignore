@@ -338,3 +338,4 @@ cython_debug/
 
  #  Добавлено вручную
 /*.env
+/notes.txt
