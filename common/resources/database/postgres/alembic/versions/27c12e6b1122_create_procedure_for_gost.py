@@ -36,7 +36,7 @@ BEGIN
     );
 
 COPY tmp (code, description, is_active, oks_code)
-FROM PROGRAM 'curl -L --compressed  https://www.rst.gov.ru/opendata/7706406291-nationalstandards/data-20240808-structure-20220330.csv'
+FROM PROGRAM 'curl -L -m 10 --compressed  https://www.rst.gov.ru/opendata/7706406291-nationalstandards/data-20240808-structure-20220330.csv'
 WITH
     delimiter ';'
     csv
