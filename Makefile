@@ -45,3 +45,6 @@ prefect_ui: ## UI Prefect
 
 prefect_server: ## Prefect server start
 	 uv run prefect server start
+
+test: ## Run pytest
+	uv run pytest -vv
