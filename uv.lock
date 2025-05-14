@@ -732,6 +732,7 @@ dependencies = [
     { name = "asyncpg" },
     { name = "faststream", extra = ["kafka"] },
     { name = "prefect" },
+    { name = "prefect-docker" },
     { name = "pydantic-settings" },
     { name = "python-ulid", extra = ["pydantic"] },
     { name = "sqlalchemy", extra = ["asyncio"] },
@@ -750,6 +751,7 @@ requires-dist = [
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "faststream", extras = ["kafka"], specifier = ">=0.5.40" },
     { name = "prefect", specifier = ">=3.4.1" },
+    { name = "prefect-docker", specifier = ">=0.6.4" },
     { name = "pydantic-settings", specifier = ">=2.9.1" },
     { name = "python-ulid", extras = ["pydantic"], specifier = ">=3.0.0" },
     { name = "sqlalchemy", extras = ["asyncio"], specifier = ">=2.0.40" },
@@ -893,6 +895,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a9/08/0f25d1ad33fef5b7117f061d48855f66396ab28610b4bfd828805d17c3db/prefect-3.4.1.tar.gz", hash = "sha256:8e80a95966daf63e064db57f64682a33be3574baf97dc829e0c708648b311f0d", size = 5501871, upload-time = "2025-05-08T20:52:08.266Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/53/24/8958e77ab1777e6301d027d668f8e3dd3f723df84ead10c51515e9f29c81/prefect-3.4.1-py3-none-any.whl", hash = "sha256:59663b3521b45f6d0bc6cd99409e5c69bd01b2e5b374c18c4c280f6c43feb8e3", size = 5988494, upload-time = "2025-05-08T20:52:04.989Z" },
+]
+
+[[package]]
+name = "prefect-docker"
+version = "0.6.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "docker" },
+    { name = "exceptiongroup" },
+    { name = "prefect" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5d/f0/f01610de78bd8b704c2506f41776475a914bc527039462ce4d9dfa43acb3/prefect_docker-0.6.4.tar.gz", hash = "sha256:b791c1d20c6c68a11e272c9a9e7e89e17a8390993012654f846c6d64393cc564", size = 38099, upload-time = "2025-04-24T19:48:29.139Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/37/e4/f348bbab06c7df61fe2c4a6b965e087828b07bf3bfeb0f5c44ac8e23f83b/prefect_docker-0.6.4-py3-none-any.whl", hash = "sha256:ef162a937aac46a08c02f8359e4af2033f4a991312f62b94b99517fb3234ad56", size = 26894, upload-time = "2025-04-24T19:48:27.764Z" },
 ]
 
 [[package]]

@@ -11,6 +11,7 @@ dependencies = [
     "asyncpg>=0.30.0",
     "faststream[kafka]>=0.5.40",
     "prefect>=3.4.1",
+    "prefect-docker>=0.6.4",
     "pydantic-settings>=2.9.1",
     "python-ulid[pydantic]>=3.0.0",
     "sqlalchemy[asyncio]>=2.0.40",
