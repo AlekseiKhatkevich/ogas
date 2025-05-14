@@ -2,8 +2,6 @@ SHELL := /bin/bash
 .PHONY: all
 .DEFAULT_GOAL := help
 
-#all: install_packages_dev
-
 postgres_downgrade_db: down = -1
 postgres_upgrade_db: up = head
 

@@ -2,7 +2,7 @@ from sqlalchemy import Computed, VARCHAR, Table, Column, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.orm_models.mixins import TimestampMixin
-from common.resources.database.postgres import Base
+from common.resources.database.postgres.alchemy_related import Base
 
 __all__ = (
     'CategoryORM',

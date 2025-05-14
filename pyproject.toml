@@ -3,7 +3,7 @@ name = "ogas"
 version = "0.1.0"
 description = "OGAS"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "alembic>=1.15.2",
     "alembic-postgresql-enum>=1.7.0",
@@ -19,9 +19,11 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "polyfactory>=2.21.0",
     "pytest>=8.3.5",
 ]
 
 [tool.uv]
 python-downloads = "manual"
 python-preference = "only-system"
+
