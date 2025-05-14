@@ -1,7 +1,10 @@
 from common.orm_models import CategoryORM
 from common.testing.factories.sqlalchemy import CategoryFactory
+import pytest
 
 
-def test_person_factory(category_factory: CategoryFactory) -> None:
+@pytest.mark.asyncio
+async def test_person_factory(category_factory: CategoryFactory, save_in_db) -> None:
     person_instance = category_factory.build()
     assert isinstance(person_instance, CategoryORM)
+    await save_in_db(category_factory)
