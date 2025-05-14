@@ -3,8 +3,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.enums.product import ProductUnit
 from common.orm_models.mixins import TimestampMixin
-from common.resources.database.postgres import Base
-from common.resources.database.postgres.alchemy_related import ULID_PK
+from common.resources.database.postgres.alchemy_related import Base, ULID_PK
 
 __all__ = (
     'ProductORM',

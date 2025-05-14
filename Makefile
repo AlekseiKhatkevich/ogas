@@ -41,3 +41,9 @@ postgres_migrations_check: ## Проверка не примененных из�
 
 print: ##  Вывод содержимого Makefile в консоль
 	@cat $(MAKEFILE_LIST) | sed 's/^/    /'
+
+prefect_ui: ## UI Prefect
+	xdg-open http://127.0.0.1:4200
+
+prefect_server: ## Prefect server start
+	 uv run prefect server start

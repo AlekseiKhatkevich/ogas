@@ -376,16 +376,16 @@ wheels = [
 
 [[package]]
 name = "faststream"
-version = "0.5.39"
+version = "0.5.40"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
     { name = "fast-depends" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/86/22/190abd60a6fb38d44c45567556b0cafc7a37eb5919ef0b9a1a37b77678e7/faststream-0.5.39.tar.gz", hash = "sha256:fe13ed5d643043682c19867e918e0edb552755e284cc1c9e3595cf760c335a0c", size = 292976, upload-time = "2025-04-10T07:41:28.451Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ca/e0/813b617aec2bc5524fc25542aeec89fb08efa0262c321f282c3b4546cd7e/faststream-0.5.40.tar.gz", hash = "sha256:ad29ec54213858574fb17fabe9253aba6714696eb597e3a4ccc8bd816d14f25f", size = 294793, upload-time = "2025-05-05T17:52:01.035Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/18/41/ce4c906923492cc93b9cf58ab3136231a3d52b531d3f86f97b5c83ef6e7f/faststream-0.5.39-py3-none-any.whl", hash = "sha256:5928e9e85d3e2a06a0780e068b0ddc1081a13c802789e0684df3971dbcc816e2", size = 392881, upload-time = "2025-04-10T07:41:26.215Z" },
+    { url = "https://files.pythonhosted.org/packages/c5/8b/68cbfa5212db0a72fd9a3f9dc0e34a478870bd4a723f40b755d5742d2913/faststream-0.5.40-py3-none-any.whl", hash = "sha256:abd153ceb77f9806d2cb7d384b0cecc826edfb3f569d21d04199bde50912e9dd", size = 394931, upload-time = "2025-05-05T17:51:59.321Z" },
 ]
 
 [package.optional-dependencies]
@@ -748,7 +748,7 @@ requires-dist = [
     { name = "alembic-postgresql-enum", specifier = ">=1.7.0" },
     { name = "alembic-utils", specifier = ">=0.8.8" },
     { name = "asyncpg", specifier = ">=0.30.0" },
-    { name = "faststream", extras = ["kafka"], specifier = ">=0.5.39" },
+    { name = "faststream", extras = ["kafka"], specifier = ">=0.5.40" },
     { name = "prefect", specifier = ">=3.4.1" },
     { name = "pydantic-settings", specifier = ">=2.9.1" },
     { name = "python-ulid", extras = ["pydantic"], specifier = ">=3.0.0" },
