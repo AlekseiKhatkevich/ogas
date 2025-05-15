@@ -1,5 +1,6 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from common.settings.common import CommonSettings
 from common.settings.postgres import PostgresSettings
 
 __all__ = (
@@ -9,6 +10,7 @@ __all__ = (
 
 class GeneralSettings(
     PostgresSettings,
+    CommonSettings,
     BaseSettings,
 ):
     model_config = SettingsConfigDict(

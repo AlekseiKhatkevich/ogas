@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from common import settings
 from common.orm_models import *  # Do not remove !!!
 from common.orm_models.custom_types import ULID
-from common.resources.database.postgres import Base
+from common.resources.database.postgres.alchemy_related import Base
 from common.resources.database.postgres.alembic.utils.rewriters import writer
 from common.utils import get_all_subclasses
 
