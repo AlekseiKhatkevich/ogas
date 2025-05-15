@@ -18,9 +18,10 @@ class Database:
     def __init__(self, **kwargs) -> None:
         self._kwargs = kwargs
 
-    def __new__(cls, **kwargs):
+    def __new__(cls, **kwargs) -> 'Database':
         if not hasattr(cls, 'instance'):
             cls.instance = super().__new__(cls)
+        # noinspection PyUnresolvedReferences
         return cls.instance
 
     @cached_property
