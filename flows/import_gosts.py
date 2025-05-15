@@ -3,7 +3,7 @@ from sqlalchemy import text
 
 
 @flow(retries=12, retry_delay_seconds=60)
-async def import_gosts():
+async def import_gosts() -> None:
     """
     Импорт данных из внешнего CSV файла в модель standard.
     uv run flows/import_gosts.py

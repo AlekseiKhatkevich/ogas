@@ -10,6 +10,11 @@ class PostgresSettings(BaseSettings):
         Field(repr=False, description='Урл БД Postgres',),
     ]
 
+    POSTGRES_TEST_DSN: Annotated[
+        PostgresDsn,
+        Field(repr=False, description='Урл БД Postgres для тестов',),
+    ] = None
+
     POSTGRES_ECHO: Annotated[
         bool,
         Field(description='Вывод SQL команд в консоль',),
