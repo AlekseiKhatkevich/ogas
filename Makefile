@@ -4,7 +4,8 @@ SHELL := /bin/bash
 
 postgres_downgrade_db: down = -1
 postgres_upgrade_db: up = head
-test: path = ''
+test: path =
+test: args = -vv
 
 OS := $(shell uname)
 
@@ -48,4 +49,4 @@ prefect_server: ## Prefect server start
 	 uv run prefect server start
 
 test: ## Run pytest
-	uv run pytest -vv $(path)
+	uv run pytest $(args) $(path)
