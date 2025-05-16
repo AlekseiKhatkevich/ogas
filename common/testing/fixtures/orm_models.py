@@ -1,4 +1,4 @@
-from typing import Awaitable, Callable, TYPE_CHECKING, TypeVar
+from typing import Awaitable, Callable, TYPE_CHECKING
 
 import pytest
 from polyfactory.pytest_plugin import register_fixture
@@ -9,7 +9,7 @@ import common.testing.factories as factories
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
 
 if TYPE_CHECKING:
-    from common.orm_models import CategoryORM, StandardORM
+    from common.orm_models import CategoryORM, StandardORM, ProductORM
     from common.resources.database.postgres.alchemy_related import Base
     from common.resources.database.postgres.database import Database
 
@@ -38,3 +38,9 @@ async def category_in_db(save_in_db, category_factory: factories.CategoryFactory
 async def standard_in_db(save_in_db, standard_factory: factories.StandardFactory) -> 'StandardORM':
     standard_factory.build()
     return await save_in_db(standard_factory)
+
+
+@pytest.fixture
+async def product_in_db(save_in_db, product_factory: factories.ProductFactory) -> 'ProductORM':
+    product_factory.build()
+    return await save_in_db(product_factory)
