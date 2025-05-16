@@ -15,6 +15,7 @@ if TYPE_CHECKING:
 
 register_fixture(factories.CategoryFactory)
 register_fixture(factories.StandardFactory)
+register_fixture(factories.ProductFactory)
 
 
 @pytest.fixture
