@@ -1,6 +1,6 @@
 import subprocess
-from typing import AsyncGenerator, Awaitable, Callable, TYPE_CHECKING, Type
-
+from typing import AsyncGenerator, Awaitable, Callable, Generator, TYPE_CHECKING, Type
+from _pytest.monkeypatch import MonkeyPatch
 import pytest
 from polyfactory.pytest_plugin import register_fixture
 from sqlalchemy import text
@@ -20,8 +20,7 @@ register_fixture(factories.CategoryFactory)
 
 
 @pytest.fixture(scope='session')
-def monkeysession():
-    from _pytest.monkeypatch import MonkeyPatch
+def monkeysession() -> Generator[MonkeyPatch]:
     mpatch = MonkeyPatch()
     yield mpatch
     mpatch.undo()
@@ -49,6 +48,7 @@ def save_in_db(db: Database) -> Callable[[Type['SQLAlchemyFactory']], Awaitable[
 def augment_postgres_db(monkeysession, settings) -> None:
     test_db = Database(url=orig_settings.POSTGRES_TEST_DSN.unicode_string())
     monkeysession.setattr('common.resources.database.postgres.db', test_db)
+    monkeysession.setenv('POSTGRES_DSN', settings.POSTGRES_TEST_DSN.unicode_string())
 
 
 @pytest.fixture(autouse=True)
@@ -61,6 +61,5 @@ async def truncate_db(db) -> AsyncGenerator[None]:
 
 
 @pytest.fixture(scope='session', autouse=True)
-async def apply_alembic_migrations(augment_postgres_db, monkeysession, settings) -> None:
-    monkeysession.setenv('POSTGRES_DSN', settings.POSTGRES_TEST_DSN.unicode_string())
+async def apply_alembic_migrations(augment_postgres_db) -> None:
     await greenlet_spawn(lambda: subprocess.Popen(['alembic', 'upgrade', 'head']).wait())
