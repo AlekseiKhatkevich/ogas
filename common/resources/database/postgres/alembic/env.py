@@ -7,9 +7,9 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from common import settings
 from common.orm_models import *  # Do not remove !!!
 from common.orm_models.custom_types import ULID
+from common.resources.database.postgres import db
 from common.resources.database.postgres.alchemy_related import Base
 from common.resources.database.postgres.alembic.utils.rewriters import writer
 from common.utils import get_all_subclasses
@@ -41,11 +41,7 @@ extra_common_kwargs = dict(
         user_module_prefix="common.orm_models.custom_types.",
     )
 
-
-def _get_db_url() -> str:
-    from common.resources.database.postgres import db
-    return db.engine.url.render_as_string(hide_password=False)
-    # return settings.POSTGRES_TEST_DSN.unicode_string()
+url = db.engine.url.render_as_string(hide_password=False)
 
 
 def check_all_column_comments() -> None:
@@ -73,7 +69,7 @@ def run_migrations_offline() -> None:
     script output.
     """
     context.configure(
-        url=_get_db_url(),
+        url=url,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -106,7 +102,7 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
 
     """
-    config.set_main_option('sqlalchemy.url', _get_db_url())
+    config.set_main_option('sqlalchemy.url', url)
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",

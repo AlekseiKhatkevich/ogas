@@ -13,7 +13,7 @@ from common.resources.database.postgres.alchemy_related import Base
 from common.resources.database.postgres.database import Database
 
 if TYPE_CHECKING:
-    from pydantic_settings import BaseSettings
+    from common.settings.general import GeneralSettings
     from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
 
 register_fixture(factories.CategoryFactory)
@@ -32,8 +32,8 @@ def db() -> Database:
     return _db
 
 
-@pytest.fixture
-def settings() -> 'BaseSettings':
+@pytest.fixture(scope='session')
+def settings() -> 'GeneralSettings':
     return orig_settings
 
 
@@ -46,7 +46,7 @@ def save_in_db(db: Database) -> Callable[[Type['SQLAlchemyFactory']], Awaitable[
 
 
 @pytest.fixture(autouse=True, scope='session')
-def augment_postgres_db(monkeysession) -> None:
+def augment_postgres_db(monkeysession, settings) -> None:
     test_db = Database(url=orig_settings.POSTGRES_TEST_DSN.unicode_string())
     monkeysession.setattr('common.resources.database.postgres.db', test_db)
 
@@ -61,5 +61,6 @@ async def truncate_db(db) -> AsyncGenerator[None]:
 
 
 @pytest.fixture(scope='session', autouse=True)
-async def apply_alembic_migrations(augment_postgres_db):
+async def apply_alembic_migrations(augment_postgres_db, monkeysession, settings) -> None:
+    monkeysession.setenv('POSTGRES_DSN', settings.POSTGRES_TEST_DSN.unicode_string())
     await greenlet_spawn(lambda: subprocess.Popen(['alembic', 'upgrade', 'head']).wait())

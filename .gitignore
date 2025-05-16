@@ -339,3 +339,4 @@ cython_debug/
  #  Добавлено вручную
 /*.env
 /notes.txt
+/_try.py
