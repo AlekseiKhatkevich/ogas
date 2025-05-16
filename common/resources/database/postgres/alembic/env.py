@@ -42,6 +42,12 @@ extra_common_kwargs = dict(
     )
 
 
+def _get_db_url() -> str:
+    from common.resources.database.postgres import db
+    return db.engine.url.render_as_string(hide_password=False)
+    # return settings.POSTGRES_TEST_DSN.unicode_string()
+
+
 def check_all_column_comments() -> None:
     """
     Проверяем чтобы все поля имели комменты.
@@ -66,9 +72,8 @@ def run_migrations_offline() -> None:
     Calls to context.execute() here emit the given string to the
     script output.
     """
-    url = settings.POSTGRES_DSN.unicode_string()
     context.configure(
-        url=url,
+        url=_get_db_url(),
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
@@ -101,7 +106,7 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
 
     """
-    config.set_main_option('sqlalchemy.url', settings.POSTGRES_DSN.unicode_string())
+    config.set_main_option('sqlalchemy.url', _get_db_url())
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
