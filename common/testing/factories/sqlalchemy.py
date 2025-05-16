@@ -11,5 +11,4 @@ __all__ = (
 
 class CategoryFactory(SQLAlchemyFactory[CategoryORM]):
     main_prefix = Ignore()
-# CategoryFactory.__async_session__ = db.async_sessionmaker()
-# await CategoryFactory.create_async()
+

@@ -1,12 +1,11 @@
 import subprocess
-from typing import AsyncGenerator, Awaitable, Callable, Generator, TYPE_CHECKING, Type
-from _pytest.monkeypatch import MonkeyPatch
+from typing import AsyncGenerator, Generator, TYPE_CHECKING
+
 import pytest
-from polyfactory.pytest_plugin import register_fixture
+from _pytest.monkeypatch import MonkeyPatch
 from sqlalchemy import text
 from sqlalchemy.util import greenlet_spawn
 
-import common.testing.factories as factories
 from common import settings as orig_settings
 from common.resources.database.postgres import db as _db
 from common.resources.database.postgres.alchemy_related import Base
@@ -14,9 +13,6 @@ from common.resources.database.postgres.database import Database
 
 if TYPE_CHECKING:
     from common.settings.general import GeneralSettings
-    from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
-
-register_fixture(factories.CategoryFactory)
 
 
 @pytest.fixture(scope='session')
@@ -34,14 +30,6 @@ def db() -> Database:
 @pytest.fixture(scope='session')
 def settings() -> 'GeneralSettings':
     return orig_settings
-
-
-@pytest.fixture
-def save_in_db(db: Database) -> Callable[[Type['SQLAlchemyFactory']], Awaitable[None]]:
-    async def _inner(factory: Type['SQLAlchemyFactory']) -> None:
-        factory.__async_session__ = db.async_sessionmaker()
-        await factory.create_async()
-    return _inner
 
 
 @pytest.fixture(autouse=True, scope='session')
