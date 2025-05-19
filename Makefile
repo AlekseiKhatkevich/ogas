@@ -50,3 +50,4 @@ prefect_server: ## Prefect server start
 
 test: ## Run pytest
 	uv run pytest $(args) $(path)
+
