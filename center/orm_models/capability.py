@@ -1,10 +1,8 @@
 import ulid
-from sqlalchemy import ForeignKey, UniqueConstraint, CheckConstraint, text
+from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from center.enums import Period
-from center.orm_models import OrganizationORM
-from common.orm_models import ProductORM
 from common.orm_models.mixins import TimestampMixin
 from common.resources.database.postgres.alchemy_related import Base, ULID_PK
 

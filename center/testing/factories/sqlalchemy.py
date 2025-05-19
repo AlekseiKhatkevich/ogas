@@ -3,6 +3,11 @@ from polyfactory import Use
 from center.orm_models import CapabilityORM, OrganizationORM
 from common.testing.factories.sqlalchemy import CustomFactory
 
+__all__ = (
+    'OrganizationFactory',
+    'CapabilityFactory',
+)
+
 
 class OrganizationFactory(CustomFactory[OrganizationORM]):
     __set_relationships__ = True
@@ -12,4 +17,5 @@ class OrganizationFactory(CustomFactory[OrganizationORM]):
 
 
 class CapabilityFactory(CustomFactory[CapabilityORM]):
-    pass
+    __set_relationships__ = True
+    value: int = Use(CustomFactory.__faker__.random_int, min=0)

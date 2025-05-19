@@ -22,5 +22,5 @@ class OrganizationORM(TimestampMixin, ActiveMixin,  Base):
     )
 
     def __repr__(self):
-        return self.name[:50]
+        return f'{self.__class__.__name__}({self.name[:50]})'
 

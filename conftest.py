@@ -1,4 +1,74 @@
+import subprocess
+from typing import AsyncGenerator, Awaitable, Callable, Generator, TYPE_CHECKING
+
+import pytest
+from _pytest.monkeypatch import MonkeyPatch
+from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
+from sqlalchemy import text
+from sqlalchemy.util import greenlet_spawn
+
+from common import settings as orig_settings
+
+if TYPE_CHECKING:
+    from common.resources.database.postgres.alchemy_related import Base
+    from common.resources.database.postgres.database import Database
+    from common.settings.general import GeneralSettings
+
 pytest_plugins = [
     'common.testing.fixtures.orm_models',
     'center.testing.fixtures.orm_models',
 ]
+
+
+@pytest.fixture
+def db():
+    from common.resources.database.postgres import db as _db
+    return _db
+
+
+@pytest.fixture
+def save_in_db[SQLALCHEMY_T: 'Base'](db: 'Database') ->\
+        Callable[[SQLAlchemyFactory[SQLALCHEMY_T]], Awaitable[SQLALCHEMY_T]]:
+    async def _inner(factory: SQLAlchemyFactory[SQLALCHEMY_T]) -> SQLALCHEMY_T:
+        # noinspection PyClassVar
+        factory.__async_session__ = db.async_sessionmaker()
+        return await factory.create_async()
+    return _inner
+
+
+@pytest.fixture(scope='session')
+def monkeysession() -> Generator[MonkeyPatch]:
+    mpatch = MonkeyPatch()
+    yield mpatch
+    mpatch.undo()
+
+
+@pytest.fixture(scope='session')
+def settings() -> 'GeneralSettings':
+    return orig_settings
+
+
+@pytest.fixture(autouse=True, scope='session')
+def augment_postgres_db(monkeysession, settings) -> None:
+    from common.resources.database.postgres.database import Database
+    test_db = Database(url=orig_settings.POSTGRES_TEST_DSN.unicode_string())
+    monkeysession.setattr('common.resources.database.postgres.db', test_db)
+    monkeysession.setenv('POSTGRES_DSN', settings.POSTGRES_TEST_DSN.unicode_string())
+
+
+@pytest.fixture(autouse=True)
+async def truncate_db(db) -> AsyncGenerator[None]:
+    yield
+    from common.resources.database.postgres.alchemy_related import Base
+    table_names = [table.name for table in Base.metadata.sorted_tables]
+    async with db.async_session as session:
+        await session.execute(text(fr'TRUNCATE {', '.join(table_names)} CASCADE'))
+        await session.commit()
+
+
+@pytest.fixture(scope='session', autouse=True)
+async def apply_alembic_migrations(augment_postgres_db) -> None:
+    await greenlet_spawn(lambda: subprocess.Popen(['alembic', 'upgrade', 'head']).wait())
+
+
+

@@ -5,6 +5,7 @@ from common.settings.postgres import PostgresSettings
 
 __all__ = (
     'general_settings',
+    'GeneralSettings',
 )
 
 
