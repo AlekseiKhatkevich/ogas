@@ -9,14 +9,13 @@ import common.testing.factories as factories
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
 
 if TYPE_CHECKING:
-    from common.orm_models import CategoryORM, StandardORM, OrganizationORM
+    from common.orm_models import CategoryORM, StandardORM, OrganizationORM, ProductORM
     from common.resources.database.postgres.alchemy_related import Base
     from common.resources.database.postgres.database import Database
 
 register_fixture(factories.CategoryFactory)
 register_fixture(factories.StandardFactory)
 register_fixture(factories.ProductFactory)
-register_fixture(factories.OrganizationFactory)
 
 
 @pytest.fixture
@@ -45,9 +44,3 @@ async def standard_in_db(save_in_db, standard_factory: factories.StandardFactory
 async def product_in_db(save_in_db, product_factory: factories.ProductFactory) -> 'ProductORM':
     product_factory.build()
     return await save_in_db(product_factory)
-
-
-@pytest.fixture
-async def organization_in_db(save_in_db, organization_factory: factories.OrganizationFactory) -> 'OrganizationORM':
-    organization_factory.build()
-    return await save_in_db(organization_factory)

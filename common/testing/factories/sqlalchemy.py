@@ -3,17 +3,16 @@ from typing import Any, Callable, Generic, TypeVar
 
 import ulid
 from faker import Faker
-from polyfactory import Ignore, Use
+from polyfactory import Ignore
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
 
-from common.orm_models import CategoryORM, OrganizationORM, ProductORM, StandardORM
+from common.orm_models import CategoryORM, ProductORM, StandardORM
 from common.orm_models.custom_types import ULID as ULID_TYPE_FIELD
 
 __all__ = (
     'CategoryFactory',
     'StandardFactory',
     'ProductFactory',
-    'OrganizationFactory',
 )
 
 T = TypeVar("T")
@@ -47,8 +46,3 @@ class StandardFactory(CustomFactory[StandardORM]):
 
 class ProductFactory(CustomFactory[ProductORM]):
     __set_relationships__ = True
-
-
-class OrganizationFactory(CustomFactory[OrganizationORM]):
-    name = Use(CustomFactory.__faker__.company)
-    is_active: bool = True

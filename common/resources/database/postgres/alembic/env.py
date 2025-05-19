@@ -8,6 +8,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from common.orm_models import *  # Do not remove !!!
+from center.orm_models import *
 from common.orm_models.custom_types import ULID
 from common.resources.database.postgres import db
 from common.resources.database.postgres.alchemy_related import Base
@@ -126,4 +127,4 @@ if context.is_offline_mode():
 else:
     run_migrations_online()
 
-optimization_import_keepers = [alembic_postgresql_enum, ProductORM]
+optimization_import_keepers = [alembic_postgresql_enum, ProductORM, OrganizationORM]

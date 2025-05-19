@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Boolean, Column, FetchedValue, false, func, true
+from sqlalchemy import Boolean, Column, false, func, true
 from sqlalchemy.orm import Mapped, declared_attr, mapped_column
 
 
@@ -15,7 +15,6 @@ class TimestampMixin:
     )
     updated_at: Mapped[datetime.datetime | None] = mapped_column(
         onupdate=func.Now(),
-        server_onupdate=FetchedValue(),
         comment='Время обновления.',
     )
     __mapper_args__ = {'eager_defaults': True}
