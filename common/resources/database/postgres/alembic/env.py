@@ -38,7 +38,7 @@ target_metadata = Base.metadata
 
 extra_common_kwargs = dict(
         compare_server_default=True,
-        process_revision_directives=writer,
+        # process_revision_directives=writer,
         user_module_prefix="common.orm_models.custom_types.",
     )
 

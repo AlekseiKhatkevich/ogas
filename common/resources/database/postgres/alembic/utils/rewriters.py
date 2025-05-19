@@ -50,6 +50,7 @@ def order_columns(context: 'MigrationContext', revision: tuple, op: ops.CreateTa
     https://alembic.sqlalchemy.org/en/latest/cookbook.html#apply-custom-sorting-to-table-columns-within-create-table
     """
     columns_with_weights = []
+    non_columns = []
     for col in op.columns:
         if isinstance(col, Column):
             if isinstance(col.type, one_byte_alignment_types):
@@ -67,8 +68,11 @@ def order_columns(context: 'MigrationContext', revision: tuple, op: ops.CreateTa
 
             columns_with_weights.append((weight, col.copy(),))
 
+        else:
+            non_columns.append(col.copy())
+
     columns = [
         col for _, col in sorted(columns_with_weights, key=lambda entry: entry[0], reverse=True)
     ]
 
-    return ops.CreateTableOp(op.table_name, columns, schema=op.schema, **op.kw)
+    return ops.CreateTableOp(op.table_name, columns + non_columns, schema=op.schema, **op.kw)
