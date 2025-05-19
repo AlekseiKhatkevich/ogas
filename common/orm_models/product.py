@@ -1,6 +1,7 @@
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from center.orm_models import CapabilityORM
 from common.enums.product import ProductUnit
 from common.orm_models.mixins import TimestampMixin
 from common.resources.database.postgres.alchemy_related import Base, ULID_PK
@@ -36,6 +37,9 @@ class ProductORM(TimestampMixin, Base):
         secondary='category_association_table',
         back_populates='products',
         cascade='all, delete',
+    )
+    capabilities: Mapped[list['CapabilityORM']] = relationship(
+        back_populates='product',
     )
 
     __table_args__ = (

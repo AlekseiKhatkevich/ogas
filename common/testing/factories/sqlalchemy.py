@@ -13,6 +13,7 @@ __all__ = (
     'CategoryFactory',
     'StandardFactory',
     'ProductFactory',
+    'CustomFactory',
 )
 
 T = TypeVar("T")

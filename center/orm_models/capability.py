@@ -1,8 +1,10 @@
 import ulid
 from sqlalchemy import ForeignKey, UniqueConstraint, CheckConstraint, text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from center.enums import Period
+from center.orm_models import OrganizationORM
+from common.orm_models import ProductORM
 from common.orm_models.mixins import TimestampMixin
 from common.resources.database.postgres.alchemy_related import Base, ULID_PK
 
@@ -26,6 +28,12 @@ class CapabilityORM(TimestampMixin, Base):
     )
     value: Mapped[int | None] = mapped_column(
         comment='Производительность, единиц товара.',
+    )
+    organization: Mapped['OrganizationORM'] = relationship(
+        back_populates='capabilities',
+    )
+    product: Mapped['ProductORM'] = relationship(
+        back_populates='capabilities',
     )
 
     __table_args__ = (

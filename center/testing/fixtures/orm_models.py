@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 import pytest
 from polyfactory.pytest_plugin import register_fixture
 
 from center.testing import factories
+
+if TYPE_CHECKING:
+    from center.orm_models import OrganizationORM
 
 register_fixture(factories.OrganizationFactory)
 

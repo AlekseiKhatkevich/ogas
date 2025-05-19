@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.orm_models.mixins import ActiveMixin, TimestampMixin
 from common.resources.database.postgres.alchemy_related import Base, ULID_PK
@@ -16,6 +16,9 @@ class OrganizationORM(TimestampMixin, ActiveMixin,  Base):
     name: Mapped[str] = mapped_column(
         comment='Название организации.',
         unique=True,
+    )
+    capabilities: Mapped[list['CapabilityORM']] = relationship(
+        back_populates='organization',
     )
 
     def __repr__(self):
