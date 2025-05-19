@@ -41,7 +41,7 @@ extra_common_kwargs = dict(
         user_module_prefix="common.orm_models.custom_types.",
     )
 
-url = 'postgresql+asyncpg://postgres:1q2w3e@localhost:5432/test'
+url = db.engine.url.render_as_string(hide_password=False)
 
 
 def check_all_column_comments() -> None:
