@@ -22,4 +22,3 @@ async def organization_in_db(save_in_db, organization_factory: factories.Organiz
 async def capability_in_db(save_in_db, capability_factory: factories.CapabilityFactory) -> 'CapabilityORM':
     capability_factory.build()
     return await save_in_db(capability_factory)
-
