@@ -51,3 +51,14 @@ prefect_server: ## Prefect server start
 test: ## Run pytest
 	uv run pytest $(args) $(path)
 
+kafka_ui_server: ## Run Kafka-ui and open default page
+	@java -jar /opt/kafka-ui/kafka-ui-api-v0.7.2.jar --spring.config.location=file:/opt/kafka-ui/config/application.yml \
+	& $(MAKE) kafka_ui
+
+kafka_ui: ## WEB UI for Kafka
+	xdg-open http://localhost:8080
+
+kafka_ui_server_stop: ## Stop Kafka UI server
+	@pkill -f kafka-ui
+
+
