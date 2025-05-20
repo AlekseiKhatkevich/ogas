@@ -58,12 +58,14 @@ def augment_postgres_db(monkeysession, settings) -> None:
 
 @pytest.fixture(autouse=True)
 async def truncate_db(db) -> AsyncGenerator[None]:
-    yield
-    from common.resources.database.postgres.alchemy_related import Base
-    table_names = [table.name for table in Base.metadata.sorted_tables]
-    async with db.async_session as session:
-        await session.execute(text(fr'TRUNCATE {', '.join(table_names)} CASCADE'))
-        await session.commit()
+    try:
+        yield
+    finally:
+        from common.resources.database.postgres.alchemy_related import Base
+        table_names = [table.name for table in Base.metadata.sorted_tables]
+        async with db.async_session as session:
+            await session.execute(text(fr'TRUNCATE {', '.join(table_names)} CASCADE'))
+            await session.commit()
 
 
 @pytest.fixture(scope='session', autouse=True)
