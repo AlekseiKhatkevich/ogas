@@ -9,5 +9,6 @@ class Period(str, enum.Enum):
     DAY = 'day'
     WEEK = 'week'
     MONTH = 'month'
-    YEAR = 'quarter'
+    QUARTER = 'quarter'
+    YEAR = 'year'
 
