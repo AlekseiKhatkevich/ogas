@@ -11,7 +11,22 @@ __all__ = (
 
 
 class CapabilityIn(BaseModel):
-    organization_id: Annotated[ulid.ULID, Field(description='ID компании передающей производительность.')]
-    product_id: Annotated[ulid.ULID, Field(description='ID продукта.')]
-    period: Annotated[Period, Field(description='Период производительности.')]
-    value: Annotated[NonNegativeInt | None, Field(description='Значение производительности')] = None
+    """
+    Модель для сериализации входящих данный от компании по производительности в единицу времени.
+    """
+    organization_id: Annotated[
+        ulid.ULID,
+        Field(description='ID компании передающей производительность.'),
+    ]
+    product_id: Annotated[
+        ulid.ULID,
+        Field(description='ID продукта.'),
+    ]
+    period: Annotated[
+        Period,
+        Field(description='Период производительности.'),
+    ]
+    value: Annotated[
+        NonNegativeInt | None,
+        Field(description='Значение производительности.'),
+    ] = None

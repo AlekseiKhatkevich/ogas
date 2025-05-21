@@ -1,16 +1,18 @@
 import enum
 
+from utils.enums import CaseInsensitiveMixin
 
-class ProductUnit(str, enum.Enum):
+
+class ProductUnit(CaseInsensitiveMixin, enum.StrEnum):
     """
     Варианты упаковки продукта.
     """
-    BOX = 'box'
-    PACKET = 'packet'
-    PLASTIC_BOTTLE = 'plastic_bottle'
-    GLASS_BOTTLE = 'glass_bottle'
-    PALLET = 'pallet'
-    IN_BULK = 'in_bulk'
-    CONTAINER = 'container'
-    CISTERN = 'cistern'
-    WITHOUT_PACKAGE = 'without_package'
+    BOX = enum.auto()
+    PACKET = enum.auto()
+    PLASTIC_BOTTLE = enum.auto()
+    GLASS_BOTTLE = enum.auto()
+    PALLET = enum.auto()
+    IN_BULK = enum.auto()
+    CONTAINER = enum.auto()
+    CISTERN = enum.auto()
+    WITHOUT_PACKAGE = enum.auto()

@@ -1,14 +1,17 @@
 import enum
 
+from utils.enums import CaseInsensitiveMixin
 
-class Period(str, enum.Enum):
+
+# noinspection PyEnum
+class Period(CaseInsensitiveMixin, enum.StrEnum):
     """
     Период времени.
     """
-    HOUR = 'hour'
-    DAY = 'day'
-    WEEK = 'week'
-    MONTH = 'month'
-    QUARTER = 'quarter'
-    YEAR = 'year'
+    HOUR = enum.auto()
+    DAY = enum.auto()
+    WEEK = enum.auto()
+    MONTH = enum.auto()
+    QUARTER = enum.auto()
+    YEAR = enum.auto()
 
