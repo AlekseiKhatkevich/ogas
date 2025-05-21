@@ -37,9 +37,11 @@ class ProductORM(TimestampMixin, Base):
         secondary='category_association_table',
         back_populates='products',
         cascade='all, delete',
+        passive_deletes=True,
     )
     capabilities: Mapped[list['CapabilityORM']] = relationship(
         back_populates='product',
+        passive_deletes=True,
     )
 
     __table_args__ = (

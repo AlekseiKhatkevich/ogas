@@ -19,6 +19,7 @@ class OrganizationORM(TimestampMixin, ActiveMixin,  Base):
     )
     capabilities: Mapped[list['CapabilityORM']] = relationship(
         back_populates='organization',
+        passive_deletes=True,
     )
 
     def __repr__(self):

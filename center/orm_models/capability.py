@@ -29,9 +29,11 @@ class CapabilityORM(TimestampMixin, Base):
     )
     organization: Mapped['OrganizationORM'] = relationship(
         back_populates='capabilities',
+        passive_deletes=True,
     )
     product: Mapped['ProductORM'] = relationship(
         back_populates='capabilities',
+        passive_deletes=True,
     )
 
     __table_args__ = (
