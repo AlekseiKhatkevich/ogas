@@ -14,7 +14,7 @@ __all__ = (
 )
 
 
-# stmt.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True})
+# print(stmt.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
 
 class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM):
     """
@@ -25,18 +25,18 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
         value_expr = sa.values(
             sa.column('organization_name', sa.TEXT),
             sa.column('product_id', sa.TEXT), # ULID
-            sa.column('period', sa.TEXT), # ENUM
-            sa.column('value', sa.INTEGER),
+            sa.column('period', self._model.period.type),
+            sa.column('value', self._model.value.type),
             name='capabilities_from_company',
         ).data([
-            (c.organization_name, str(c.product_id), str(c.period), c.value)
+            (c.organization_name, str(c.product_id), c.period, c.value)
             for c in capabilities
         ])
 
         sel = sa.select(
             OrganizationORM.id,
-            value_expr.c.product_id,
-            value_expr.c.period,
+            sa.cast(value_expr.c.product_id, self._model.product_id.type),
+            sa.cast(value_expr.c.period, self._model.period.type),
             value_expr.c.value,
         ).join(
             OrganizationORM,
