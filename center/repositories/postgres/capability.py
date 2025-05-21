@@ -38,13 +38,16 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
             value_expr.c.product_id,
             value_expr.c.period,
             value_expr.c.value,
-
-        ).join(OrganizationORM, OrganizationORM.name == value_expr.c.organization_name)
+        ).join(
+            OrganizationORM,
+            OrganizationORM.name == value_expr.c.organization_name,
+        )
 
         stmt = sa.insert(self._model).from_select(
-            ['organization.id', 'product_id', 'period', 'value'],
+            ['organization_id', 'product_id', 'period', 'value',],
             sel,
         )
+
         async with self._db.async_session as session:
             await session.execute(stmt)
             await session.commit()
