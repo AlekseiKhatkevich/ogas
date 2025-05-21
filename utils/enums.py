@@ -1,7 +1,7 @@
 
 class CaseInsensitiveMixin:
     """
-    Миксин для StrEnum с помощью которого можно конструировать ENUM из сток в независимости от регистра.
+    Миксин для StrEnum с помощью которого можно конструировать ENUM из строк в независимости от их регистра.
     """
     # @classmethod
     # def _missing_(cls, value: str) -> str | None:
