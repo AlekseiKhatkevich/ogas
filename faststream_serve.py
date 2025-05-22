@@ -16,7 +16,7 @@ app = FastStream(broker)
     'capability_in',
     filter=lambda msg: msg.content_type == ContentTypes.json,
 )
-async def create_or_update_capability(capability: list[CapabilityIn]):
+async def create_or_update_capability(capability: set[CapabilityIn]):
     print(capability)
 
 

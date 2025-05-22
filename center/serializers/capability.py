@@ -4,12 +4,14 @@ import ulid
 from pydantic import BaseModel, Field, NonNegativeInt
 
 from center.enums import Period
+from utils.pydantic_utils import hashable_model
 
 __all__ = (
     'CapabilityIn',
 )
 
 
+@hashable_model(fields=['organization_name', 'product_id', 'period'])
 class CapabilityIn(BaseModel):
     """
     Модель для сериализации входящих данный от компании по производительности в единицу времени.

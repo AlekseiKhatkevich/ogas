@@ -19,7 +19,7 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
     """
     Репозиторий БД для модели CapabilityORM.
     """
-    async def insert_or_update_capabilities(self, capabilities: list['CapabilityIn']) -> tuple[int, int]:
+    async def insert_or_update_capabilities(self, capabilities: set['CapabilityIn']) -> tuple[int, int]:
         """
         Создает или обновляет в БД записи CapabilityORM пришедшими от компании данными.
         :param capabilities: Набор производительностей от компании.
