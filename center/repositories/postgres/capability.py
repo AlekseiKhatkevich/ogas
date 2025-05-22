@@ -1,10 +1,10 @@
-from center.enums import Period
+from typing import TYPE_CHECKING
+
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql as pg
+
 from center.orm_models import CapabilityORM, OrganizationORM
 from center.repositories.postgres import CommonPostgresRepository
-from typing import TYPE_CHECKING
-import sqlalchemy as sa
-from sqlalchemy.dialects import postgresql
-from common.orm_models import custom_types
 
 if TYPE_CHECKING:
     from center.serializers import CapabilityIn
@@ -14,22 +14,23 @@ __all__ = (
 )
 
 
-# print(stmt.compile(dialect=postgresql.dialect(), compile_kwargs={"literal_binds": True}))
-
 class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM):
     """
-
+    Репозиторий БД для модели CapabilityORM
     """
-
     async def insert_or_update_capabilities(self, capabilities: list['CapabilityIn']) -> None:
+        """
+        :param capabilities: Набор производительностей от компании.
+        :return:
+        """
         value_expr = sa.values(
             sa.column('organization_name', sa.TEXT),
-            sa.column('product_id', sa.TEXT), # ULID
+            sa.column('product_id', self._model.product_id.type),
             sa.column('period', self._model.period.type),
             sa.column('value', self._model.value.type),
             name='capabilities_from_company',
         ).data([
-            (c.organization_name, str(c.product_id), c.period, c.value)
+            (c.organization_name, c.product_id, c.period, c.value)
             for c in capabilities
         ])
 
@@ -43,31 +44,22 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
             OrganizationORM.name == value_expr.c.organization_name,
         )
 
-        stmt = sa.insert(self._model).from_select(
+        insert_stmt = pg.insert(self._model).from_select(
             ['organization_id', 'product_id', 'period', 'value',],
             sel,
+        )
+
+        stmt = insert_stmt.on_conflict_do_update(
+            index_elements=('organization_id', 'product_id', 'period'),
+            set_={
+                self._model.value: insert_stmt.excluded.value,
+                self._model.updated_at: sa.func.now(),
+            },
+            where=self._model.value.is_distinct_from(insert_stmt.excluded.value),
+        ).returning(
+            self._model.updated_at == sa.func.now(),  # обновленные
         )
 
         async with self._db.async_session as session:
             await session.execute(stmt)
             await session.commit()
-
-
-
-
-
-
-
-
-
-
-
-#
-# insert into capability(organization_id, product_id, period, value)
-# select organization.id, product_id, period, value
-# from (
-#     VALUES ('ТМК Чермет'::text, '01JVMDB7W5C3CH4WP052BHBJN4'::ulid, 'QUARTER'::period, 99::int),
-#            ('ТМК Чермет'::text, '01JVMDB7W5C3CH4WP052BHBJN4'::ulid, 'MONTH'::period, 99::int)
-#      ) x (organization_name, product_id, period, value)
-# JOIN organization on organization.name = x.organization_name
-# -- on conflict ...

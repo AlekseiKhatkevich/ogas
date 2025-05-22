@@ -13,7 +13,7 @@ app = FastStream(broker)
 
 @broker.subscriber(
     'capability_in',
-    filter=lambda msg: msg.content_type == 'application/json',
+    filter=lambda msg: msg.content_type == 'application/json',  # есть ли константа
 )
 async def create_or_update_capability(capability: list[CapabilityIn]):
     print(capability)
