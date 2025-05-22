@@ -12,8 +12,7 @@ from center.orm_models import *
 from common.orm_models.custom_types import ULID
 from common.resources.database.postgres import db
 from common.resources.database.postgres.alchemy_related import Base
-from common.resources.database.postgres.alembic.utils.rewriters import writer
-from common.utils import get_all_subclasses
+from utils.utils import get_all_subclasses
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
