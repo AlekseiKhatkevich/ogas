@@ -16,12 +16,13 @@ __all__ = (
 
 class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM):
     """
-    Репозиторий БД для модели CapabilityORM
+    Репозиторий БД для модели CapabilityORM.
     """
-    async def insert_or_update_capabilities(self, capabilities: list['CapabilityIn']) -> None:
+    async def insert_or_update_capabilities(self, capabilities: list['CapabilityIn']) -> tuple[int, int]:
         """
+
         :param capabilities: Набор производительностей от компании.
-        :return:
+        :return: Кол-во созданных + кол-во обновленных записей.
         """
         value_expr = sa.values(
             sa.column('organization_name', sa.TEXT),
@@ -57,9 +58,15 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
             },
             where=self._model.value.is_distinct_from(insert_stmt.excluded.value),
         ).returning(
-            self._model.updated_at == sa.func.now(),  # обновленные
+            self._model.updated_at.is_not_distinct_from(sa.func.now()),
         )
 
         async with self._db.async_session as session:
-            await session.execute(stmt)
+            response = await session.scalars(stmt)
             await session.commit()
+
+        work_done_info = response.all()
+        cnt_updated = work_done_info.count(True)
+        cnt_created = len(work_done_info) - cnt_updated
+
+        return cnt_created, cnt_updated
