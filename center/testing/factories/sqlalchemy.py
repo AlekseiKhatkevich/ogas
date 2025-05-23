@@ -10,7 +10,7 @@ __all__ = (
 
 
 class OrganizationFactory(CustomFactory[OrganizationORM]):
-    __set_relationships__ = True
+    # __set_relationships__ = True
 
     name: str = Use(CustomFactory.__faker__.unique.company)
     is_active: bool = True

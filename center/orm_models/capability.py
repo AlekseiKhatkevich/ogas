@@ -32,7 +32,6 @@ class CapabilityORM(TimestampMixin, Base):
         passive_deletes=True,
     )
     product: Mapped['ProductORM'] = relationship(
-        back_populates='capabilities',
         passive_deletes=True,
     )
 

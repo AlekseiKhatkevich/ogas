@@ -38,10 +38,6 @@ class ProductORM(TimestampMixin, Base):
         cascade='all, delete',
         passive_deletes=True,
     )
-    capabilities: Mapped[list['CapabilityORM']] = relationship(
-        back_populates='product',
-        passive_deletes=True,
-    )
 
     __table_args__ = (
         UniqueConstraint('name', 'unit', 'standard_code',),
