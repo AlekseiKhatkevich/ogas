@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 
 from center.orm_models import CapabilityORM, OrganizationORM
-from center.repositories.postgres import CommonPostgresRepository
+from center.repositories.postgres import CommonPostgresRepository, UpsertResult
 from utils.common import batch_for_asyncpg
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
     """
     Репозиторий БД для модели CapabilityORM.
     """
-    async def insert_or_update_capabilities(self, capabilities: set['CapabilityIn']) -> tuple[int, int]:
+    async def insert_or_update_capabilities(self, capabilities: set['CapabilityIn']) -> UpsertResult:
         """
         Создает или обновляет в БД записи CapabilityORM пришедшими от компании данными.
         :param capabilities: Набор производительностей от компании.
@@ -62,14 +62,15 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
                     },
                     where=self._model.value.is_distinct_from(insert_stmt.excluded.value),
                 ).returning(
+                    self._model.id,
                     self._model.updated_at.is_not_distinct_from(sa.func.now()),
                 )
 
-                response = await session.scalars(stmt)
+                response = await session.execute(stmt)
                 await session.commit()
 
-                work_done_info = response.all()
-                cnt_updated += (updated_this_batch := work_done_info.count(True))
-                cnt_created += len(work_done_info) - updated_this_batch
+                ids, is_updated = zip(*response.all())
+                cnt_updated += (updated_this_batch := is_updated.count(True))
+                cnt_created += len(is_updated) - updated_this_batch
 
-        return cnt_created, cnt_updated
+        return UpsertResult(ids, cnt_created, cnt_updated)

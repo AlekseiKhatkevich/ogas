@@ -30,7 +30,7 @@ def batch_for_asyncpg[T](iterable: Iterable[T], batch_size: int | None = None) -
             try:
                 num_elements = len(head[0])
             except TypeError:
-                num_elements = len(head[0].model_fields)  # for pydantic
+                num_elements = len(head[0].__class__.model_fields)  # for pydantic
             batch_size = math.floor((constants.SMALLINT_MAX / num_elements) * safety_coefficient)
 
     yield from more_itertools.batched(iterable, batch_size)
