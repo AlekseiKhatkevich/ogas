@@ -37,7 +37,7 @@ class CapabilityORM(TimestampMixin, Base):
     )
 
     __table_args__ = (
-        UniqueConstraint('organization_id', 'product_id', 'period', ),
+        UniqueConstraint('product_id', 'organization_id',  'period', ),
         CheckConstraint(text('value >= 0'), name='value_gt_0_check', ),
     )
 
