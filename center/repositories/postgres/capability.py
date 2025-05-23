@@ -35,10 +35,9 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
                     sa.column('period', self._model.period.type),
                     sa.column('value', self._model.value.type),
                     name='capabilities_from_company',
-                ).data([
-                    (c.organization_name, c.product_id, c.period, c.value)
-                    for c in batch
-                ])
+                ).data(
+                    [(c.organization_name, c.product_id, c.period, c.value) for c in batch]
+                )
 
                 sel = sa.select(
                     OrganizationORM.id,

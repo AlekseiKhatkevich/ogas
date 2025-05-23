@@ -19,7 +19,7 @@ class AbstractPostgresRepository(ABC):
         self._db = db
 
 
-class CommonPostgresRepository[M, bound='Base'](AbstractPostgresRepository):
+class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
     def __init_subclass__(cls, model: M, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         cls._model: M = model
