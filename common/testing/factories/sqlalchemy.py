@@ -16,7 +16,7 @@ __all__ = (
     'CustomFactory',
 )
 
-T = TypeVar("T")
+T = TypeVar('T')
 
 
 # noinspection PyUnresolvedReferences

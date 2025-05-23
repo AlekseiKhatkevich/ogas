@@ -14,6 +14,11 @@ broker = KafkaBroker(settings.KAFKA_DSN)
 app = FastStream(broker)
 
 
+async def get_broker[T:KafkaBroker](_broker) -> [T]:
+    await _broker.connect()
+    return _broker
+
+
 @broker.subscriber(
     'capability_in',
     filter=lambda msg: msg.content_type == ContentTypes.json,
