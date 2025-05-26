@@ -30,6 +30,7 @@ class CapabilityORM(TimestampMixin, Base):
     organization: Mapped['OrganizationORM'] = relationship(
         back_populates='capabilities',
         passive_deletes=True,
+        cascade='save-update',
         innerjoin=True,
         lazy='joined',
     )
