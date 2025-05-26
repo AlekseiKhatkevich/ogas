@@ -17,8 +17,9 @@ from common import settings
 
 
 class Database:
-    def __init__(self, **kwargs) -> None:
+    def __init__(self,con=None, **kwargs) -> None:
         self._kwargs = kwargs
+        self.con=con
 
     def __new__(cls, **kwargs) -> 'Database':
         if not hasattr(cls, 'instance'):
@@ -26,7 +27,7 @@ class Database:
         # noinspection PyUnresolvedReferences
         return cls.instance
 
-    @cached_property
+    @property
     def engine(self) -> AsyncEngine:
         return create_async_engine(
             **dict(
@@ -46,9 +47,9 @@ class Database:
             ) | self._kwargs,
         )
 
-    @cached_property
+    @property
     def async_sessionmaker(self) -> async_sessionmaker:
-        return async_sessionmaker(self.engine, expire_on_commit=False, )
+        return async_sessionmaker(self.con or self.engine, expire_on_commit=False, join_transaction_mode="create_savepoint")
 
     @property
     @asynccontextmanager

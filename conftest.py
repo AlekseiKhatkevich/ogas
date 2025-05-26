@@ -52,27 +52,38 @@ def settings() -> 'GeneralSettings':
     return orig_settings
 
 
-@pytest.fixture(autouse=True, scope='session')
-def augment_postgres_db(monkeysession, settings) -> None:
+@pytest.fixture(autouse=True, )
+async def augment_postgres_db(monkeypatch, settings,) -> None:
     from common.resources.database.postgres.database import Database
     test_db = Database(url=orig_settings.POSTGRES_TEST_DSN.unicode_string())
-    monkeysession.setattr('common.resources.database.postgres.db', test_db)
-    monkeysession.setenv('POSTGRES_DSN', settings.POSTGRES_TEST_DSN.unicode_string())
+    monkeypatch.setattr('common.resources.database.postgres.db', test_db)
+    monkeypatch.setenv('POSTGRES_DSN', settings.POSTGRES_TEST_DSN.unicode_string())
+
+    con = await test_db.engine.connect()
+
+    test_db.con = con
+    trans = await test_db.con.begin()
+
+    yield None
+
+    await trans.rollback()
+    await con.close()
 
 
-@pytest.fixture(autouse=True)
-async def truncate_db(db) -> AsyncGenerator[None]:
-    from common.resources.database.postgres.alchemy_related import Base
-    table_names = [table.name for table in Base.metadata.sorted_tables]
-    async with db.async_session as session:
-        await session.execute(text(fr'TRUNCATE {', '.join(table_names)} CASCADE'))
-        await session.commit()
 
-    yield
+# @pytest.fixture(autouse=True)
+# async def truncate_db(db) -> AsyncGenerator[None]:
+#     from common.resources.database.postgres.alchemy_related import Base
+#     table_names = [table.name for table in Base.metadata.sorted_tables]
+#     async with db.async_session as session:
+#         await session.execute(text(fr'TRUNCATE {', '.join(table_names)} CASCADE'))
+#         await session.commit()
+#
+#     yield
 
 
 @pytest.fixture(scope='session', autouse=True)
-async def apply_alembic_migrations(augment_postgres_db) -> None:
+async def apply_alembic_migrations() -> None:
     await greenlet_spawn(lambda: subprocess.Popen(['alembic', 'upgrade', 'head']).wait())
 
 
