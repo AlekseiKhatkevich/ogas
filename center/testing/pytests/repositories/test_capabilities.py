@@ -50,9 +50,6 @@ async def test_positive_insert_or_update_capabilities_insert_plus_update(
         capability_in_db,
         capabilities_for_each_period,
 ):
-    """
-
-    """
     capability_to_update = capability_in_factory.build(
         organization_name=capability_in_db.organization.name,
         product_id=capability_in_db.product_id,
@@ -70,6 +67,25 @@ async def test_positive_insert_or_update_capabilities_insert_plus_update(
         ids=result.ids_created,
         where=model.updated_at.is_not_distinct_from(None),
     )
-    assert len(result.ids_updated) == 1
-    assert len(result.ids_created) == len(capabilities_for_each_period)
-# тест нет проблем с несколькоими одинкаовыми инстансами)хеш). Отсутсвие обновлениия при одинаковых value
+    assert result.cnt_updated == 1
+    assert result.cnt_created == len(capabilities_for_each_period)
+
+
+async def test_no_update_with_same_value(capability_in_db, repo):
+    capability_to_update = CapabilityIn(
+        organization_name=capability_in_db.organization.name,
+        product_id=capability_in_db.product_id,
+        period=capability_in_db.period,
+        value=capability_in_db.value,
+    )
+
+    result = await repo.insert_or_update_capabilities({capability_to_update, })
+
+    assert not result.ids_updated
+    assert not result.ids_updated
+
+    assert await repo.exists(
+        ids=[capability_in_db.id],
+        where=model.updated_at.is_not_distinct_from(None),
+    )
+

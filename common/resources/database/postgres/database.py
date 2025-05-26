@@ -4,6 +4,8 @@ from typing import AsyncGenerator
 
 import pydantic_core
 import ulid
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
@@ -53,6 +55,15 @@ class Database:
     async def async_session(self) -> AsyncGenerator[AsyncSession]:
         async with aclosing(self.async_sessionmaker()) as async_session:
             yield async_session
+
+    async def check_health(self) -> bool:
+        try:
+            async with self.async_session as session:
+                await session.execute(text('SELECT 1'))
+            return True
+        except SQLAlchemyError as e:
+            print(f'Database health check failed: {e}')
+            return False
 
 
 db = Database()

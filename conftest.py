@@ -1,5 +1,6 @@
 import asyncio
 import subprocess
+from asyncio import AbstractEventLoop
 from typing import AsyncGenerator, Awaitable, Callable, Generator, TYPE_CHECKING
 
 import pytest
@@ -14,6 +15,7 @@ if TYPE_CHECKING:
     from common.resources.database.postgres.alchemy_related import Base
     from common.resources.database.postgres.database import Database
     from common.settings.general import GeneralSettings
+    from _pytest.main import Session
 
 pytest_plugins = [
     'common.testing.fixtures.orm_models',
@@ -74,11 +76,11 @@ async def apply_alembic_migrations(augment_postgres_db) -> None:
     await greenlet_spawn(lambda: subprocess.Popen(['alembic', 'upgrade', 'head']).wait())
 
 
-@pytest.fixture(scope='session')
-def event_loop():
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-    yield loop
-    loop.close()
+@pytest.fixture
+def event_loop() -> Generator[AbstractEventLoop]:
+    yield asyncio.get_event_loop()
+
+
+def pytest_sessionfinish(session: 'Session', exitstatus: int) -> None:
+    asyncio.get_event_loop().close()
+
