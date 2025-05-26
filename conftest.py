@@ -1,3 +1,4 @@
+import asyncio
 import subprocess
 from typing import AsyncGenerator, Awaitable, Callable, Generator, TYPE_CHECKING
 
@@ -73,4 +74,11 @@ async def apply_alembic_migrations(augment_postgres_db) -> None:
     await greenlet_spawn(lambda: subprocess.Popen(['alembic', 'upgrade', 'head']).wait())
 
 
-
+@pytest.fixture(scope='session')
+def event_loop():
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()

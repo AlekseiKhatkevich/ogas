@@ -30,6 +30,10 @@ class UpsertResult[T]:
     def cnt_updated(self) -> int:
         return len(self.ids_updated)
 
+    @property
+    def ids(self) -> list[T]:
+        return self.ids_created + self.ids_updated
+
 
 class AbstractPostgresRepository(ABC):
     _model: ClassVar['Base']
