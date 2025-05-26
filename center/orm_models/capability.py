@@ -30,6 +30,8 @@ class CapabilityORM(TimestampMixin, Base):
     organization: Mapped['OrganizationORM'] = relationship(
         back_populates='capabilities',
         passive_deletes=True,
+        innerjoin=True,
+        lazy='joined',
     )
     product: Mapped['ProductORM'] = relationship(
         passive_deletes=True,

@@ -19,13 +19,14 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
     """
     Репозиторий БД для модели CapabilityORM.
     """
+
     async def insert_or_update_capabilities(self, capabilities: set['CapabilityIn']) -> UpsertResult:
         """
         Создает или обновляет в БД записи CapabilityORM пришедшими от компании данными.
         :param capabilities: Набор производительностей от компании.
         :return: Кол-во созданных + кол-во обновленных записей.
         """
-        cnt_updated, cnt_created = 0, 0
+        updated, created = [], []
 
         async with self._db.async_session as session:
             for batch in batch_for_asyncpg(capabilities):
@@ -50,7 +51,7 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
                 )
 
                 insert_stmt = pg.insert(self._model).from_select(
-                    ['organization_id', 'product_id', 'period', 'value',],
+                    ['organization_id', 'product_id', 'period', 'value', ],
                     sel,
                 )
 
@@ -69,8 +70,10 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
                 response = await session.execute(stmt)
                 await session.commit()
 
-                ids, is_updated = zip(*response.all())
-                cnt_updated += (updated_this_batch := is_updated.count(True))
-                cnt_created += len(is_updated) - updated_this_batch
+                for _ulid, is_updated in response.all():
+                    if is_updated:
+                        updated.append(_ulid)
+                    else:
+                        created.append(_ulid)
 
-        return UpsertResult(ids, cnt_created, cnt_updated)
+        return UpsertResult(created, updated)
