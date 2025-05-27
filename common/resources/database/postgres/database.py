@@ -1,5 +1,4 @@
 from contextlib import aclosing, asynccontextmanager
-from functools import cached_property
 from typing import AsyncGenerator
 
 import pydantic_core
