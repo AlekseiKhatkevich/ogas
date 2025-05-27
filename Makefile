@@ -21,6 +21,7 @@ FASTSTREAM_NUM_WORKERS := $(FASTSTREAM_NUM_WORKERS)
 ifeq ($(ENVIRONMENT),PRODUCTION)
     NO_CACHE_FLAG = --no-cache
     faststream: workers = $(FASTSTREAM_NUM_WORKERS)
+    test: args = $(args) -n auto
 else
     NO_CACHE_FLAG =
     faststream: reload = --reload
