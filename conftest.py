@@ -52,22 +52,27 @@ def settings() -> 'GeneralSettings':
     return orig_settings
 
 
-@pytest.fixture(autouse=True, )
-async def augment_postgres_db(monkeypatch, settings,) -> None:
+@pytest.fixture(scope='session')
+def test_db() -> 'Database':
     from common.resources.database.postgres.database import Database
-    test_db = Database(url=orig_settings.POSTGRES_TEST_DSN.unicode_string())
+    return Database(url=orig_settings.POSTGRES_TEST_DSN.unicode_string())
+
+
+@pytest.fixture(autouse=True, )
+async def augment_postgres_db(monkeypatch, settings, test_db) -> None:
     monkeypatch.setattr('common.resources.database.postgres.db', test_db)
     monkeypatch.setenv('POSTGRES_DSN', settings.POSTGRES_TEST_DSN.unicode_string())
 
-    con = await test_db.engine.connect()
 
-    test_db.connection = con
-    trans = await test_db.connection.begin()
-
-    yield None
-
-    await trans.rollback()
-    await con.close()
+@pytest.fixture(autouse=True)
+async def augment_postgres_engine(test_db) -> AsyncGenerator[None]:
+    test_db.connection = await test_db.engine.connect()
+    transaction = await test_db.connection.begin()
+    try:
+        yield None
+    finally:
+        await transaction.rollback()
+        await test_db.connection.close()
 
 
 @pytest.fixture
