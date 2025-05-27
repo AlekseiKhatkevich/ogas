@@ -19,7 +19,8 @@ async def test_capability_orm_negative_uniqueness(test_db, capability_in_db):
             session.add(instance)
             await session.commit()
 
+
 async def test_capability_orm_negative_check_c(capability_factory, save_in_db):
-    capability = capability_factory.build(value=-1)
-    await save_in_db(capability_factory)
+    with pytest.raises(IntegrityError, match='value_gt_0_check'):
+        await save_in_db(capability_factory, value=-1)
 

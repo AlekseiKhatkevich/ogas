@@ -15,13 +15,11 @@ register_fixture(factories.CapabilityFactory)
 
 @pytest.fixture
 async def organization_in_db(save_in_db, organization_factory: factories.OrganizationFactory) -> 'OrganizationORM':
-    organization_factory.build()
     return await save_in_db(organization_factory)
 
 
 @pytest.fixture
 async def capability_in_db(save_in_db, capability_factory: factories.CapabilityFactory) -> 'CapabilityORM':
-    capability_factory.build()
     return await save_in_db(capability_factory)
 
 

@@ -15,17 +15,14 @@ register_fixture(factories.ProductFactory)
 
 @pytest.fixture
 async def category_in_db(save_in_db, category_factory: factories.CategoryFactory) -> 'CategoryORM':
-    category_factory.build()
     return await save_in_db(category_factory)
 
 
 @pytest.fixture
 async def standard_in_db(save_in_db, standard_factory: factories.StandardFactory) -> 'StandardORM':
-    standard_factory.build()
     return await save_in_db(standard_factory)
 
 
 @pytest.fixture
 async def product_in_db(save_in_db, product_factory: factories.ProductFactory) -> 'ProductORM':
-    product_factory.build()
     return await save_in_db(product_factory)

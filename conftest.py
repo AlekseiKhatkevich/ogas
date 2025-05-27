@@ -25,12 +25,22 @@ pytest_plugins = [
 
 
 @pytest.fixture
-def save_in_db[SQLALCHEMY_T: 'Base'](test_db: 'Database') ->\
-        Callable[[SQLAlchemyFactory[SQLALCHEMY_T]], Awaitable[SQLALCHEMY_T]]:
-    async def _inner(factory: SQLAlchemyFactory[SQLALCHEMY_T]) -> SQLALCHEMY_T:
+def save_in_db_batch[SQLALCHEMY_T: 'Base'](test_db: 'Database') ->\
+        Callable[[SQLAlchemyFactory[SQLALCHEMY_T]], Awaitable[list[SQLALCHEMY_T]]]:
+    async def _inner(factory: SQLAlchemyFactory[SQLALCHEMY_T], batch_size: int = 1, **kwargs) -> list[SQLALCHEMY_T]:
         # noinspection PyClassVar
         factory.__async_session__ = test_db.async_sessionmaker()
-        return await factory.create_async()
+        return await factory.create_batch_async(size=batch_size, **kwargs)
+    return _inner
+
+
+@pytest.fixture
+def save_in_db[SQLALCHEMY_T: 'Base'](test_db: 'Database', save_in_db_batch) ->\
+        Callable[[SQLAlchemyFactory[SQLALCHEMY_T]], Awaitable[SQLALCHEMY_T]]:
+    async def _inner(factory: SQLAlchemyFactory[SQLALCHEMY_T], **kwargs) -> SQLALCHEMY_T:
+        # noinspection PyClassVar,PyArgumentList
+        instances = await save_in_db_batch(factory, batch_size=1, **kwargs)
+        return instances[0]
     return _inner
 
 
@@ -69,14 +79,13 @@ async def augment_postgres_engine(test_db) -> AsyncGenerator[None]:
         await test_db.connection.close()
 
 
-@pytest.fixture
-async def truncate_db(test_db) -> AsyncGenerator[None]:
+@pytest.fixture(autouse=True, scope='session')
+async def truncate_db(test_db) -> None:
     from common.resources.database.postgres.alchemy_related import Base
     table_names = [table.name for table in Base.metadata.sorted_tables]
     async with test_db.async_session as session:
         await session.execute(text(fr'TRUNCATE {', '.join(table_names)} CASCADE'))
         await session.commit()
-    yield
 
 
 @pytest.fixture(scope='session', autouse=True)
