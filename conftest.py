@@ -25,17 +25,11 @@ pytest_plugins = [
 
 
 @pytest.fixture
-def db():
-    from common.resources.database.postgres import db as _db
-    return _db
-
-
-@pytest.fixture
-def save_in_db[SQLALCHEMY_T: 'Base'](db: 'Database') ->\
+def save_in_db[SQLALCHEMY_T: 'Base'](test_db: 'Database') ->\
         Callable[[SQLAlchemyFactory[SQLALCHEMY_T]], Awaitable[SQLALCHEMY_T]]:
     async def _inner(factory: SQLAlchemyFactory[SQLALCHEMY_T]) -> SQLALCHEMY_T:
         # noinspection PyClassVar
-        factory.__async_session__ = db.async_sessionmaker()
+        factory.__async_session__ = test_db.async_sessionmaker()
         return await factory.create_async()
     return _inner
 
@@ -76,13 +70,12 @@ async def augment_postgres_engine(test_db) -> AsyncGenerator[None]:
 
 
 @pytest.fixture
-async def truncate_db(db) -> AsyncGenerator[None]:
+async def truncate_db(test_db) -> AsyncGenerator[None]:
     from common.resources.database.postgres.alchemy_related import Base
     table_names = [table.name for table in Base.metadata.sorted_tables]
-    async with db.async_session as session:
+    async with test_db.async_session as session:
         await session.execute(text(fr'TRUNCATE {', '.join(table_names)} CASCADE'))
         await session.commit()
-
     yield
 
 
