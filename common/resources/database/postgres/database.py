@@ -26,6 +26,7 @@ class Database:
     def __init__(self, connection: AsyncConnection | None = None, **kwargs) -> None:
         self._kwargs = kwargs
         self.connection = connection
+        self._maker: async_sessionmaker | None = None
 
     def __new__(cls, **kwargs) -> 'Database':
         if not hasattr(cls, 'instance'):
@@ -55,7 +56,11 @@ class Database:
 
     @property
     def async_sessionmaker(self) -> async_sessionmaker:
-        return async_sessionmaker(self.connection or self.engine, **self._sessionmaker_kwargs)
+        if self._maker is None:
+            self._maker = async_sessionmaker(self.engine, **self._sessionmaker_kwargs)
+        if self.connection is not None:
+            self._maker.configure(bind=self.connection)
+        return self._maker
 
     @property
     @asynccontextmanager
