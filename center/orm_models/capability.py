@@ -45,4 +45,3 @@ class CapabilityORM(TimestampMixin, Base):
 
     def __repr__(self):
         return f'Product {self.product_id} in {self.organization_id} per {self.period}.'
-

@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Callable, Generic, TypeVar
+from typing import Any, Callable, Generic, TYPE_CHECKING, TypeVar
 
 import ulid
 from faker import Faker
@@ -8,6 +8,9 @@ from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
 
 from common.orm_models import CategoryORM, ProductORM, StandardORM
 from common.orm_models.custom_types import ULID as ULID_TYPE_FIELD
+
+if TYPE_CHECKING:
+    pass
 
 __all__ = (
     'CategoryFactory',
@@ -25,7 +28,7 @@ class CustomFactory(Generic[T], SQLAlchemyFactory[T]):
     __faker__ = Faker(locale='ru_RU')
     __randomize_collection_length__ = True
     __min_collection_length__ = 1
-    __max_collection_length__ = 3
+    __max_collection_length__ = 2
     __check_model__ = True
 
     created_at: datetime.datetime = Ignore()
