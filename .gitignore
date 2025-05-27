@@ -341,3 +341,4 @@ cython_debug/
 /notes.txt
 /_try.py
 /files/
+/docker-compose.yml

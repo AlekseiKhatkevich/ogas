@@ -61,8 +61,8 @@ async def augment_postgres_db(monkeypatch, settings,) -> None:
 
     con = await test_db.engine.connect()
 
-    test_db.con = con
-    trans = await test_db.con.begin()
+    test_db.connection = con
+    trans = await test_db.connection.begin()
 
     yield None
 

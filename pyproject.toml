@@ -36,6 +36,6 @@ asyncio_mode = "auto"
 filterwarnings = [
     "ignore:The event_loop fixture:DeprecationWarning",
     "ignore:pytest-asyncio detected an unclosed event loop:DeprecationWarning",
-    'ignore:The configuration option "asyncio_default_fixture_loop_scope" is unset:DeprecationWarning',
+    'ignore: asyncio_default_fixture_loop_scope:DeprecationWarning',
 ]
 

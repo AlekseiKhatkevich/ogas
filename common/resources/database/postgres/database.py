@@ -7,6 +7,7 @@ import ulid
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
+    AsyncConnection,
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
@@ -17,9 +18,14 @@ from common import settings
 
 
 class Database:
-    def __init__(self,con=None, **kwargs) -> None:
+    _sessionmaker_kwargs = dict(
+        expire_on_commit=False,
+        join_transaction_mode='create_savepoint',
+    )
+
+    def __init__(self, connection: AsyncConnection | None = None, **kwargs) -> None:
         self._kwargs = kwargs
-        self.con=con
+        self.connection = connection
 
     def __new__(cls, **kwargs) -> 'Database':
         if not hasattr(cls, 'instance'):
@@ -49,7 +55,7 @@ class Database:
 
     @property
     def async_sessionmaker(self) -> async_sessionmaker:
-        return async_sessionmaker(self.con or self.engine, expire_on_commit=False, join_transaction_mode="create_savepoint")
+        return async_sessionmaker(self.connection or self.engine, **self._sessionmaker_kwargs)
 
     @property
     @asynccontextmanager
