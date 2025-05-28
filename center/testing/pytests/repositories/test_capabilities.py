@@ -85,7 +85,7 @@ async def test_no_update_with_same_value(capability_in_db, repo):
     assert not result.ids_updated
 
     assert await repo.exists(
-        ids=[capability_in_db.id],
+        capability_in_db.id,
         where=model.updated_at.is_not_distinct_from(None),
     )
 
