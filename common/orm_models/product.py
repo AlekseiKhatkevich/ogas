@@ -31,6 +31,7 @@ class ProductORM(TimestampMixin, Base):
         back_populates='products',
         innerjoin=True,
         passive_deletes=True,
+        lazy='joined',
     )
     categories: Mapped[list['CategoryORM']] = relationship(
         secondary='category_association_table',

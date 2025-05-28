@@ -46,6 +46,18 @@ def save_in_db[SQLALCHEMY_T: 'Base'](test_db: 'Database', save_in_db_batch) ->\
     return _inner
 
 
+@pytest.fixture
+def save_in_db_session[SQLALCHEMY_T: 'Base'](test_db: 'Database') ->\
+        Callable[[SQLALCHEMY_T], Awaitable[SQLALCHEMY_T]]:
+    async def inner(instance: SQLALCHEMY_T) -> Awaitable[SQLALCHEMY_T]:
+        async with test_db.async_session as session:
+            session.add(instance)
+            await session.commit()
+        return instance
+    return inner
+
+
+
 @pytest.fixture(scope='session')
 def monkeysession() -> Generator[MonkeyPatch]:
     mpatch = MonkeyPatch()
