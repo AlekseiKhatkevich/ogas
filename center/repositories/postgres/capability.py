@@ -4,7 +4,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 
 from center.orm_models import CapabilityORM, OrganizationORM
-from center.repositories.postgres import CommonPostgresRepository, UpsertResult
+from common.repositories.postgres import CommonPostgresRepository, UpsertResult
 from utils.common import batch_for_asyncpg
 
 if TYPE_CHECKING:

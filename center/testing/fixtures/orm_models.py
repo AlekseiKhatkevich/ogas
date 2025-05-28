@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING
 import pytest
 from polyfactory.pytest_plugin import register_fixture
 
-from center.repositories.postgres import CapabilityPostgresRepository
 from center.testing import factories
 
 if TYPE_CHECKING:
@@ -21,8 +20,3 @@ async def organization_in_db(save_in_db, organization_factory: factories.Organiz
 @pytest.fixture
 async def capability_in_db(save_in_db, capability_factory: factories.CapabilityFactory) -> 'CapabilityORM':
     return await save_in_db(capability_factory)
-
-
-@pytest.fixture(scope='session')
-def capabilities_repo() -> CapabilityPostgresRepository:
-    return CapabilityPostgresRepository()

@@ -19,8 +19,10 @@ if TYPE_CHECKING:
 
 pytest_plugins = [
     'common.testing.fixtures.orm_models',
+    'common.testing.fixtures.repositories',
     'center.testing.fixtures.orm_models',
     'center.testing.fixtures.pydantic_models',
+    'center.testing.fixtures.repositories',
 ]
 
 

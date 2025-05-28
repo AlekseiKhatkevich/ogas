@@ -1,6 +1,11 @@
 from typing import TYPE_CHECKING
 
-from center.repositories.postgres import CapabilityPostgresRepository, CommonPostgresRepository
+from center.repositories.postgres import (
+    CapabilityPostgresRepository,
+    CommonPostgresRepository,
+    UpsertResult,
+)
+
 from common.usecases.common import AbstractUseCase
 
 if TYPE_CHECKING:
@@ -20,6 +25,5 @@ class UpdateCapabilitiesUseCase(AbstractUseCase):
         # noinspection PyCallingNonCallable
         self.repository = repository()
 
-    async def execute(self) -> tuple[int, int]:
-        cnt_created, cnt_updated = await self.repository.insert_or_update_capabilities(self.capabilities)
-        return cnt_created, cnt_updated
+    async def execute(self) -> UpsertResult:
+        return await self.repository.insert_or_update_capabilities(self.capabilities)

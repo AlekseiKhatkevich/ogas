@@ -1,6 +1,5 @@
 from center.orm_models import OrganizationORM
-from center.repositories.postgres import CommonPostgresRepository
-
+from common.repositories.postgres import CommonPostgresRepository
 
 __all__ = (
     'OrganizationPostgresRepository',
