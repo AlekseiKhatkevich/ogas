@@ -1,11 +1,7 @@
 from typing import TYPE_CHECKING
 
-from center.repositories.postgres import (
-    CapabilityPostgresRepository,
-    CommonPostgresRepository,
-    UpsertResult,
-)
-
+from center.repositories.postgres import CapabilityPostgresRepository
+from common.repositories.postgres import CommonPostgresRepository, UpsertResult
 from common.usecases.common import AbstractUseCase
 
 if TYPE_CHECKING:

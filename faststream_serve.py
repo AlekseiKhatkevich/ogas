@@ -14,7 +14,7 @@ broker = KafkaBroker(settings.KAFKA_DSN)
 app = FastStream(broker)
 
 
-async def get_broker[T:KafkaBroker](_broker) -> [T]:
+async def get_broker[T:KafkaBroker](_broker) -> T:
     await _broker.connect()
     return _broker
 
@@ -28,8 +28,8 @@ async def create_or_update_capability(capabilities: set[CapabilityIn]):
     Принимает данные о производительностях от компании и записывает их в БД.
     """
     use_case = UpdateCapabilitiesUseCase(capabilities)
-    cnt_created, cnt_updated = await use_case.execute()
-    return cnt_created, cnt_updated
+    res = await use_case.execute()
+    return res.cnt_created, res.cnt_updated
 
 
 async def main() -> Never:

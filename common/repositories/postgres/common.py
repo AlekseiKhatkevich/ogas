@@ -69,3 +69,16 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
         async with self._db.async_session as session:
             res = await session.scalar(query)
             return res == len(ids)
+
+    async def count(
+            self,
+            is_active: bool = True,
+            where: ColumnExpressionArgument | None = None,
+    ) -> int:
+        query = sa.select(sa.func.count(self._model.id))
+        if is_active and ('is_active' in self._model.__table__.columns):
+            query = query.where(self._model.is_active == sa.true())
+        if where is not None:
+            query = query.where(where)
+        async with self._db.async_session as session:
+            return await session.scalar(query)

@@ -60,7 +60,7 @@ prefect_server: ## Prefect server start
 	 uv run prefect server start
 
 test: ## Run pytest
-	uv run pytest $(args) $(path)
+	uv run pytest $(args) --exitfirst $(path)
 
 kafka_ui_server: ## Run Kafka-ui and open default page
 	@java -jar /opt/kafka-ui/kafka-ui-api-v0.7.2.jar --spring.config.location=file:/opt/kafka-ui/config/application.yml \

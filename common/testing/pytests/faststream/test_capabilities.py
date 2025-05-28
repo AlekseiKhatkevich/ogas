@@ -1,0 +1,14 @@
+async def test_create_or_update_capability_positive(
+        capability_in_factory,
+        kafka_broker,
+        organization_in_db,
+        product_in_db,
+        capabilities_repo,
+):
+    capability = capability_in_factory.build(
+        organization_name=organization_in_db.name,
+        product_id=product_in_db.id,
+    )
+    await kafka_broker.publish([capability], topic='capability_in')
+
+    assert await capabilities_repo.count() == 1
