@@ -3,7 +3,7 @@ from sqlalchemy.exc import IntegrityError
 
 
 async def test_product_orm_positive(product_in_db, product_repo):
-    assert await product_repo.exists(ids=[product_in_db.id])
+    assert await product_repo.exists(product_in_db.id)
 
 
 async def test_product_orm_negative_unique(

@@ -41,7 +41,7 @@ async def test_positive_insert_or_update_capabilities_only_insert(repo, capabili
     assert not result.cnt_updated
     assert result.cnt_created == len(capabilities_for_each_period)
 
-    assert await repo.exists(ids=result.ids, where=model.updated_at == None)
+    assert await repo.count(where=model.updated_at == None) == len(result.ids)
 
 
 async def test_positive_insert_or_update_capabilities_insert_plus_update(
@@ -59,14 +59,14 @@ async def test_positive_insert_or_update_capabilities_insert_plus_update(
 
     result = await repo.insert_or_update_capabilities({capability_to_update, *capabilities_for_each_period})
 
-    assert await repo.exists(
-        ids=result.ids_updated,
-        where=model.updated_at.is_distinct_from(None) & (model.value == capability_in_db.value + 1),
-    )
-    assert await repo.exists(
-        ids=result.ids_created,
-        where=model.updated_at.is_not_distinct_from(None),
-    )
+    assert await repo.count(
+        where=model.updated_at.is_distinct_from(None) &
+              (model.value == capability_in_db.value + 1) &
+              (model.id.in_(result.ids_updated)),
+    ) == len(result.ids_updated)
+    assert await repo.count(
+        where=model.updated_at.is_not_distinct_from(None) & model.id.in_(result.ids_created)
+    ) == len(result.ids_created)
     assert result.cnt_updated == 1
     assert result.cnt_created == len(capabilities_for_each_period)
 

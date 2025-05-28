@@ -5,7 +5,7 @@ from center.orm_models import CapabilityORM
 
 
 async def test_capability_orm_positive(capability_in_db, capabilities_repo):
-    assert await capabilities_repo.exists(ids=[capability_in_db.id])
+    assert await capabilities_repo.exists(capability_in_db.id)
 
 
 async def test_capability_orm_negative_uniqueness(test_db, capability_in_db):
