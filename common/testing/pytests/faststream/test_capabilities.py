@@ -1,3 +1,7 @@
+import pytest
+from faststream.exceptions import SubscriberNotFound
+
+
 async def test_create_or_update_capability_positive(
         capability_in_factory,
         kafka_broker,
@@ -12,3 +16,17 @@ async def test_create_or_update_capability_positive(
     await kafka_broker.publish([capability], topic='capability_in')
 
     assert await capabilities_repo.count() == 1
+
+
+async def test_create_or_update_capability_negative(
+        capability_in_factory,
+        kafka_broker,
+):
+    capability = capability_in_factory.build()
+
+    with pytest.raises(SubscriberNotFound):
+        await kafka_broker.publish(
+            [capability],
+            topic='capability_in',
+            headers={'content-type': 'fucking/bullshit'},
+        )
