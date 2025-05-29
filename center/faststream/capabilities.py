@@ -6,6 +6,8 @@ from common.faststream.filters import contentype_json
 
 __all__ = (
     'router',
+    'capability_out_publisher',
+    'create_or_update_capability',
 )
 
 router = KafkaRouter(prefix='capabilities_')
