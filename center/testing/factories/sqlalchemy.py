@@ -14,6 +14,7 @@ class OrganizationFactory(CustomFactory[OrganizationORM]):
 
     name: str = Use(CustomFactory.__faker__.unique.company)
     is_active: bool = True
+    token: str = '$2a$06$QaK1P3svJ/ZjSO2WdaebhuHk8/0K2B2A42svHnn/y7hdzGDUbrv9K'  # token = test_token
 
 
 class CapabilityFactory(CustomFactory[CapabilityORM]):

@@ -1,3 +1,4 @@
+from sqlalchemy import VARCHAR
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.orm_models.mixins import ActiveMixin, TimestampMixin
@@ -16,6 +17,10 @@ class OrganizationORM(TimestampMixin, ActiveMixin,  Base):
     name: Mapped[str] = mapped_column(
         comment='Название организации.',
         unique=True,
+    )
+    token: Mapped[str | None] = mapped_column(
+        VARCHAR(length=60),
+        comment='Токен организации в виде хеша.',
     )
     capabilities: Mapped[list['CapabilityORM']] = relationship(
         back_populates='organization',
