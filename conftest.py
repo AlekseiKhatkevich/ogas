@@ -27,6 +27,12 @@ pytest_plugins = [
 ]
 
 
+@pytest.fixture(autouse=True, scope='session')
+async def augment_postgres_db(monkeysession, settings, test_db) -> None:
+    monkeysession.setattr('common.resources.database.postgres.db', test_db)
+    monkeysession.setenv('POSTGRES_DSN', settings.POSTGRES_TEST_DSN.unicode_string())
+
+
 @pytest.fixture
 def save_in_db_batch[SQLALCHEMY_T: 'Base'](test_db: 'Database') ->\
         Callable[[SQLAlchemyFactory[SQLALCHEMY_T]], Awaitable[list[SQLALCHEMY_T]]]:
@@ -58,7 +64,6 @@ def save_in_db_session[SQLALCHEMY_T: 'Base'](test_db: 'Database') ->\
     return inner
 
 
-
 @pytest.fixture(scope='session')
 def monkeysession() -> Generator[MonkeyPatch]:
     mpatch = MonkeyPatch()
@@ -75,12 +80,6 @@ def settings() -> 'GeneralSettings':
 def test_db() -> 'Database':
     from common.resources.database.postgres.database import Database
     return Database(url=orig_settings.POSTGRES_TEST_DSN.unicode_string())
-
-
-@pytest.fixture(autouse=True, )
-async def augment_postgres_db(monkeypatch, settings, test_db) -> None:
-    monkeypatch.setattr('common.resources.database.postgres.db', test_db)
-    monkeypatch.setenv('POSTGRES_DSN', settings.POSTGRES_TEST_DSN.unicode_string())
 
 
 @pytest.fixture(autouse=True)
@@ -104,7 +103,7 @@ async def truncate_db(test_db) -> None:
 
 
 @pytest.fixture(scope='session', autouse=True)
-async def apply_alembic_migrations() -> None:
+async def apply_alembic_migrations(augment_postgres_db) -> None:
     await greenlet_spawn(lambda: subprocess.Popen(['alembic', 'upgrade', 'head']).wait())
 
 
