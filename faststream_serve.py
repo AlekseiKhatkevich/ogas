@@ -17,6 +17,7 @@ app = FastStream(broker)
 __all__ = (
     'broker',
     'app',
+    'capability_out_publisher',
 )
 
 
