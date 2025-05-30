@@ -47,6 +47,10 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
         super().__init_subclass__(**kwargs)
         cls._model: M = model
 
+    @property
+    def select(self) -> sa.Select:
+        return sa.select(self._model)
+
     async def exists(self, _id: Any | None = None, /, *args, **kwargs) -> int:
         if _id is not None:
             kwargs['where'] = (self._model.id == _id)
