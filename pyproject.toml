@@ -8,6 +8,7 @@ dependencies = [
     "alembic>=1.15.2",
     "alembic-postgresql-enum>=1.7.0",
     "alembic-utils>=0.8.8",
+    "async-cache>=1.1.1",
     "asyncpg>=0.30.0",
     "faststream[cli,kafka]>=0.5.40",
     "more-itertools>=10.7.0",

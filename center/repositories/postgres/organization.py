@@ -1,6 +1,7 @@
-from typing import TYPE_CHECKING, Optional
+from typing import Optional, TYPE_CHECKING
 
 import sqlalchemy as sa
+from cache import AsyncTTL
 
 from center.orm_models import OrganizationORM
 from common.repositories.postgres import CommonPostgresRepository
@@ -11,10 +12,12 @@ if TYPE_CHECKING:
 __all__ = (
     'OrganizationPostgresRepository',
 )
+# оптимизация вызовов sa.func.crypt
 
 
 class OrganizationPostgresRepository(CommonPostgresRepository, model=OrganizationORM):
 
+    @AsyncTTL(time_to_live=60 * 10, maxsize=1024, skip_args=1)
     async def get_organization_by_header(
             self,
             _id: Optional['ULID'],
