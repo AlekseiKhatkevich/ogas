@@ -1,6 +1,8 @@
 import pytest
 from faststream.exceptions import SubscriberNotFound
-from center.faststream.capabilities import create_or_update_capability, capability_out_publisher
+
+from center.faststream.capabilities import capability_out_publisher, create_or_update_capability
+from constants import ORGANIZATION_TEST_TOKEN
 
 
 async def test_create_or_update_capability_positive(
@@ -14,7 +16,15 @@ async def test_create_or_update_capability_positive(
         organization_name=organization_in_db.name,
         product_id=product_in_db.id,
     )
-    await kafka_broker.publish([capability], topic='capabilities_in')
+    await kafka_broker.publish(
+        [capability],
+        topic='capabilities_in',
+        headers={
+            'content-type': 'application/json',
+            'organization_name': organization_in_db.name,
+            'token': ORGANIZATION_TEST_TOKEN,
+        }
+    )
 
     assert await capabilities_repo.count() == 1
     create_or_update_capability.mock.assert_called_once_with([capability.model_dump()])
