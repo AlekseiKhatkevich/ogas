@@ -1,5 +1,5 @@
 import ulid
-from faststream import Depends, Header
+from faststream import Depends, Header, apply_types
 
 from center.orm_models import OrganizationORM
 from center.repositories.postgres import OrganizationPostgresRepository
@@ -10,10 +10,12 @@ __all__ = (
 )
 
 
+@apply_types
 def organization_repo() -> OrganizationPostgresRepository:
     return OrganizationPostgresRepository()
 
 
+@apply_types
 async def organization(
         token: str = Header(),
         organization_id: ulid.ULID = Header(default=None),

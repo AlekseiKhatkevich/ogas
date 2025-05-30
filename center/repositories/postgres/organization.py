@@ -26,7 +26,7 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
         async with self._db.async_session as session:
             # noinspection PyTypeChecker
             organization = await session.scalar(
-                self.select.where(
+                self.select_active.where(
                     self._model.id == _id if _id is not None else self._model.name == name,
                     self._model.token == sa.func.crypt(token, self._model.token),
                 )

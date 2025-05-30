@@ -17,9 +17,9 @@ class CapabilityIn(BaseModel):
     Модель для сериализации входящих данный от компании по производительности в единицу времени.
     """
     organization_name: Annotated[
-        str,
+        str | None,
         Field(description='Имя компании передающей производительность.'),
-    ]
+    ] = None
     product_id: Annotated[
         ulid.ULID,
         Field(description='ID продукта.'),

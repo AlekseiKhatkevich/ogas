@@ -51,6 +51,17 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
     def select(self) -> sa.Select:
         return sa.select(self._model)
 
+    @property
+    def select_active(self) -> sa.Select:
+        if self.has_is_active:
+            return self.select.where(self._model.is_active == sa.true())
+        else:
+            return self.select
+
+    @property
+    def has_is_active(self) -> bool:
+        return 'is_active' in self._model.__table__.columns
+
     async def exists(self, _id: Any | None = None, /, *args, **kwargs) -> int:
         if _id is not None:
             kwargs['where'] = (self._model.id == _id)
@@ -62,7 +73,7 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
             where: ColumnExpressionArgument | None = None,
     ) -> int:
         query = sa.select(sa.func.count(self._model.id))
-        if is_active and ('is_active' in self._model.__table__.columns):
+        if is_active and self.has_is_active:
             query = query.where(self._model.is_active == sa.true())
         if where is not None:
             query = query.where(where)
