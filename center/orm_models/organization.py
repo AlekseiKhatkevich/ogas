@@ -21,6 +21,7 @@ class OrganizationORM(TimestampMixin, ActiveMixin,  Base):
     token: Mapped[str | None] = mapped_column(
         VARCHAR(length=60),
         comment='Токен организации в виде хеша.',
+        deferred=True,
     )
     capabilities: Mapped[list['CapabilityORM']] = relationship(
         back_populates='organization',

@@ -1,0 +1,1 @@
+ORGANIZATION_TEST_TOKEN = 'test_token'
