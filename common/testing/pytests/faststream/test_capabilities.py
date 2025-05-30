@@ -2,7 +2,6 @@ import pytest
 from faststream.exceptions import SubscriberNotFound
 
 from center.faststream.capabilities import capability_out_publisher, create_or_update_capability
-from constants import ORGANIZATION_TEST_TOKEN
 
 
 async def test_create_or_update_capability_positive(
@@ -11,6 +10,7 @@ async def test_create_or_update_capability_positive(
         organization_in_db,
         product_in_db,
         capabilities_repo,
+        organization_token,
 ):
     capability = capability_in_factory.build(
         organization_name=organization_in_db.name,
@@ -22,7 +22,7 @@ async def test_create_or_update_capability_positive(
         headers={
             'content-type': 'application/json',
             'organization_name': organization_in_db.name,
-            'token': ORGANIZATION_TEST_TOKEN,
+            'token': organization_token,
         }
     )
 

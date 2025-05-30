@@ -3,7 +3,7 @@ import enum
 import typing
 
 import ulid
-from sqlalchemy import MetaData, TEXT, func
+from sqlalchemy import MetaData, TEXT, func, inspect
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.ext.mutable import MutableList
@@ -44,3 +44,13 @@ class Base(AsyncAttrs, DeclarativeBase):
     @classmethod
     def __tablename__(cls) -> str:
         return cls.__name__.rstrip('ORM').lower()
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return NotImplemented
+        return self.pk_values == other.pk_values
+
+    @property
+    def pk_values(self) -> list[typing.Any]:
+        primary_key = inspect(self.__class__).primary_key
+        return [getattr(self, key.name) for key in primary_key]

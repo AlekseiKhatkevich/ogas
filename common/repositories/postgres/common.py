@@ -53,10 +53,7 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
 
     @property
     def select_active(self) -> sa.Select:
-        if self.has_is_active:
-            return self.select.where(self._model.is_active == sa.true())
-        else:
-            return self.select
+        return self.select.where(self._model.is_active == sa.true()) if self.has_is_active else self.select
 
     @property
     def has_is_active(self) -> bool:
