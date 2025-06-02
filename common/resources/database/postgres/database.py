@@ -1,3 +1,4 @@
+from collections.abc import Awaitable
 from contextlib import aclosing, asynccontextmanager
 from typing import AsyncGenerator
 
@@ -14,9 +15,10 @@ from sqlalchemy.ext.asyncio import (
 )
 
 from common import settings
+from common.resources.interfaces import HealthCheckable
 
 
-class Database:
+class Database(HealthCheckable):
     _sessionmaker_kwargs = dict(
         expire_on_commit=False,
         join_transaction_mode='create_savepoint',
@@ -72,9 +74,13 @@ class Database:
             async with self.async_session as session:
                 await session.execute(text('SELECT 1'))
             return True
-        except SQLAlchemyError as e:
+        except (SQLAlchemyError, OSError) as e:
             print(f'Database health check failed: {e}')
             return False
+
+    @property
+    def service_name(self) -> str:
+        return 'PostgresBD'
 
 
 db = Database()
