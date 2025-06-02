@@ -4,8 +4,7 @@ from faststream.kafka import KafkaRouter
 from center.serializers import CapabilityIn
 from center.usecases.capability import UpdateCapabilitiesUseCase
 from common.faststream.filters import contentype_json
-from .dependencies import organization
-from ..orm_models import OrganizationORM
+from .dependencies import CurrentOrganizationDep, organization
 
 __all__ = (
     'router',
@@ -22,7 +21,7 @@ capability_out_publisher = router.publisher('out')
 @capability_out_publisher
 async def create_or_update_capability(
         capabilities: set[CapabilityIn],
-        _organization: OrganizationORM | None = Depends(organization),
+        _organization: CurrentOrganizationDep,
 ) -> dict:
     """
     Принимает данные о производительностях от компании и записывает их в БД.

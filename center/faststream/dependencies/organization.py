@@ -1,5 +1,7 @@
+from typing import Annotated
+
 import ulid
-from faststream import Depends, Header, apply_types
+from faststream import Depends, Header
 
 from center.orm_models import OrganizationORM
 from center.repositories.postgres import OrganizationPostgresRepository
@@ -7,6 +9,7 @@ from common.exceptions.app import AuthMessageException, NoOrganizationIdentityEx
 
 __all__ = (
     'organization',
+    'CurrentOrganizationDep',
 )
 
 
@@ -30,3 +33,6 @@ async def organization(
             f'Компания с названием "{organization_name}" и id "{organization_id}" не существует или токен не валиден.'
         )
     return organization_instance
+
+
+CurrentOrganizationDep = Annotated[OrganizationORM | None, Depends(organization)]
