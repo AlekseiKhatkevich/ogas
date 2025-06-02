@@ -10,21 +10,19 @@ __all__ = (
 )
 
 
-@apply_types
 def organization_repo() -> OrganizationPostgresRepository:
     return OrganizationPostgresRepository()
 
 
-@apply_types
 async def organization(
         token: str = Header(),
-        organization_id: ulid.ULID = Header(default=None),
+        organization_id: ulid.ULID | None = Header(default=None),
         organization_name: str | None = Header(default=None),
         repo: OrganizationPostgresRepository = Depends(organization_repo, cast=False)
 ) -> OrganizationORM | None:
     if organization_id is None and organization_name is None:
         raise NoOrganizationIdentityException(
-            'Не указаны organization_id или organization_name. Укажите одно из двух',
+            'Не указаны organization_id или organization_name. Укажите одно из двух.',
         )
     organization_instance = await repo.get_organization_by_token(organization_id, organization_name, token)
     if organization_instance is None:
