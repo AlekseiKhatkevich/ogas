@@ -1,7 +1,7 @@
 from typing import Annotated
 
 import ulid
-from faststream import Depends, Header
+from faststream import Depends, Header, context
 
 from center.orm_models import OrganizationORM
 from center.repositories.postgres import OrganizationPostgresRepository
@@ -19,10 +19,10 @@ def organization_repo() -> OrganizationPostgresRepository:
 
 async def organization(
         token: str = Header(),
-        organization_id: ulid.ULID | None = Header(default=None),
+        organization_id: ulid.ULID | None = Header(default=None, cast=True),
         organization_name: str | None = Header(default=None),
-        repo: OrganizationPostgresRepository = Depends(organization_repo, cast=False)
-) -> OrganizationORM | None:
+        repo: OrganizationPostgresRepository = Depends(organization_repo),
+) -> OrganizationORM:
     if organization_id is None and organization_name is None:
         raise NoOrganizationIdentityException(
             'Не указаны organization_id или organization_name. Укажите одно из двух.',
@@ -32,6 +32,7 @@ async def organization(
         raise AuthMessageException(
             f'Компания с названием "{organization_name}" и id "{organization_id}" не существует или токен не валиден.'
         )
+    context.set_local('current_organization', organization_instance)
     return organization_instance
 
 
