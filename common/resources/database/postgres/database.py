@@ -1,4 +1,3 @@
-from collections.abc import Awaitable
 from contextlib import aclosing, asynccontextmanager
 from typing import AsyncGenerator
 
@@ -80,7 +79,7 @@ class Database(HealthCheckable):
 
     @property
     def service_name(self) -> str:
-        return 'PostgresBD'
+        return 'PostgresDB'
 
 
 db = Database()

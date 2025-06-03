@@ -20,10 +20,10 @@ __all__ = (
 
 router = KafkaRouter(prefix='capabilities_', dependencies=[Depends(organization)])
 
-capability_out_publisher = router.publisher('out')
+capability_out_publisher = router.publisher('out', title='Респонс после получения данных о производительности')
 
 
-@router.subscriber('in', filter=contentype_json)
+@router.subscriber('in', filter=contentype_json, title='Получение данных о производительности.')
 @capability_out_publisher
 async def create_or_update_capability(
         capabilities: set[CapabilityIn],

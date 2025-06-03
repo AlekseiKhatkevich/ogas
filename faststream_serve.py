@@ -15,7 +15,12 @@ __all__ = (
 broker = KafkaBroker(settings.KAFKA_DSN)
 broker.include_router(capabilities.router)
 
-app = FastStream(broker)
+app = FastStream(
+    broker,
+    title='OGAS',
+    version='0.1.1'
+)
+asgi_app = FastStream(broker).as_asgi(asyncapi_path='/docs/asyncapi')
 
 
 @app.on_startup
