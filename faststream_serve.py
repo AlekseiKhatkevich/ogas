@@ -1,25 +1,41 @@
 import asyncio
 from typing import Never
 
-from faststream import FastStream, Logger
+from faststream import Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
+from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
+from faststream.kafka.prometheus import KafkaPrometheusMiddleware
+from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from prometheus_client import CollectorRegistry, make_asgi_app
 
 from center.faststream import capabilities
 from common import settings
-from faststream.kafka.prometheus import KafkaPrometheusMiddleware
-from prometheus_client import CollectorRegistry, make_asgi_app
 
 __all__ = (
     'broker',
     'app',
 )
 
+resource = Resource.create(attributes={'service.name': 'faststream'})
+tracer_provider = TracerProvider(resource=resource)
+trace.set_tracer_provider(tracer_provider)
+exporter = OTLPSpanExporter(endpoint='http://localhost:4317')
+processor = BatchSpanProcessor(exporter)
+tracer_provider.add_span_processor(processor)
+
 registry = CollectorRegistry()
 
 broker = KafkaBroker(
     settings.KAFKA_DSN,
-    middlewares=(KafkaPrometheusMiddleware(registry=registry),)
+    middlewares=(
+        KafkaPrometheusMiddleware(registry=registry),
+        # KafkaTelemetryMiddleware(tracer_provider=tracer_provider),
+    )
 )
 broker.include_router(capabilities.router)
 
@@ -27,7 +43,7 @@ app = AsgiFastStream(
     broker,
     asyncapi_path='/docs/asyncapi',
     asgi_routes=[
-        ('/metrics', make_asgi_app(registry)),
+        ('/metrics', make_asgi_app(registry)),  # для prometheus
     ],
     title='OGAS',
     version='0.1.1',
@@ -57,6 +73,6 @@ async def main() -> Never:
     await app.run()
 
 
-if __name__ == '__main__':  #  дебаг запускать отсюда
+if __name__ == '__main__':  # дебаг запускать отсюда
     # noinspection PyUnreachableCode
     asyncio.run(main())
