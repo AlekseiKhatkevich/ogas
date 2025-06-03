@@ -74,7 +74,3 @@ kafka_ui_server_stop: ## Stop Kafka UI server
 
 faststream: ## Run faststream
 	uv run faststream run faststream_serve:app $(reload) workers=$(workers)
-
-faststream_docs: ## Online docs for faststream
-	uv run uvicorn faststream_serve:asgi_app faststream_serve:app \
-	 > /dev/null & xdg-open http://localhost:8000/docs/asyncapi

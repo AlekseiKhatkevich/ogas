@@ -423,6 +423,9 @@ cli = [
 kafka = [
     { name = "aiokafka" },
 ]
+prometheus = [
+    { name = "prometheus-client" },
+]
 
 [[package]]
 name = "flupy"
@@ -773,7 +776,7 @@ dependencies = [
     { name = "alembic-utils" },
     { name = "async-cache" },
     { name = "asyncpg" },
-    { name = "faststream", extra = ["cli", "kafka"] },
+    { name = "faststream", extra = ["cli", "kafka", "prometheus"] },
     { name = "more-itertools" },
     { name = "prefect" },
     { name = "prefect-docker" },
@@ -799,7 +802,7 @@ requires-dist = [
     { name = "alembic-utils", specifier = ">=0.8.8" },
     { name = "async-cache", specifier = ">=1.1.1" },
     { name = "asyncpg", specifier = ">=0.30.0" },
-    { name = "faststream", extras = ["cli", "kafka"], specifier = ">=0.5.40" },
+    { name = "faststream", extras = ["cli", "kafka", "prometheus"], specifier = ">=0.5.40" },
     { name = "more-itertools", specifier = ">=10.7.0" },
     { name = "prefect", specifier = ">=3.4.1" },
     { name = "prefect-docker", specifier = ">=0.6.4" },

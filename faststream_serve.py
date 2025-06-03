@@ -2,25 +2,36 @@ import asyncio
 from typing import Never
 
 from faststream import FastStream, Logger
+from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
 
 from center.faststream import capabilities
 from common import settings
+from faststream.kafka.prometheus import KafkaPrometheusMiddleware
+from prometheus_client import CollectorRegistry, make_asgi_app
 
 __all__ = (
     'broker',
     'app',
 )
 
-broker = KafkaBroker(settings.KAFKA_DSN)
+registry = CollectorRegistry()
+
+broker = KafkaBroker(
+    settings.KAFKA_DSN,
+    middlewares=(KafkaPrometheusMiddleware(registry=registry),)
+)
 broker.include_router(capabilities.router)
 
-app = FastStream(
+app = AsgiFastStream(
     broker,
+    asyncapi_path='/docs/asyncapi',
+    asgi_routes=[
+        ('/metrics', make_asgi_app(registry)),
+    ],
     title='OGAS',
-    version='0.1.1'
+    version='0.1.1',
 )
-asgi_app = FastStream(broker).as_asgi(asyncapi_path='/docs/asyncapi')
 
 
 @app.on_startup
