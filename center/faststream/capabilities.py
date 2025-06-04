@@ -7,6 +7,7 @@ from center.serializers import CapabilityIn
 from center.usecases.capability import UpdateCapabilitiesUseCase
 from common.faststream.filters import contentype_json
 from .dependencies import organization
+from .dependencies.middleware import current_organization_topic_middleware
 
 if TYPE_CHECKING:
     from ..orm_models import OrganizationORM
@@ -20,10 +21,17 @@ __all__ = (
 
 router = KafkaRouter(prefix='capabilities_', dependencies=[Depends(organization)])
 
-capability_out_publisher = router.publisher('out', title='Response-for-capabilities_in')
+
+# noinspection PyTypeChecker
+capability_out_publisher = router.publisher(
+    'out',
+    title='Response-for-capabilities_in',
+    middlewares=[current_organization_topic_middleware],
+)
 
 
 @router.subscriber('in', filter=contentype_json, title='Receive-capability-info-from-organization.')
+@capability_out_publisher
 async def create_or_update_capability(
         capabilities: set[CapabilityIn],
         current_organization: 'OrganizationORM' = Context(),
@@ -36,10 +44,4 @@ async def create_or_update_capability(
         c.organization_name = current_organization.name
     use_case = UpdateCapabilitiesUseCase(capabilities)
     res = await use_case.execute()
-    return_message = {'created': res.cnt_created, 'updated': res.cnt_updated}
-    await capability_out_publisher.publish(
-        message=return_message,
-        no_confirm=True,
-        topic=f'capabilities_out_{current_organization.name}',
-    )
-    return return_message
+    return {'created': res.cnt_created, 'updated': res.cnt_updated}

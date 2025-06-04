@@ -1,3 +1,4 @@
+import contextvars
 from typing import Annotated
 
 import ulid
@@ -10,7 +11,10 @@ from common.exceptions.app import AuthMessageException, NoOrganizationIdentityEx
 __all__ = (
     'organization',
     'CurrentOrganizationDep',
+    'current_organization_name',
 )
+
+current_organization_name = contextvars.ContextVar('current_organization_name')
 
 
 def organization_repo() -> OrganizationPostgresRepository:
@@ -33,6 +37,7 @@ async def organization(
             f'Компания с названием "{organization_name}" и id "{organization_id}" не существует или токен не валиден.'
         )
     context.set_local('current_organization', organization_instance)
+    current_organization_name.set(organization_instance.name)
     return organization_instance
 
 
