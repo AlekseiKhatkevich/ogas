@@ -3,6 +3,7 @@ from pydantic import Field
 
 from common.enums.product import ProductUnit
 from common.faststream.filters import contentype_json
+from common.usecases.product import UpsertProductUseCase
 
 router = KafkaRouter(prefix='products_')
 
@@ -14,4 +15,4 @@ async def create_or_update_product(
     standard_code: str = Field(description='ГОСТ',),
     categories: set[str] = Field(description='Категории продукта', default_factory=set),
 ) -> None:
-    pass
+    await UpsertProductUseCase(name, unit, standard_code, categories).execute()

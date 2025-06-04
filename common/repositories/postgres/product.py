@@ -46,7 +46,6 @@ class ProductPostgresRepository(CommonPostgresRepository, model=ProductORM):
             else:
                 categories_stmt = sa.select(CategoryORM).where(CategoryORM.code.in_(categories))
                 categories = await session.scalars(categories_stmt)
-
                 instance.categories = list(categories.all())
 
             session.add(instance)
