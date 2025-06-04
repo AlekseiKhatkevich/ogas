@@ -24,7 +24,6 @@ capability_out_publisher = router.publisher('out', title='Response-for-capabilit
 
 
 @router.subscriber('in', filter=contentype_json, title='Receive-capability-info-from-organization.')
-@capability_out_publisher
 async def create_or_update_capability(
         capabilities: set[CapabilityIn],
         current_organization: 'OrganizationORM' = Context(),
@@ -37,4 +36,10 @@ async def create_or_update_capability(
         c.organization_name = current_organization.name
     use_case = UpdateCapabilitiesUseCase(capabilities)
     res = await use_case.execute()
-    return {'created': res.cnt_created, 'updated': res.cnt_updated}
+    return_message = {'created': res.cnt_created, 'updated': res.cnt_updated}
+    await capability_out_publisher.publish(
+        message=return_message,
+        no_confirm=True,
+        topic=f'capabilities_out_{current_organization.name}',
+    )
+    return return_message

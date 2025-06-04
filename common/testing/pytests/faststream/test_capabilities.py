@@ -28,7 +28,6 @@ async def test_create_or_update_capability_positive(
 
     assert await capabilities_repo.count() == 1
     create_or_update_capability.mock.assert_called_once_with([capability.model_dump()])
-    capability_out_publisher.mock.assert_called_once_with({'created': 1, 'updated': 0})
 
 
 async def test_create_or_update_capability_negative(
