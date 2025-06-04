@@ -1,8 +1,9 @@
 from abc import ABC
 from dataclasses import dataclass
-from typing import Any, ClassVar, Sequence, TYPE_CHECKING
+from typing import Any, ClassVar, TYPE_CHECKING
 
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.sql._typing import ColumnExpressionArgument
 
 from common.resources.database.postgres.database import Database, db
@@ -46,6 +47,10 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
     def __init_subclass__(cls, model: M, **kwargs) -> None:
         super().__init_subclass__(**kwargs)
         cls._model: M = model
+
+    @property
+    def insert(self) -> pg.Insert:
+        return pg.insert(self._model)
 
     @property
     def select(self) -> sa.Select:

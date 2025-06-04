@@ -38,6 +38,7 @@ class ProductORM(TimestampMixin, Base):
         back_populates='products',
         cascade='all, delete',
         passive_deletes=True,
+        # lazy='selectin'
     )
 
     __table_args__ = (

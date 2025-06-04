@@ -13,8 +13,8 @@ async def current_organization_topic_middleware(
     **options: Any,
 ) -> Any:
     """
+    Для publisher.
     Добавляет к названию топика название текущей организации в конец.
     """
     options['topic'] = f'{options['topic']}_{current_organization_name.get()}'
     return await call_next(msg, **options)
-
