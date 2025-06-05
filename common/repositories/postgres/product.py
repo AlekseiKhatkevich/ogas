@@ -1,14 +1,10 @@
-from typing import TYPE_CHECKING
-
 import sqlalchemy as sa
-from sqlalchemy.orm import selectinload
+from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.orm import noload
-from common.orm_models import CategoryORM, ProductORM, category_association_table
-from common.repositories.postgres import CommonPostgresRepository
+
 from common.enums.product import ProductUnit
-from sqlalchemy.dialects import postgresql
-
-
+from common.orm_models import ProductORM, category_association_table
+from common.repositories.postgres import CommonPostgresRepository
 
 __all__ = (
     'ProductPostgresRepository',
@@ -17,6 +13,7 @@ __all__ = (
 
 class ProductPostgresRepository(CommonPostgresRepository, model=ProductORM):
 
+    # noinspection PyTypeChecker
     async def create_or_update_product(self,
                                        name: str,
                                        unit: ProductUnit,
@@ -44,10 +41,8 @@ class ProductPostgresRepository(CommonPostgresRepository, model=ProductORM):
         """
         timeout_stmt = sa.text("SET lock_timeout = '5s'")
 
-        # noinspection PyTypeChecker
         extant_stmt = self.select.options(
             noload(self._model.standard),
-            # selectinload(self._model.categories),
         ).where(
             self._model.name == name,
             self._model.unit == unit,
@@ -71,16 +66,34 @@ class ProductPostgresRepository(CommonPostgresRepository, model=ProductORM):
 
         union_stmt = sa.select(inserted_stmt).union_all(sa.select(extant_stmt))
 
-        final_stmt = self.select.from_statement(union_stmt).options(
-            selectinload(self._model.categories),
-        )
+        final_stmt = self.select.from_statement(union_stmt)
 
         async with self._db.async_session as session:
             await session.execute(timeout_stmt)
             instance = await session.scalar(final_stmt)
-            await session.execute(sa.delete(category_association_table).where(category_association_table.c.product_id == instance.id))
+            await session.execute(
+                sa.delete(
+                    category_association_table
+                ).where(
+                    category_association_table.c.product_id == instance.id,
+                ))
+            new_categories_data = [
+                        {category_association_table.c.product_id: instance.id,
+                         category_association_table.c.category_code: code}
+                        for code in categories
+            ]
+            if new_categories_data:
+                insert_new_categories_stmt = pg.insert(
+                        category_association_table,
+                    ).values(
+                       new_categories_data,
+                    )
+                await session.execute(
+                    insert_new_categories_stmt.on_conflict_do_nothing(
+                        index_elements=['product_id', 'category_code', ]
+                    )
+                )
 
             await session.commit()
-
 
             return instance
