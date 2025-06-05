@@ -7,7 +7,7 @@ from common.usecases.product import UpsertProductUseCase
 
 router = KafkaRouter(prefix='products_')
 
-
+# попробовать с reply_to
 @router.subscriber('in', filter=contentype_json, title='add-update-product',)
 async def create_or_update_product(
     name: str = Field(description='Название продукта',),
