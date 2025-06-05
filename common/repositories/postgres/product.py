@@ -3,12 +3,17 @@ from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.orm import noload
 
 from common.enums.product import ProductUnit
-from common.orm_models import ProductORM, category_association_table
+from common.orm_models import ProductCategoryM2MIntermediate, ProductORM, category_association_table
 from common.repositories.postgres import CommonPostgresRepository
 
 __all__ = (
     'ProductPostgresRepository',
+    'ProductCategoryM2MIntermediateRepository',
 )
+
+
+class ProductCategoryM2MIntermediateRepository(CommonPostgresRepository, model=ProductCategoryM2MIntermediate):
+    pass
 
 
 class ProductPostgresRepository(CommonPostgresRepository, model=ProductORM):
@@ -39,7 +44,7 @@ class ProductPostgresRepository(CommonPostgresRepository, model=ProductORM):
         UNION ALL
         SELECT * FROM extant;
         """
-        timeout_stmt = sa.text("SET lock_timeout = '5s'")
+        timeout_stmt = sa.text("SET lock_timeout = '3s'")
 
         extant_stmt = self.select.options(
             noload(self._model.standard),

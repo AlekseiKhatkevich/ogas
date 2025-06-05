@@ -7,6 +7,7 @@ from common.resources.database.postgres.alchemy_related import Base
 __all__ = (
     'CategoryORM',
     'category_association_table',
+    'ProductCategoryM2MIntermediate',
 )
 
 
@@ -51,3 +52,7 @@ category_association_table = Table(
         primary_key=True,
     ),
 )
+
+
+class ProductCategoryM2MIntermediate(Base):
+    __table__ = category_association_table

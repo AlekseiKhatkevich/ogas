@@ -74,10 +74,17 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
             is_active: bool = True,
             where: ColumnExpressionArgument | None = None,
     ) -> int:
-        query = sa.select(sa.func.count(self._model.id))
+        # query = sa.select(sa.func.count(self._model.id))
+        query = sa.select(sa.func.count(sa.literal('*')))
         if is_active and self.has_is_active:
             query = query.where(self._model.is_active == sa.true())
         if where is not None:
             query = query.where(where)
         async with self._db.async_session as session:
             return await session.scalar(query)
+
+    async def refresh(self, instance: M, **kwargs) -> M:
+        async with self._db.async_session as session:
+            session.add(instance)
+            await session.refresh(instance, **kwargs)
+            return instance
