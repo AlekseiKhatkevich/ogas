@@ -54,9 +54,9 @@ class ProductPostgresRepository(CommonPostgresRepository, model=ProductORM):
         inserted_stmt = self.insert.from_select(
             ['name', 'unit', 'standard_code', ],
             sa.select(
-                sa.text(f"'{name}'"),
-                sa.cast(sa.text(f"'{unit.name}'"), sa.Enum(ProductUnit)),
-                sa.text(f"'{code}'")
+                sa.literal(name),
+                sa.literal(unit.name, type_=sa.Enum(ProductUnit)),
+                sa.literal(code)
             ).where(
                 ~ exists_sq,
             )
