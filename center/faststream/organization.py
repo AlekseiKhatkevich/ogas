@@ -8,7 +8,7 @@ from common.faststream.filters import contentype_json
 
 router = KafkaRouter(prefix='organizations_', dependencies=[Depends(organization)])
 organization_out_publisher = router.publisher(
-    'org_name_changed',
+    'name_changed',
     title='Organization-name-changed',
 )
 
@@ -18,5 +18,5 @@ async def update_organization(
         data: OrganizationUpdateIn,
         current_organization: CurrentOrganizationDep,
 ):
-    use_case = OrganizationUpdateUseCase(current_organization, data, organization_out_publisher)
+    use_case = OrganizationUpdateUseCase(current_organization.name, data, organization_out_publisher)
     await use_case.execute()

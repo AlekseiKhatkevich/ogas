@@ -56,7 +56,7 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
             )
             async with self._db.async_session as session:
                 if data.new_token:
-                    await session.execute("SET LOCAL log_statement = 'none'")
+                    await session.execute(sa.text("SET LOCAL log_statement = 'none'"))
                 updated_instance = await session.scalar(stmt)
                 await session.commit()
                 return updated_instance
