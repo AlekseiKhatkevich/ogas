@@ -1,5 +1,5 @@
 from typing import Optional, TYPE_CHECKING
-
+from common import settings
 import sqlalchemy as sa
 from cache import AsyncTTL
 
@@ -35,9 +35,30 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
             )
             return organization
 
-    async def update_organization(self, name: str, data: 'OrganizationUpdateIn'):
+    async def update_organization(self, name: str, data: 'OrganizationUpdateIn') -> OrganizationORM | None:
         values = {}
         if data.new_name:
             values['name'] = data.new_name
         if data.new_token:
-            values['token'] = data.new_token
+            raw_token = data.new_token.get_secret_value()
+            values['token'] = sa.func.crypt(
+                sa.literal(raw_token),
+                sa.func.gen_salt(settings.POSTGRES_CRYPTO_HASHER),
+            )
+
+        if values:
+            stmt = self.update.where(
+                self._model.name == name,
+            ).values(
+                **values
+            ).returning(
+                self._model,
+            )
+            async with self._db.async_session as session:
+                if data.new_token:
+                    await session.execute("SET LOCAL log_statement = 'none'")
+                updated_instance = await session.scalar(stmt)
+                await session.commit()
+                return updated_instance
+
+        return None

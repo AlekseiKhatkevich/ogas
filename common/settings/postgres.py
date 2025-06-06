@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import AfterValidator, Field, PositiveInt, PostgresDsn
 from pydantic_settings import BaseSettings
@@ -47,3 +47,11 @@ class PostgresSettings(BaseSettings):
             description='Закрывать коннект после n секунд неактивности.',
         ),
     ] = -1
+
+    POSTGRES_CRYPTO_HASHER: Annotated[
+        Literal['bf', 'md5', 'xdes', 'des',],
+        Field(
+            description='Алгоритм хеширования токена. '
+                        '(https://www.postgresql.org/docs/current/pgcrypto.html#PGCRYPTO-CRYPT-ALGORITHMS)',
+        )
+    ]
