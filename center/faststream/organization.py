@@ -7,6 +7,7 @@ from center.usecases.organization import OrganizationUpdateUseCase
 from common.faststream.filters import contentype_json
 
 router = KafkaRouter(prefix='organizations_', dependencies=[Depends(organization)])
+
 organization_out_publisher = router.publisher(
     'name_changed',
     title='Organization-name-changed',

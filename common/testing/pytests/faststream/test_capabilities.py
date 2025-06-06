@@ -1,7 +1,7 @@
 import pytest
 from faststream.exceptions import SubscriberNotFound
 
-from center.faststream.capabilities import capability_out_publisher, create_or_update_capability
+from center.faststream.capabilities import create_or_update_capability
 
 
 async def test_create_or_update_capability_positive(

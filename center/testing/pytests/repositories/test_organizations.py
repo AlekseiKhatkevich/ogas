@@ -67,7 +67,7 @@ def input_data(
     ([True, True], [True, False], [False, True], [False, False],),
     indirect=True,
 )
-async def test_update_organization_positive_token_and_name(
+async def test_update_organization_positive(
         input_data,
         organization_in_db,
         organization_repo,
@@ -83,4 +83,3 @@ async def test_update_organization_positive_token_and_name(
         name=input_data.new_name or organization_in_db.name,
         token=input_data.new_token.get_secret_value() if input_data.new_token else organization_token,
     )
-
