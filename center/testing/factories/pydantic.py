@@ -1,13 +1,15 @@
-from typing import Generic, TypeVar
+from typing import Any, Generic, Type, TypeVar
 
 from faker import Faker
 from polyfactory import Use
 from polyfactory.factories.pydantic_factory import ModelFactory
+from pydantic.types import SecretStr
 
-from center.serializers import CapabilityIn
+from center.serializers import CapabilityIn, OrganizationUpdateIn
 
 __all__ = (
     'CapabilityInFactory',
+    'OrganizationUpdateInFactory',
 )
 
 
@@ -22,7 +24,19 @@ class CustomFactory(Generic[T], ModelFactory[T]):
     __max_collection_length__ = 3
     __check_model__ = True
 
+    @classmethod
+    def get_provider_map(cls) -> dict[Type, Any]:
+        return {
+            SecretStr: lambda: cls.__faker__.unique.pystr(min_chars=24, max_chars=72),
+            **super().get_provider_map(),
+        }
+
 
 class CapabilityInFactory(CustomFactory[CapabilityIn]):
     __allow_none_optionals__ = False
     organization_name: str = Use(CustomFactory.__faker__.unique.company)
+
+
+class OrganizationUpdateInFactory(CustomFactory[OrganizationUpdateIn]):
+    __allow_none_optionals__ = False
+    new_token: str = Use(CustomFactory.__faker__.unique.pystr, min_chars=24, max_chars=72)
