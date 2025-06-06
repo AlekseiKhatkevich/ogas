@@ -57,6 +57,10 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
         return sa.select(self._model)
 
     @property
+    def update(self) -> sa.Update:
+        return sa.update(self._model)
+
+    @property
     def select_active(self) -> sa.Select:
         return self.select.where(self._model.is_active == sa.true()) if self.has_is_active else self.select
 

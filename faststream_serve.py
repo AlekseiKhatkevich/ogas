@@ -13,7 +13,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from prometheus_client import CollectorRegistry, make_asgi_app
 
-from center.faststream import capabilities
+from center.faststream import capabilities, organization
 from common.faststream import product
 from common import settings
 
@@ -40,6 +40,7 @@ broker = KafkaBroker(
 )
 broker.include_router(capabilities.router)
 broker.include_router(product.router)
+broker.include_router(organization.router)
 
 app = AsgiFastStream(
     broker,

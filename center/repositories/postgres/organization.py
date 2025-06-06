@@ -4,10 +4,12 @@ import sqlalchemy as sa
 from cache import AsyncTTL
 
 from center.orm_models import OrganizationORM
+
 from common.repositories.postgres import CommonPostgresRepository
 
 if TYPE_CHECKING:
     from ulid import ULID
+    from center.serializers import OrganizationUpdateIn
 
 __all__ = (
     'OrganizationPostgresRepository',
@@ -32,3 +34,10 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
                 )
             )
             return organization
+
+    async def update_organization(self, name: str, data: 'OrganizationUpdateIn'):
+        values = {}
+        if data.new_name:
+            values['name'] = data.new_name
+        if data.new_token:
+            values['token'] = data.new_token
