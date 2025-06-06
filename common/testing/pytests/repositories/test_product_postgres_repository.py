@@ -1,7 +1,4 @@
-from typing import TYPE_CHECKING
-
 import pytest
-
 
 from common.orm_models import CategoryORM, ProductCategoryM2MIntermediate
 
