@@ -1,14 +1,10 @@
-from typing import TYPE_CHECKING
-
-from faststream import Context, Depends
+from faststream import Depends
 from faststream.kafka import KafkaRouter
 
 from center.faststream.dependencies import organization
 from common.faststream.filters import contentype_json
 from ..serializers import OperativeDataIn
-
-if TYPE_CHECKING:
-    from ..orm_models import OrganizationORM
+from ..usecases.operative_data import OperativeDataInSaveUseCase
 
 __all__ = (
     'receive_operative_data',
@@ -26,8 +22,7 @@ router = KafkaRouter(prefix='operative_data_', dependencies=[Depends(organizatio
     batch_timeout_ms=1000 * 5,  # msec.
 )
 async def receive_operative_data(
-        messages: list[OperativeDataIn],
-        current_organization: 'OrganizationORM' = Context(),
+        op_info: list[OperativeDataIn],
 ):
-    print(messages)
-    print(current_organization)
+    use_case = await OperativeDataInSaveUseCase(msg=op_info)
+    await use_case.execute()
