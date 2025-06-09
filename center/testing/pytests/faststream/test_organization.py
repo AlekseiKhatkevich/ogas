@@ -26,7 +26,7 @@ async def test_update_organization_name_updated(
 
     assert await organization_repo.get_organization_by_token(
         _id=None,
-        name=data_in.new_name ,
+        name=data_in.new_name,
         token=data_in.new_token.get_secret_value(),
     )
     update_organization.mock.assert_called_once_with(kafka_message)

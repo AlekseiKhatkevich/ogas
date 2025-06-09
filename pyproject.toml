@@ -16,7 +16,6 @@ dependencies = [
     "prefect>=3.4.1",
     "prefect-docker>=0.6.4",
     "pydantic-settings>=2.9.1",
-    "pytest-asyncio>=1.0.0",
     "python-ulid[pydantic]>=3.0.0",
     "sqlalchemy[asyncio]>=2.0.40",
 ]
