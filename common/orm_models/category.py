@@ -45,11 +45,13 @@ category_association_table = Table(
         'product_id',
         ForeignKey('product.id', ondelete='CASCADE', ),
         primary_key=True,
+        comment='Продукт',
     ),
     Column(
         "category_code",
         ForeignKey('category.code', ondelete='CASCADE',),
         primary_key=True,
+        comment='Код категории',
     ),
 )
 

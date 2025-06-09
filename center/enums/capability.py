@@ -15,3 +15,12 @@ class Period(CaseInsensitiveMixin, enum.StrEnum):
     QUARTER = enum.auto()
     YEAR = enum.auto()
 
+
+# noinspection PyEnum
+class Role(CaseInsensitiveMixin, enum.StrEnum):
+    """
+    Потребитель или производитель или накопитель продукта.
+    """
+    PRODUCER = enum.auto()
+    CONSUMER = enum.auto()
+

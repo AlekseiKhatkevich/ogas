@@ -2,7 +2,7 @@ import ulid
 from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from center.enums import Period
+from center.enums import Period, Role
 from common.orm_models.mixins import TimestampMixin
 from common.resources.database.postgres.alchemy_related import Base, ULID_PK
 
@@ -12,6 +12,9 @@ __all__ = (
 
 
 class CapabilityORM(TimestampMixin, Base):
+    """
+    Производительность / потребление организацией продукта.
+    """
     id: Mapped[ULID_PK]
     organization_id: Mapped[ulid.ULID] = mapped_column(
         ForeignKey('organization.id', ondelete='CASCADE', ),
@@ -23,6 +26,9 @@ class CapabilityORM(TimestampMixin, Base):
     )
     period: Mapped[Period] = mapped_column(
         comment='Период за который указана производительность.',
+    )
+    role: Mapped[Role] = mapped_column(
+        comment='В качестве производителя или потребителя товара.',
     )
     value: Mapped[int | None] = mapped_column(
         comment='Производительность, единиц товара.',
@@ -39,7 +45,7 @@ class CapabilityORM(TimestampMixin, Base):
     )
 
     __table_args__ = (
-        UniqueConstraint('product_id', 'organization_id', 'period', ),
+        UniqueConstraint('product_id', 'organization_id', 'period', 'role', ),
         CheckConstraint(text('value >= 0'), name='value_gt_0_check', ),
     )
 
