@@ -34,16 +34,18 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
                     sa.column('organization_name', sa.TEXT),
                     sa.column('product_id', self._model.product_id.type),
                     sa.column('period', self._model.period.type),
+                    sa.column('role', self._model.role.type),
                     sa.column('value', self._model.value.type),
                     name='capabilities_from_company',
                 ).data(
-                    [(c.organization_name, c.product_id, c.period, c.value) for c in batch]
+                    [(c.organization_name, c.product_id, c.period, c.role, c.value) for c in batch]
                 )
 
                 sel = sa.select(
                     OrganizationORM.id,
                     sa.cast(value_expr.c.product_id, self._model.product_id.type),
                     sa.cast(value_expr.c.period, self._model.period.type),
+                    sa.cast(value_expr.c.role, self._model.role.type),
                     value_expr.c.value,
                 ).join(
                     OrganizationORM,
@@ -51,12 +53,12 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
                 )
 
                 insert_stmt = pg.insert(self._model).from_select(
-                    ['organization_id', 'product_id', 'period', 'value', ],
+                    ['organization_id', 'product_id', 'period', 'role', 'value', ],
                     sel,
                 )
 
                 stmt = insert_stmt.on_conflict_do_update(
-                    index_elements=('organization_id', 'product_id', 'period'),
+                    index_elements=('organization_id', 'product_id', 'period', 'role', ),
                     set_={
                         self._model.value: insert_stmt.excluded.value,
                         self._model.updated_at: sa.func.now(),

@@ -1,6 +1,6 @@
 import pytest
 
-from center.enums import Period
+from center.enums import Period, Role
 from center.orm_models import CapabilityORM
 from center.repositories.postgres import CapabilityPostgresRepository
 from center.serializers import CapabilityIn
@@ -8,7 +8,6 @@ from center.serializers import CapabilityIn
 """
 Тесты относящиеся к CapabilityPostgresRepository.
 """
-
 
 model = CapabilityORM
 
@@ -54,6 +53,7 @@ async def test_positive_insert_or_update_capabilities_insert_plus_update(
         organization_name=capability_in_db.organization.name,
         product_id=capability_in_db.product_id,
         period=capability_in_db.period,
+        role=capability_in_db.role,
         value=capability_in_db.value + 1,
     )
 
@@ -77,6 +77,7 @@ async def test_no_update_with_same_value(capability_in_db, repo):
         product_id=capability_in_db.product_id,
         period=capability_in_db.period,
         value=capability_in_db.value,
+        role=Role.PRODUCER,
     )
 
     result = await repo.insert_or_update_capabilities({capability_to_update, })
@@ -88,4 +89,3 @@ async def test_no_update_with_same_value(capability_in_db, repo):
         capability_in_db.id,
         where=model.updated_at.is_not_distinct_from(None),
     )
-

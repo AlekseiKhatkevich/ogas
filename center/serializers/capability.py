@@ -3,7 +3,7 @@ from typing import Annotated
 import ulid
 from pydantic import BaseModel, Field, NonNegativeInt
 
-from center.enums import Period
+from center.enums import Period, Role
 from utils.pydantic_utils import hashable_model
 
 __all__ = (
@@ -27,6 +27,10 @@ class CapabilityIn(BaseModel):
     period: Annotated[
         Period,
         Field(description='Период производительности.'),
+    ]
+    role: Annotated[
+        Role,
+        Field(description='Производитель или потребитель продукта.'),
     ]
     value: Annotated[
         NonNegativeInt | None,

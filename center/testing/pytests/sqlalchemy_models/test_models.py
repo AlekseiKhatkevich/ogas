@@ -13,6 +13,7 @@ async def test_capability_orm_negative_uniqueness(test_db, capability_in_db):
         product_id=capability_in_db.product_id,
         organization_id=capability_in_db.organization_id,
         period=capability_in_db.period,
+        role=capability_in_db.role,
     )
     with pytest.raises(IntegrityError, match='uq_capability_product_id'):
         async with test_db.async_session as session:
