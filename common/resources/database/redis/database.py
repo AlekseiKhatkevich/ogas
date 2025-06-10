@@ -29,7 +29,7 @@ class RedisDAOImpl(RedisDAO):
 
 
 service_provider = Provider(scope=Scope.APP)
-service_provider.provide(RedisDAOImpl, provides=RedisDAO)
+service_provider.provide(RedisDAOImpl, provides=RedisDAO, scope=Scope.APP)
 
 
 class ClientProvider(Provider):
