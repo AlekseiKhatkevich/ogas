@@ -10,6 +10,7 @@ dependencies = [
     "alembic-utils>=0.8.8",
     "async-cache>=1.1.1",
     "asyncpg>=0.30.0",
+    "dishka>=1.6.0",
     "faststream[cli,kafka,otel,prometheus]>=0.5.40",
     "more-itertools>=10.7.0",
     "opentelemetry-exporter-otlp>=1.33.1",
@@ -17,6 +18,7 @@ dependencies = [
     "prefect-docker>=0.6.4",
     "pydantic-settings>=2.9.1",
     "python-ulid[pydantic]>=3.0.0",
+    "redis>=6.2.0",
     "sqlalchemy[asyncio]>=2.0.40",
 ]
 

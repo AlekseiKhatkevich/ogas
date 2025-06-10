@@ -43,7 +43,7 @@ class AsyncObj:
         Standard constructor used for arguments pass
         Do not override. Use __ainit__ instead
         """
-        self.__storedargs = args, kwargs
+        self.storedargs = args, kwargs
         self.async_initialized = False
 
     async def __ainit__(self, *args, **kwargs):
@@ -53,7 +53,7 @@ class AsyncObj:
         """ Crutch used for __await__ after spawning """
         assert not self.async_initialized
         self.async_initialized = True
-        await self.__ainit__(*self.__storedargs[0], **self.__storedargs[1])  # pass the parameters to __ainit__ that
+        await self.__ainit__(*self.storedargs[0], **self.storedargs[1])  # pass the parameters to __ainit__ that
         # passed to __init__
         return self
 
