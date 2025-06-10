@@ -24,5 +24,5 @@ router = KafkaRouter(prefix='operative_data_', dependencies=[Depends(organizatio
 async def receive_operative_data(
         op_info: list[OperativeDataIn],
 ):
-    use_case = await OperativeDataInSaveUseCase(msg=op_info)
+    use_case = await OperativeDataInSaveUseCase(op_info=op_info)
     await use_case.execute()

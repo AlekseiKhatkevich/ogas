@@ -12,7 +12,6 @@ if TYPE_CHECKING:
 
 
 class OperativeDataInSaveUseCase(AsyncObj, AbstractUseCase):
-
     @apply_types
     async def __ainit__(
             self, op_info: 'OperativeDataIn',
