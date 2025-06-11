@@ -33,5 +33,5 @@ class OperativeDataIn(BaseModel):
         return f'Product {self.product_id}, organization {self.organization_id}.'
 
     @field_serializer('organization_id')
-    def remove_stopwords(self, v: ulid.ULID | None, info: SerializationInfo) -> ulid.ULID | None:
+    def add_organization_id(self, v: ulid.ULID | None, info: SerializationInfo) -> ulid.ULID | None:
         return context.get('organization_id') if (context := info.context) else v

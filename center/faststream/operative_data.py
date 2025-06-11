@@ -16,13 +16,11 @@ router = KafkaRouter(prefix='operative_data_', dependencies=[Depends(organizatio
 @router.subscriber(
     'in',
     filter=contentype_json,
-    title='Consumation-from-organizations.',
+    title='Operative_data-from-organizations.',
     batch=True,
     max_records=1000,
-    batch_timeout_ms=1000 * 5,  # msec.
+    batch_timeout_ms=1000 * 1,  # msec.
 )
-async def receive_operative_data(
-        op_info: list[OperativeDataIn],
-):
+async def receive_operative_data(op_info: list[OperativeDataIn]) -> None:
     use_case = await OperativeDataInSaveUseCase(op_info=op_info)
     await use_case.execute()

@@ -1,5 +1,7 @@
-import ulid
 from typing import TYPE_CHECKING
+
+import ulid
+
 from center.orm_models import OperativeDataORM
 from center.serializers import OperativeDataIn
 from common.repositories.postgres import CommonPostgresRepository
