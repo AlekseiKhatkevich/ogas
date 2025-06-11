@@ -42,9 +42,8 @@ class OperativeDataORM(Base):
     )
 
     __mapper_args__ = {
-        'primary_key': ['product_id', 'organization_id', 'change_datetime', ]
+        'primary_key': ['product_id', 'organization_id', 'change_datetime', ],
     }
 
     def __repr__(self) -> str:
         return f'Product {self.product_id}, organization {self.organization_id}.'
-

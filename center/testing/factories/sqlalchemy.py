@@ -1,11 +1,14 @@
+import datetime
+
 from polyfactory import Use
 
-from center.orm_models import CapabilityORM, OrganizationORM
+from center.orm_models import CapabilityORM, OperativeDataORM, OrganizationORM
 from common.testing.factories.sqlalchemy import CustomFactory
 
 __all__ = (
     'OrganizationFactory',
     'CapabilityFactory',
+    'OperativeDataFactory',
 )
 
 
@@ -19,3 +22,11 @@ class CapabilityFactory(CustomFactory[CapabilityORM]):
     __set_relationships__ = True
     __allow_none_optionals__ = False
     value: int = Use(CustomFactory.__faker__.random_int, min=0)
+
+
+class OperativeDataFactory(CustomFactory[OperativeDataORM]):
+    __set_relationships__ = True
+    diff: float = Use(CustomFactory.__faker__.pyfloat, min_value=-100, max_value=1000)
+    change_datetime: datetime.datetime = Use(
+        CustomFactory.__faker__.date_time_between, '-1m', 'now', datetime.UTC,
+    )
