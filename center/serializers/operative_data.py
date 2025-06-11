@@ -29,9 +29,6 @@ class OperativeDataIn(BaseModel):
         Field(description='ID организации.'),
     ] = None
 
-    def __repr__(self) -> str:
-        return f'Product {self.product_id}, organization {self.organization_id}.'
-
     @field_serializer('organization_id')
     def add_organization_id(self, v: ulid.ULID | None, info: SerializationInfo) -> ulid.ULID | None:
         return context.get('organization_id') if (context := info.context) else v

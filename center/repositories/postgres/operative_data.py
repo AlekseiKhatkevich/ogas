@@ -20,8 +20,4 @@ class OperativeDataPostgresRepository(CommonPostgresRepository, model=OperativeD
         instances = [
             OperativeDataORM(**d.model_dump(context={'organization_id': organization_id})) for d in data
         ]
-        async with self._db.async_session as session:
-            session.add_all(instances)
-            await session.commit()
-
-        return instances
+        return await self.add_all(instances)

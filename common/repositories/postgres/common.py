@@ -78,7 +78,6 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
             is_active: bool = True,
             where: ColumnExpressionArgument | None = None,
     ) -> int:
-        # query = sa.select(sa.func.count(self._model.id))
         query = sa.select(sa.func.count(sa.literal('*')))
         if is_active and self.has_is_active:
             query = query.where(self._model.is_active == sa.true())
@@ -92,3 +91,9 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
             session.add(instance)
             await session.refresh(instance, **kwargs)
             return instance
+
+    async def add_all(self, instances: list[M]) -> list[M]:
+        async with self._db.async_session as session:
+            session.add_all(instances)
+            await session.commit()
+            return instances
