@@ -15,7 +15,7 @@ class OperativeDataIn(BaseModel):
         Field(description='ID продукта.'),
     ]
     diff: Annotated[
-        int,
+        float,
         Field(description='Изменение кол-ва продукта.'),
     ]
     change_datetime: Annotated[
