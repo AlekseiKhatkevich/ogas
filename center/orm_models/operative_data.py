@@ -11,11 +11,6 @@ __all__ = (
 
 
 class OperativeDataORM(Base):
-    # id: Mapped[int] = mapped_column(
-    #     Identity(cycle=True, always=True,),
-    #     primary_key=True,
-    #     comment='ID',
-    # )
     product_id: Mapped[ulid.ULID] = mapped_column(
         comment='Продукт.',
     )

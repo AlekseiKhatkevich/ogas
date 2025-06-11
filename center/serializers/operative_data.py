@@ -2,11 +2,13 @@ import datetime
 from typing import Annotated
 
 import ulid
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_serializer
 
 __all__ = (
     'OperativeDataIn',
 )
+
+from pydantic_core.core_schema import SerializationInfo
 
 
 class OperativeDataIn(BaseModel):
@@ -22,3 +24,14 @@ class OperativeDataIn(BaseModel):
         datetime.datetime,
         Field(description='Время наступления события.'),
     ]
+    organization_id: Annotated[
+        ulid.ULID | None,
+        Field(description='ID организации.'),
+    ] = None
+
+    def __repr__(self) -> str:
+        return f'Product {self.product_id}, organization {self.organization_id}.'
+
+    @field_serializer('organization_id')
+    def remove_stopwords(self, v: ulid.ULID | None, info: SerializationInfo) -> ulid.ULID | None:
+        return context.get('organization_id') if (context := info.context) else v

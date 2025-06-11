@@ -35,11 +35,16 @@ def upgrade() -> None:
     )
     op.execute(
         """
-         alter table public.operativedata SET(
+         alter table operativedata SET(
            timescaledb.enable_columnstore,
            timescaledb.orderby = 'change_datetime DESC',
            timescaledb.segmentby = 'product_id, organization_id'
            );
+        """
+    )
+    op.execute(
+        """
+        CALL add_columnstore_policy('operativedata', after => INTERVAL '1d');
         """
     )
     # ### end Alembic commands ###

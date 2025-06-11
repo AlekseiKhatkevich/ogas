@@ -14,10 +14,12 @@ class OperativeDataInSaveUseCase(AsyncObj, AbstractUseCase):
             self,
             op_info: list[OperativeDataIn],
             current_organization: OrganizationORM = Depends(organization),
+            # repository: OrganizationPostgresRepository = OrganizationPostgresRepository,
     ) -> None:
         self.op_info = op_info
         self.current_organization = current_organization
         self.redis_client = redis_container.get(RedisDAO)
+        # self.repository = repository
 
     async def execute(self):
         pass
