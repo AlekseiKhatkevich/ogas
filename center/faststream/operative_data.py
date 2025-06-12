@@ -1,8 +1,10 @@
 from faststream import Depends
 from faststream.kafka import KafkaRouter
 
-from center.faststream.dependencies import organization
+from center.faststream.dependencies import CurrentOrganizationDepBatch, organization
 from common.faststream.filters import contentype_json
+from .dependencies.organization import organization_batch
+from ..orm_models import OrganizationORM
 from ..serializers import OperativeDataIn
 from ..usecases.operative_data import OperativeDataInSaveUseCase
 
@@ -10,7 +12,7 @@ __all__ = (
     'receive_operative_data',
 )
 
-router = KafkaRouter(prefix='operative_data_', dependencies=[Depends(organization)])
+router = KafkaRouter(prefix='operative_data_', )
 
 
 @router.subscriber(
@@ -21,6 +23,8 @@ router = KafkaRouter(prefix='operative_data_', dependencies=[Depends(organizatio
     max_records=1000,
     batch_timeout_ms=1000 * 1,  # msec.
 )
-async def receive_operative_data(op_info: list[OperativeDataIn]) -> None:
-    use_case = await OperativeDataInSaveUseCase(op_info=op_info)
+async def receive_operative_data(op_info: list[OperativeDataIn],
+                                 organizations=Depends(organization_batch),
+                                 ) -> None:
+    use_case = await OperativeDataInSaveUseCase(op_info, organizations)
     await use_case.execute()

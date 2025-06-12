@@ -41,7 +41,7 @@ class CustomFactory(Generic[T], SQLAlchemyFactory[T]):
 
 
 class CategoryFactory(CustomFactory[CategoryORM]):
-    code: str = Use(CustomFactory.__faker__.unique.pystr, min_chars=20)
+    code: str = Use(CustomFactory.__faker__.unique.pystr, min_chars=12)
 
 
 class StandardFactory(CustomFactory[StandardORM]):

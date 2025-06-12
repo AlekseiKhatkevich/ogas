@@ -11,18 +11,19 @@ from ..repositories.postgres import OperativeDataPostgresRepository
 
 
 class OperativeDataInSaveUseCase(AsyncObj, AbstractUseCase):
-    @apply_types
     async def __ainit__(
             self,
             op_info: list[OperativeDataIn],
-            current_organization: OrganizationORM = Depends(organization),
+            current_organizations: list[OrganizationORM | None],
             repository: CommonPostgresRepository = OperativeDataPostgresRepository,
     ) -> None:
         self.op_info = op_info
-        self.current_organization = current_organization
+        self.current_organizations = current_organizations
         self.redis_client = redis_container.get(RedisDAO)
         # noinspection PyCallingNonCallable
         self.repository = repository()
 
     async def execute(self) -> list[OperativeDataORM]:
-        return await self.repository.insert_data(self.op_info, self.current_organization.id)
+        for info, org in zip(self.op_info, self.current_organizations):
+            info.organization_id = org.id
+        return await self.repository.insert_data(self.op_info,)
