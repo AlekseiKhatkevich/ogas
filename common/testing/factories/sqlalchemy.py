@@ -3,7 +3,7 @@ from typing import Any, Callable, Generic, TYPE_CHECKING, TypeVar
 
 import ulid
 from faker import Faker
-from polyfactory import Ignore
+from polyfactory import Ignore, Use
 from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
 
 from common.orm_models import CategoryORM, ProductORM, StandardORM
@@ -41,7 +41,7 @@ class CustomFactory(Generic[T], SQLAlchemyFactory[T]):
 
 
 class CategoryFactory(CustomFactory[CategoryORM]):
-    pass
+    code: str = Use(CustomFactory.__faker__.unique.pystr, min_chars=20)
 
 
 class StandardFactory(CustomFactory[StandardORM]):
