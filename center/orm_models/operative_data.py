@@ -30,13 +30,13 @@ class OperativeDataORM(Base):
     )
     organization: Mapped['OrganizationORM'] = relationship(
         'OrganizationORM',
-        backref='operative_data',
+        # backref='operative_data',
         primaryjoin='OperativeDataORM.organization_id == OrganizationORM.id',
         foreign_keys=organization_id,
     )
     product: Mapped['ProductORM'] = relationship(
         'ProductORM',
-        backref='operative_data',
+        # backref='operative_data',
         primaryjoin='OperativeDataORM.product_id == ProductORM.id',
         foreign_keys=product_id,
     )

@@ -13,11 +13,13 @@ __all__ = (
     'OperativeDataPostgresRepository',
 )
 
-
+# todo написать в гитхаб по поводу поддержки операций над батчем
 class OperativeDataPostgresRepository(CommonPostgresRepository, model=OperativeDataORM):
 
     async def insert_data(self, data: list['OperativeDataIn'], organization_id: ulid.ULID) -> list[OperativeDataORM]:
         instances = [
-            OperativeDataORM(**d.model_dump(context={'organization_id': organization_id})) for d in data
+            OperativeDataORM(
+                **d.model_dump(context={'organization_id': organization_id}, warnings='warn')
+            ) for d in data
         ]
         return await self.add_all(instances)

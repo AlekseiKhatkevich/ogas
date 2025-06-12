@@ -38,7 +38,8 @@ def upgrade() -> None:
          alter table operativedata SET(
            timescaledb.enable_columnstore,
            timescaledb.orderby = 'change_datetime DESC',
-           timescaledb.segmentby = 'product_id, organization_id'
+           timescaledb.segmentby = 'product_id, organization_id',
+           timescaledb.chunk_interval='1 day'
            );
         """
     )

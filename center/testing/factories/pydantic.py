@@ -1,15 +1,18 @@
+import datetime
 from typing import Any, Generic, Type, TypeVar
 
+import ulid
 from faker import Faker
 from polyfactory import Use
 from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic.types import SecretStr
 
-from center.serializers import CapabilityIn, OrganizationUpdateIn
+from center.serializers import CapabilityIn, OperativeDataIn, OrganizationUpdateIn
 
 __all__ = (
     'CapabilityInFactory',
     'OrganizationUpdateInFactory',
+    'OperativeDataInFactory',
 )
 
 
@@ -40,3 +43,10 @@ class CapabilityInFactory(CustomFactory[CapabilityIn]):
 class OrganizationUpdateInFactory(CustomFactory[OrganizationUpdateIn]):
     __allow_none_optionals__ = False
     new_token: str = Use(CustomFactory.__faker__.unique.pystr, min_chars=24, max_chars=72)
+
+
+class OperativeDataInFactory(CustomFactory[OperativeDataIn]):
+    organization_id: ulid.ULID | None = None
+    change_datetime: datetime.datetime = Use(
+        CustomFactory.__faker__.date_time_between, '-1m', 'now', datetime.UTC,
+    )
