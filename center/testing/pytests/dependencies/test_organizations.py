@@ -1,6 +1,7 @@
 import pytest
 
 from center.faststream.dependencies import organization
+from center.repositories.postgres import OrganizationPostgresRepository
 from common.exceptions.app import AuthMessageException, NoOrganizationIdentityException
 
 
@@ -20,6 +21,7 @@ async def test_organization_dependency_negative_no_organization(organization_in_
             token='random_str',
             organization_id=organization_in_db.id,
             organization_name=organization_in_db.name,
+            repo=OrganizationPostgresRepository(),
         )
 
 
@@ -28,6 +30,7 @@ async def test_organization_dependency_positive(organization_in_db, organization
         token=organization_token,
         organization_id=organization_in_db.id,
         organization_name=organization_in_db.name,
+        repo=OrganizationPostgresRepository(),
     )
 
     assert organization_instance == organization_in_db

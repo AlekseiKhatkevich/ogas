@@ -19,7 +19,6 @@ __all__ = (
 current_organization_name = contextvars.ContextVar('current_organization_name')
 
 
-
 def organization_repo() -> OrganizationPostgresRepository:
     return OrganizationPostgresRepository()
 
