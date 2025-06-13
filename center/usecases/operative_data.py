@@ -1,6 +1,3 @@
-from faststream import Depends, apply_types
-
-from center.faststream.dependencies import organization
 from center.serializers import OperativeDataIn
 from common.repositories.postgres import CommonPostgresRepository
 from common.resources.database.redis import RedisDAO, redis_container
@@ -24,6 +21,9 @@ class OperativeDataInSaveUseCase(AsyncObj, AbstractUseCase):
         self.repository = repository()
 
     async def execute(self) -> list[OperativeDataORM]:
+        to_insert = []
         for info, org in zip(self.op_info, self.current_organizations):
-            info.organization_id = org.id
-        return await self.repository.insert_data(self.op_info,)
+            if org is not None:
+                info.organization_id = org.id
+                to_insert.append(info)
+        return await self.repository.insert_data(to_insert)

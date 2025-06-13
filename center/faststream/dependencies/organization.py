@@ -65,6 +65,5 @@ async def organization_batch(
     return [auth_status.organization for auth_status in auth_statuses_filled]
 
 
-
 CurrentOrganizationDep = Annotated[OrganizationORM | None, Depends(organization)]
 CurrentOrganizationDepBatch = Annotated[list[OrganizationORM | None], Depends(organization_batch)]
