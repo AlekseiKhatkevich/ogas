@@ -1,12 +1,13 @@
 import contextvars
+import uuid
 from typing import Annotated
-from faststream import Depends, apply_types
+
 import ulid
-from faststream import Context, Depends, Header, context
-from faststream.kafka.message import KafkaMessage
+from faststream import Context, Depends, Header, apply_types, context
 
 from center.orm_models import OrganizationORM
 from center.repositories.postgres import OrganizationPostgresRepository
+from center.serializers import KafkaHeaders
 from common.exceptions.app import AuthMessageException, NoOrganizationIdentityException
 
 __all__ = (
@@ -25,11 +26,11 @@ def organization_repo() -> OrganizationPostgresRepository:
 
 @apply_types
 async def get_organization_instance(
-        organization_id,
-        organization_name,
-        token,
+        organization_id: ulid.ULID,
+        organization_name: str,
+        token: str,
         repo: OrganizationPostgresRepository = Depends(organization_repo)
-    ):
+    ) -> OrganizationORM:
     if organization_id is None and organization_name is None:
         raise NoOrganizationIdentityException(
             'Не указаны organization_id или organization_name. Укажите одно из двух.',
@@ -54,15 +55,11 @@ async def organization(
 
 
 async def organization_batch(
-        message: KafkaMessage = Context()
+        batch_headers: dict[str, str] = Context('message.batch_headers')
 ) -> list[OrganizationORM | None]:
     organization_instances = []
-    for header in message.batch_headers:
-        token = header.get('token')
-        organization_id = header.get('organization_id')
-        organization_name = header.get('organization_id')
-        organization_instance = await get_organization_instance(organization_id, organization_name, token)
-        organization_instances.append(organization_instance)
+    headers = KafkaHeaders(headers=batch_headers)
+
 
     return organization_instances
 

@@ -21,7 +21,7 @@ router = KafkaRouter(prefix='operative_data_', )
     title='Operative_data-from-organizations.',
     batch=True,
     max_records=1000,
-    batch_timeout_ms=1000 * 1,  # msec.
+    batch_timeout_ms=1000 * 5,  # msec.
 )
 async def receive_operative_data(op_info: list[OperativeDataIn],
                                  organizations=Depends(organization_batch),
