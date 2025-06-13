@@ -1,5 +1,4 @@
 import contextvars
-import uuid
 from typing import Annotated
 
 import ulid
@@ -7,7 +6,7 @@ from faststream import Context, Depends, Header, apply_types, context
 
 from center.orm_models import OrganizationORM
 from center.repositories.postgres import OrganizationPostgresRepository
-from center.serializers import KafkaHeaders
+from center.serializers import AuthStatus, kafka_header_list_adapter
 from common.exceptions.app import AuthMessageException, NoOrganizationIdentityException
 
 __all__ = (
@@ -57,11 +56,11 @@ async def organization(
 async def organization_batch(
         batch_headers: dict[str, str] = Context('message.batch_headers')
 ) -> list[OrganizationORM | None]:
-    organization_instances = []
-    headers = KafkaHeaders(headers=batch_headers)
-
-
-    return organization_instances
+    auth_statuses = [
+        AuthStatus(header=header) for header in kafka_header_list_adapter.validate_python(batch_headers)
+    ]
+    1+1
+    return None
 
 
 

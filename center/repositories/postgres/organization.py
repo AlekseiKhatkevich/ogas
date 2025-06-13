@@ -9,7 +9,7 @@ from common.repositories.postgres import CommonPostgresRepository
 
 if TYPE_CHECKING:
     from ulid import ULID
-    from center.serializers import OrganizationUpdateIn
+    from center.serializers import AuthStatus, OrganizationUpdateIn
 
 __all__ = (
     'OrganizationPostgresRepository',
@@ -34,6 +34,9 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
                 )
             )
             return organization
+
+    async def get_organizations_by_token(self, auth_data: list['AuthStatus']) -> list['AuthStatus']:
+        pass
 
     async def update_organization(self, name: str, data: 'OrganizationUpdateIn') -> OrganizationORM | None:
         values = {}

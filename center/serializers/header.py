@@ -1,9 +1,12 @@
+import dataclasses
+
 import ulid
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, SecretStr, TypeAdapter
 
 __all__ = (
     'KafkaHeader',
-    'KafkaHeaders',
+    'AuthStatus',
+    'kafka_header_list_adapter',
 )
 
 
@@ -12,13 +15,18 @@ class KafkaHeader(BaseModel):
     organization_id: ulid.ULID | None = None
     organization_name: str | None = None
 
+
+@dataclasses.dataclass
+class AuthStatus:
+    header: KafkaHeader
+    auth_passed: bool = False
+
     @property
     def auth_pair(self) -> dict[str, ulid.ULID | str] | None:
-        if self.token is None or (self.organization_id is None and self.organization_name is None):
+        if self.header.token is None or (self.header.organization_id is None and self.header.organization_name is None):
             return None
         else:
-            return self.model_dump(exclude_none=True)
+            return self.header.model_dump(exclude_none=True)
 
 
-class KafkaHeaders(BaseModel):
-    headers: list[KafkaHeader]
+kafka_header_list_adapter = TypeAdapter(list[KafkaHeader])
