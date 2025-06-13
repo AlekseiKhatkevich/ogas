@@ -54,13 +54,15 @@ async def organization(
 
 
 async def organization_batch(
-        batch_headers: dict[str, str] = Context('message.batch_headers')
+        batch_headers: dict[str, str] = Context('message.batch_headers'),
+        repo: OrganizationPostgresRepository = Depends(organization_repo)
 ) -> list[OrganizationORM | None]:
     auth_statuses = [
         AuthStatus(header=header) for header in kafka_header_list_adapter.validate_python(batch_headers)
     ]
-    1+1
-    return None
+    auth_statuses_filled = await repo.get_organizations_by_token(auth_statuses)
+
+    return 1
 
 
 

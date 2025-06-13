@@ -1,7 +1,10 @@
 import dataclasses
+from functools import cached_property
 
 import ulid
 from pydantic import BaseModel, SecretStr, TypeAdapter
+
+from center.orm_models import OrganizationORM
 
 __all__ = (
     'KafkaHeader',
@@ -19,14 +22,18 @@ class KafkaHeader(BaseModel):
 @dataclasses.dataclass
 class AuthStatus:
     header: KafkaHeader
-    auth_passed: bool = False
+    organization: OrganizationORM = None
 
-    @property
-    def auth_pair(self) -> dict[str, ulid.ULID | str] | None:
+    @cached_property
+    def auth_pair(self) -> dict | None:
         if self.header.token is None or (self.header.organization_id is None and self.header.organization_name is None):
             return None
         else:
             return self.header.model_dump(exclude_none=True)
+
+    @property
+    def identifier(self) -> ulid.ULID | str:
+        return self.header.organization_id or self.header.organization_name
 
 
 kafka_header_list_adapter = TypeAdapter(list[KafkaHeader])
