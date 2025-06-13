@@ -62,7 +62,7 @@ async def organization_batch(
     ]
     auth_statuses_filled = await repo.get_organizations_by_token(auth_statuses)
 
-    return 1
+    return [auth_status.organization for auth_status in auth_statuses_filled]
 
 
 
