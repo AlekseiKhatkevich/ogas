@@ -20,7 +20,6 @@ async def test_organization_dependency_negative_no_organization(organization_in_
             token='random_str',
             organization_id=organization_in_db.id,
             organization_name=organization_in_db.name,
-            repo=organization_repo,
         )
 
 
@@ -29,7 +28,6 @@ async def test_organization_dependency_positive(organization_in_db, organization
         token=organization_token,
         organization_id=organization_in_db.id,
         organization_name=organization_in_db.name,
-        repo=organization_repo,
     )
 
     assert organization_instance == organization_in_db

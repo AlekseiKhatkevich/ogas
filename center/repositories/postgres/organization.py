@@ -39,7 +39,8 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
                         self._model.token == sa.func.crypt(token, self._model.token),
                     )
                 )
-                self.cache.update({organization.name: organization, organization.id: organization})
+                if organization is not None:
+                    self.cache.update({organization.name: organization, organization.id: organization})
         return organization
 
     async def get_organizations_by_token(self, auth_data: list['AuthStatus']) -> list['AuthStatus']:

@@ -19,17 +19,17 @@ __all__ = (
 current_organization_name = contextvars.ContextVar('current_organization_name')
 
 
+
 def organization_repo() -> OrganizationPostgresRepository:
     return OrganizationPostgresRepository()
 
 
-@apply_types
-async def get_organization_instance(
-        organization_id: ulid.ULID,
-        organization_name: str,
-        token: str,
-        repo: OrganizationPostgresRepository = Depends(organization_repo)
-    ) -> OrganizationORM:
+async def organization(
+        token: str = Header(),
+        organization_id: ulid.ULID | None = Header(default=None, cast=True),
+        organization_name: str | None = Header(default=None),
+        repo: OrganizationPostgresRepository = Depends(organization_repo),
+) -> OrganizationORM:
     if organization_id is None and organization_name is None:
         raise NoOrganizationIdentityException(
             'Не указаны organization_id или organization_name. Укажите одно из двух.',
@@ -39,15 +39,6 @@ async def get_organization_instance(
         raise AuthMessageException(
             f'Компания с названием "{organization_name}" и id "{organization_id}" не существует или токен не валиден.'
         )
-    return organization_instance
-
-
-async def organization(
-        token: str = Header(),
-        organization_id: ulid.ULID | None = Header(default=None, cast=True),
-        organization_name: str | None = Header(default=None),
-) -> OrganizationORM:
-    organization_instance = await get_organization_instance(organization_id, organization_name, token)
     context.set_local('current_organization', organization_instance)
     current_organization_name.set(organization_instance.name)
     return organization_instance
