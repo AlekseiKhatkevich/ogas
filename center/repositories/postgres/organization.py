@@ -70,7 +70,7 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
 
             #  Проставим организации которых изначально не было в кеше и их получили из БД.
             for data in auth_data:
-                if data.organization is None:
+                if data.organization is None and data.auth_pair:
                     data.organization = self.cache.get(data.header.organization_id) or \
                                         self.cache.get(data.header.organization_name)
 

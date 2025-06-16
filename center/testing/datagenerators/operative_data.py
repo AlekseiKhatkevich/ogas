@@ -12,7 +12,11 @@ from constants import ORGANIZATION_TEST_TOKEN
 from faststream_serve import broker
 
 
-async def generate(limit: int | None = None, sleep: float = 0.05):
+def random_without_zero() -> int:
+    return random.randint(-50, 10) or random_without_zero()
+
+
+async def generate(limit: int = 9999999, sleep: float = 0.05):
     async with db.async_session as session:
         res = await session.scalars(
             sa.select(OrganizationORM.id)
@@ -27,12 +31,12 @@ async def generate(limit: int | None = None, sleep: float = 0.05):
 
     await broker.connect()
 
-    while True if limit is None else counter <= limit:
+    while counter < limit:
         await asyncio.sleep(sleep)
 
         data = OperativeDataIn(
             product_id=random.choice(product_ids),
-            diff=random.randint(-50, 10),
+            diff=random_without_zero(),
             change_datetime=datetime.datetime.now(tz=datetime.UTC) - \
                             datetime.timedelta(seconds=random.randint(0, 60)),
         )
@@ -41,7 +45,7 @@ async def generate(limit: int | None = None, sleep: float = 0.05):
         await broker.publish(
             message=data,
             topic='operative_data_in',
-            no_confirm=True,
+            # no_confirm=True,
             headers={
                 'content-type': 'application/json',
                 'organization_id': str(organization_id),

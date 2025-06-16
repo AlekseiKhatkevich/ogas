@@ -19,6 +19,8 @@ router = KafkaRouter(prefix='operative_data_', )
     batch=True,
     max_records=1000,
     batch_timeout_ms=1000 * 5,  # msec.
+    auto_commit_interval_ms=1000 * 1,
+    group_id='operative_data_in_group',
 )
 async def receive_operative_data(op_info: list[OperativeDataIn],
                                  organizations: CurrentOrganizationDepBatch,
