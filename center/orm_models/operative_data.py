@@ -60,7 +60,7 @@ class OperativeDataORM1MinuteView(BaseMatViewORMMixin, Base):
                 OperativeDataORM.product_id,
                 OperativeDataORM.organization_id,
                 sa.func.sum(OperativeDataORM.diff).filter(OperativeDataORM.diff > 0).label('positive_diff'),
-                sa.func.sum(OperativeDataORM.diff).filter(OperativeDataORM.diff < 0).label('negative_diff'),
+                sa.func.abs(sa.func.sum(OperativeDataORM.diff).filter(OperativeDataORM.diff < 0)).label('negative_diff'),
         ).group_by(
             sa.text('bucket'),
             OperativeDataORM.product_id,
@@ -76,6 +76,7 @@ class OperativeDataORM1MinuteView(BaseMatViewORMMixin, Base):
         'timescaledb.continuous': True,
         'timescaledb.materialized_only': False,
     }
+    retention_policy = datetime.timedelta(days=7)
 
     # noinspection PyUnresolvedReferences
     def __repr__(self) -> str:

@@ -1,5 +1,8 @@
+import datetime
+
 import sqlalchemy as sa
 from alembic.operations import Operations
+from sqlalchemy import DDLElement
 from sqlalchemy.ext import compiler
 from sqlalchemy_utils.view import CreateView, DropView
 
@@ -10,6 +13,7 @@ class BaseMatViewORMMixin:
     selectable: sa.Select = None
     __table__: sa.Table = None
     timescale_options = None
+    retention_policy: datetime.timedelta
     is_view = True
 
     @classmethod
@@ -47,6 +51,39 @@ class BaseMatViewORMMixin:
 
         for idx in cls.__table__.indexes:
             idx.create(op.get_bind())
+
+    @classmethod
+    def add_retention_policy(cls, op: Operations) -> None:
+        policy_sql = AddRetentionPolicy(cls.__table__.fullname, cls.retention_policy)
+        op.execute(policy_sql)
+
+    @classmethod
+    def remove_retention_policy(cls, op: Operations) -> None:
+        op.execute(RemoveRetentionPolicy(cls.__table__.fullname))
+
+
+class RemoveRetentionPolicy(DDLElement):
+    def __init__(self, name) -> None:
+        self.name = name
+
+
+@compiler.compiles(RemoveRetentionPolicy)
+def compile_create_timescale_materialized_view(element: RemoveRetentionPolicy, compiler: compiler, **kw) -> str:
+    return "SELECT remove_retention_policy('{}');".format(element.name)
+
+
+class AddRetentionPolicy(DDLElement):
+    def __init__(self, name, drop_after: datetime.timedelta) -> None:
+        self.name = name
+        self.drop_after = drop_after
+
+
+@compiler.compiles(AddRetentionPolicy)
+def compile_create_timescale_materialized_view(element: AddRetentionPolicy, compiler: compiler, **kw) -> str:
+    return "SELECT add_retention_policy('{}', INTERVAL '{} seconds');".format(
+        element.name,
+        element.drop_after.total_seconds(),
+    )
 
 
 class CreateTimescaleView(CreateView):
