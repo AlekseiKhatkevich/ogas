@@ -14,6 +14,7 @@ class BaseMatViewORMMixin:
     __table__: sa.Table = None
     timescale_options = None
     retention_policy: datetime.timedelta
+    retention_interval: datetime.timedelta
     is_view = True
 
     @classmethod
@@ -54,7 +55,7 @@ class BaseMatViewORMMixin:
 
     @classmethod
     def add_retention_policy(cls, op: Operations) -> None:
-        policy_sql = AddRetentionPolicy(cls.__table__.fullname, cls.retention_policy)
+        policy_sql = AddRetentionPolicy(cls.__table__.fullname, cls.retention_policy, cls.retention_interval)
         op.execute(policy_sql)
 
     @classmethod
@@ -68,21 +69,23 @@ class RemoveRetentionPolicy(DDLElement):
 
 
 @compiler.compiles(RemoveRetentionPolicy)
-def compile_create_timescale_materialized_view(element: RemoveRetentionPolicy, compiler: compiler, **kw) -> str:
+def compile_remove_retention_policy(element: RemoveRetentionPolicy, compiler: compiler, **kw) -> str:
     return "SELECT remove_retention_policy('{}');".format(element.name)
 
 
 class AddRetentionPolicy(DDLElement):
-    def __init__(self, name, drop_after: datetime.timedelta) -> None:
+    def __init__(self, name, drop_after: datetime.timedelta, retention_interval: datetime.timedelta) -> None:
         self.name = name
         self.drop_after = drop_after
+        self.retention_interval = retention_interval
 
 
 @compiler.compiles(AddRetentionPolicy)
-def compile_create_timescale_materialized_view(element: AddRetentionPolicy, compiler: compiler, **kw) -> str:
-    return "SELECT add_retention_policy('{}', INTERVAL '{} seconds');".format(
+def compile_add_retention_policy(element: AddRetentionPolicy, compiler: compiler, **kw) -> str:
+    return "SELECT add_retention_policy('{}', INTERVAL '{} seconds', schedule_interval := INTERVAL '{}');".format(
         element.name,
         element.drop_after.total_seconds(),
+        element.retention_interval.total_seconds(),
     )
 
 

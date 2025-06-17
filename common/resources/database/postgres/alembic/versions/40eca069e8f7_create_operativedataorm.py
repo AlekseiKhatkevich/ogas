@@ -43,15 +43,9 @@ def upgrade() -> None:
            );
         """
     )
-    # op.execute(
-    #     """
-    #     CALL add_columnstore_policy('operativedata', after => INTERVAL '1h');
-    #     """
-    # )
-    # ### end Alembic commands ###
     op.execute(
         """
-        SELECT add_retention_policy('operativedata', INTERVAL '1 hour');
+        SELECT add_retention_policy('operativedata', INTERVAL '1 hour',  schedule_interval := INTERVAL '1 hour 5 minutes');
         """
     )
 

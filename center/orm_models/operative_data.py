@@ -77,6 +77,7 @@ class OperativeDataORM1MinuteView(BaseMatViewORMMixin, Base):
         'timescaledb.materialized_only': False,
     }
     retention_policy = datetime.timedelta(days=7)
+    retention_interval = datetime.timedelta(hours=1)
 
     # noinspection PyUnresolvedReferences
     def __repr__(self) -> str:
