@@ -30,7 +30,7 @@ def upgrade() -> None:
     )
     op.execute(
         """
-        SELECT create_hypertable('operativedata', by_range('change_datetime', INTERVAL '1 day'));
+        SELECT create_hypertable('operativedata', by_range('change_datetime', INTERVAL '1 hour'));
         """
     )
     op.execute(
@@ -39,16 +39,21 @@ def upgrade() -> None:
            timescaledb.enable_columnstore,
            timescaledb.orderby = 'change_datetime DESC',
            timescaledb.segmentby = 'product_id, organization_id',
-           timescaledb.chunk_interval='1 day'
+           timescaledb.chunk_interval='1 hour'
            );
         """
     )
+    # op.execute(
+    #     """
+    #     CALL add_columnstore_policy('operativedata', after => INTERVAL '1h');
+    #     """
+    # )
+    # ### end Alembic commands ###
     op.execute(
         """
-        CALL add_columnstore_policy('operativedata', after => INTERVAL '1d');
+        SELECT add_retention_policy('operativedata', INTERVAL '1 hour');
         """
     )
-    # ### end Alembic commands ###
 
 
 def downgrade() -> None:
