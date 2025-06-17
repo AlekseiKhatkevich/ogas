@@ -51,7 +51,7 @@ def check_all_column_comments() -> None:
     for subclass in get_all_subclasses(Base):
         # noinspection PyTypeChecker
         for column in subclass.__table__.columns:
-            if column.comment is None:
+            if column.comment is None and not subclass.is_view:
                 raise AttributeError(
                     f'Comment on column "{column.name}" in model "{subclass.__name__}" is not defined.'
                 )

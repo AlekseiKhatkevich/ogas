@@ -22,6 +22,7 @@ ULID_PK = Annotated[
 
 
 class Base(AsyncAttrs, DeclarativeBase):
+    is_view = False
     metadata = MetaData(naming_convention={
         'ix': 'ix_%(column_0_label)s',
         'uq': 'uq_%(table_name)s_%(column_0_name)s',
