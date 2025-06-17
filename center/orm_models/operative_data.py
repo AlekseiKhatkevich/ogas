@@ -78,6 +78,9 @@ class OperativeDataORM1MinuteView(BaseMatViewORMMixin, Base):
     }
     retention_policy = datetime.timedelta(days=7)
     retention_interval = datetime.timedelta(hours=1)
+    continuous_aggregate_start_offset = datetime.timedelta(hours=1)
+    continuous_aggregate_end_offset = datetime.timedelta(minutes=1)
+    continuous_aggregate_schedule_interval = datetime.timedelta(minutes=1)
 
     # noinspection PyUnresolvedReferences
     def __repr__(self) -> str:

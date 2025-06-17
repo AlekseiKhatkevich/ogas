@@ -16,6 +16,9 @@ class BaseMatViewORMMixin:
     retention_policy: datetime.timedelta
     retention_interval: datetime.timedelta
     is_view = True
+    continuous_aggregate_start_offset: datetime.timedelta
+    continuous_aggregate_end_offset: datetime.timedelta
+    continuous_aggregate_schedule_interval: datetime.timedelta
 
     @classmethod
     def create(cls, op: Operations) -> None:
@@ -62,9 +65,67 @@ class BaseMatViewORMMixin:
     def remove_retention_policy(cls, op: Operations) -> None:
         op.execute(RemoveRetentionPolicy(cls.__table__.fullname))
 
+    @classmethod
+    def add_continuous_aggregate_policy(cls, op: Operations) -> None:
+        sql = AddContinuousAggregatePolicy(
+            cls.__table__.fullname,
+            start_offset=cls.continuous_aggregate_start_offset,
+            end_offset=cls.continuous_aggregate_end_offset,
+            schedule_interval=cls.continuous_aggregate_schedule_interval,
+        )
+        op.execute(sql)
+
+    @classmethod
+    def remove_continuous_aggregate_policy(cls, op: Operations) -> None:
+        op.execute(RemoveContinuousAggregatePolicy(cls.__table__.fullname))
+
+
+class RemoveContinuousAggregatePolicy(DDLElement):
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
+@compiler.compiles(RemoveContinuousAggregatePolicy)
+def compile_remove_continuous_aggregate_policy(
+        element: RemoveContinuousAggregatePolicy,
+        compiler: compiler,
+        **kw,
+) -> str:
+    return "SELECT remove_continuous_aggregate_policy('{}');".format(element.name)
+
+
+class AddContinuousAggregatePolicy(DDLElement):
+    def __init__(
+            self,
+            name: str,
+            start_offset: datetime.timedelta,
+            end_offset: datetime.timedelta,
+            schedule_interval: datetime.timedelta,
+    ) -> None:
+        self.name = name
+        self.start_offset = start_offset
+        self.end_offset = end_offset
+        self.schedule_interval = schedule_interval
+
+
+@compiler.compiles(AddContinuousAggregatePolicy)
+def compile_add_continuous_aggregate_policy(element: AddContinuousAggregatePolicy, compiler: compiler, **kw) -> str:
+    return """
+    SELECT add_continuous_aggregate_policy(
+    '{}',
+    start_offset => INTERVAL '{} SECONDS',
+    end_offset => INTERVAL '{} SECONDS',
+    schedule_interval => INTERVAL '{} SECONDS');
+    """.format(
+        element.name,
+        element.start_offset.total_seconds(),
+        element.end_offset.total_seconds(),
+        element.schedule_interval.total_seconds(),
+    )
+
 
 class RemoveRetentionPolicy(DDLElement):
-    def __init__(self, name) -> None:
+    def __init__(self, name: str) -> None:
         self.name = name
 
 
