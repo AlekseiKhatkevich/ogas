@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 __all__ = (
     'OperativeDataORM',
     'OperativeDataORM1MinuteView',
+    'OperativeDataORM1HourView',
 )
 
 
@@ -81,6 +82,40 @@ class OperativeDataORM1MinuteView(BaseMatViewORMMixin, Base):
     continuous_aggregate_end_offset = datetime.timedelta(minutes=1)
     continuous_aggregate_schedule_interval = datetime.timedelta(minutes=1)
     columnstore_policy_interval = datetime.timedelta(hours=1, minutes=5)
+
+    # noinspection PyUnresolvedReferences
+    def __repr__(self) -> str:
+        return f'{self.product_id} // {self.organization_id} :: {self.bucket}'
+
+
+class OperativeDataORM1HourView(BaseMatViewORMMixin, Base):
+    selectable = sa.select(
+                sa.func.time_bucket('1 hour', OperativeDataORM1MinuteView.bucket).label('hour_bucket'),
+                OperativeDataORM1MinuteView.product_id,
+                OperativeDataORM1MinuteView.organization_id,
+                sa.func.sum(OperativeDataORM1MinuteView.positive_diff).label('positive_diff'),
+                sa.func.sum(OperativeDataORM1MinuteView.negative_diff).label('negative_diff'),
+        ).group_by(
+            sa.text('hour_bucket'),
+            OperativeDataORM1MinuteView.product_id,
+            OperativeDataORM1MinuteView.organization_id,
+        )
+
+    __table__ = sa_utils.create_materialized_view(
+        name='operative_data_by_hour',
+        metadata=Base.metadata,
+        selectable=selectable,
+    )
+    timescale_options = {
+        'timescaledb.continuous': True,
+        # 'timescaledb.materialized_only': False,
+    }
+    retention_policy = datetime.timedelta(days=365)
+    retention_interval = datetime.timedelta(days=1)
+    continuous_aggregate_start_offset = datetime.timedelta(days=7)
+    continuous_aggregate_end_offset = datetime.timedelta(hours=1)
+    continuous_aggregate_schedule_interval = datetime.timedelta(hours=1)
+    columnstore_policy_interval = datetime.timedelta(days=1, hours=1)
 
     # noinspection PyUnresolvedReferences
     def __repr__(self) -> str:
