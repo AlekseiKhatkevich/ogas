@@ -39,7 +39,7 @@ def upgrade() -> None:
     sa.UniqueConstraint('product_id', 'organization_id', 'period', 'role', name=op.f('uq_capability_product_id')),
     postgresql_partition_by='LIST (role)'
     )
-
+    #  Для партиционирования
     op.execute("create table capability_prod partition of capability for values in ('PRODUCER'::role);")
     op.execute("create table capability_cons partition of capability for values in ('CONSUMER'::role);")
     op.create_primary_key('pk_capability_prod', 'capability_prod', ['id'])

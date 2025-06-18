@@ -15,7 +15,11 @@ class CapabilityORM(TimestampMixin, Base):
     """
     Производительность / потребление организацией продукта.
     """
-    id: Mapped[ulid.ULID] = mapped_column(comment='id', nullable=False, server_default=func.gen_monotonic_ulid(),)
+    id: Mapped[ulid.ULID] = mapped_column(
+        comment='id',
+        nullable=False,
+        server_default=func.gen_monotonic_ulid(),
+    )
     organization_id: Mapped[ulid.ULID] = mapped_column(
         ForeignKey('organization.id', ondelete='CASCADE', ),
         comment='Компания.',

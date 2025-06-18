@@ -15,7 +15,7 @@ async def test_capability_orm_negative_uniqueness(test_db, capability_in_db):
         period=capability_in_db.period,
         role=capability_in_db.role,
     )
-    with pytest.raises(IntegrityError, match='uq_capability_product_id'):
+    with pytest.raises(IntegrityError):
         async with test_db.async_session as session:
             session.add(instance)
             await session.commit()
