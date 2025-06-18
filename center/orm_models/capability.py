@@ -1,5 +1,5 @@
 import ulid
-from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint, text
+from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint, text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from center.enums import Period, Role
@@ -15,7 +15,7 @@ class CapabilityORM(TimestampMixin, Base):
     """
     Производительность / потребление организацией продукта.
     """
-    id: Mapped[ULID_PK]
+    id: Mapped[ulid.ULID] = mapped_column(comment='id', nullable=False, server_default=func.gen_monotonic_ulid(),)
     organization_id: Mapped[ulid.ULID] = mapped_column(
         ForeignKey('organization.id', ondelete='CASCADE', ),
         comment='Компания.',
@@ -43,11 +43,15 @@ class CapabilityORM(TimestampMixin, Base):
     product: Mapped['ProductORM'] = relationship(
         passive_deletes=True,
     )
-
     __table_args__ = (
         UniqueConstraint('product_id', 'organization_id', 'period', 'role', ),
         CheckConstraint(text('value >= 0'), name='value_gt_0_check', ),
+        {'postgresql_partition_by': 'LIST (role)'},
     )
+    __mapper_args__ = {
+        'primary_key': ['id', ],
+    }
 
     def __repr__(self):
         return f'Product {self.product_id} in {self.organization_id} per {self.period}.'
+
