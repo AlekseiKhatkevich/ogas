@@ -89,6 +89,7 @@ class OperativeDataORM1MinuteView(BaseMatViewORMMixin, Base):
 
 
 class OperativeDataORM1HourView(BaseMatViewORMMixin, Base):
+    # noinspection PyUnresolvedReferences
     selectable = sa.select(
                 sa.func.time_bucket('1 hour', OperativeDataORM1MinuteView.bucket).label('hour_bucket'),
                 OperativeDataORM1MinuteView.product_id,

@@ -73,4 +73,4 @@ kafka_ui_server_stop: ## Stop Kafka UI server
 	@pkill -f kafka-ui
 
 faststream: ## Run faststream
-	uv run faststream run faststream_serve:app $(reload) workers=$(workers)
+	uv run faststream run faststream_serve:app $(reload) --workers $(workers)
