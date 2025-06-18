@@ -54,7 +54,6 @@ class OperativeDataORM(Base):
 
 
 class OperativeDataORM1MinuteView(BaseMatViewORMMixin, Base):
-    is_view = True
     selectable = sa.select(
                 sa.func.time_bucket('1 minute', OperativeDataORM.change_datetime).label('bucket'),
                 OperativeDataORM.product_id,
@@ -81,6 +80,7 @@ class OperativeDataORM1MinuteView(BaseMatViewORMMixin, Base):
     continuous_aggregate_start_offset = datetime.timedelta(hours=1)
     continuous_aggregate_end_offset = datetime.timedelta(minutes=1)
     continuous_aggregate_schedule_interval = datetime.timedelta(minutes=1)
+    columnstore_policy_interval = datetime.timedelta(hours=1, minutes=5)
 
     # noinspection PyUnresolvedReferences
     def __repr__(self) -> str:

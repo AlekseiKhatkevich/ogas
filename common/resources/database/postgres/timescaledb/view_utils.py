@@ -19,6 +19,7 @@ class BaseMatViewORMMixin:
     continuous_aggregate_start_offset: datetime.timedelta
     continuous_aggregate_end_offset: datetime.timedelta
     continuous_aggregate_schedule_interval: datetime.timedelta
+    columnstore_policy_interval: datetime.timedelta
 
     @classmethod
     def create(cls, op: Operations) -> None:
@@ -78,6 +79,46 @@ class BaseMatViewORMMixin:
     @classmethod
     def remove_continuous_aggregate_policy(cls, op: Operations) -> None:
         op.execute(RemoveContinuousAggregatePolicy(cls.__table__.fullname))
+
+    @classmethod
+    def add_columnstore_policy(cls, op: Operations) -> None:
+        op.execute(AddColumnstorePolicy(cls.__table__.fullname, cls.columnstore_policy_interval))
+
+    @classmethod
+    def remove_columnstore_policy(cls, op: Operations) -> None:
+        op.execute(RemoveColumnstorePolicy(cls.__table__.fullname,))
+
+
+class RemoveColumnstorePolicy(DDLElement):
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+
+@compiler.compiles(RemoveColumnstorePolicy)
+def compile_remove_columnstore_policy(
+        element: RemoveColumnstorePolicy,
+        compiler: compiler,
+        **kw,
+) -> str:
+    return "CALL remove_columnstore_policy('{}');".format(element.name)
+
+
+class AddColumnstorePolicy(DDLElement):
+    def __init__(self, name: str, interval: datetime.timedelta) -> None:
+        self.name = name
+        self.interval = interval
+
+
+@compiler.compiles(AddColumnstorePolicy)
+def compile_add_columnstore_policy(
+        element: AddColumnstorePolicy,
+        compiler: compiler,
+        **kw,
+) -> str:
+    return "CALL add_columnstore_policy('{}', after => INTERVAL '{} SECONDS');;".format(
+        element.name,
+        element.interval.total_seconds(),
+    )
 
 
 class RemoveContinuousAggregatePolicy(DDLElement):
