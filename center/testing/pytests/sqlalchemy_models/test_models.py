@@ -40,7 +40,7 @@ async def test_organization_stock_orm_positive(organization_stock_in_db, organiz
         [1, -1, 1000, 0, 'min_level_positive',],
         [10, 1, -1, 0, 'max_level_positive',],
         [10, 1, 1000, -1, 'necessity_level_positive',],
-        # [10, 1001, 1000, 0, 'min_max_level',],
+        [10, 1001, 1000, 0, 'min_max_level',],
     )
 )
 async def test_organization_stock_orm_negative(

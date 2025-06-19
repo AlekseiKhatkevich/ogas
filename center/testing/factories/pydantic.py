@@ -7,12 +7,18 @@ from polyfactory import Use
 from polyfactory.factories.pydantic_factory import ModelFactory
 from pydantic.types import SecretStr
 
-from center.serializers import CapabilityIn, OperativeDataIn, OrganizationUpdateIn
+from center.serializers import (
+    CapabilityIn,
+    OperativeDataIn,
+    OrganizationStockIn,
+    OrganizationUpdateIn,
+)
 
 __all__ = (
     'CapabilityInFactory',
     'OrganizationUpdateInFactory',
     'OperativeDataInFactory',
+    'OrganizationStockInFactory',
 )
 
 
@@ -50,3 +56,7 @@ class OperativeDataInFactory(CustomFactory[OperativeDataIn]):
     change_datetime: datetime.datetime = Use(
         CustomFactory.__faker__.date_time_between, '-1m', 'now', datetime.UTC,
     )
+
+
+class OrganizationStockInFactory(CustomFactory[OrganizationStockIn]):
+    min_level = max_level = necessity = None

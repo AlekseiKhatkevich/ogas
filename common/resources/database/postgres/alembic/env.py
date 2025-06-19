@@ -42,7 +42,7 @@ def include_object(object, name, type_, reflected, compare_to):
 
 
 extra_common_kwargs = dict(
-        compare_server_default=True,
+        # compare_server_default=True,
         # process_revision_directives=writer,
         user_module_prefix='common.orm_models.custom_types.',
         include_object=include_object,

@@ -3,12 +3,11 @@ from typing import Annotated
 
 import ulid
 from pydantic import BaseModel, Field, field_serializer
+from pydantic_core.core_schema import SerializationInfo
 
 __all__ = (
     'OperativeDataIn',
 )
-
-from pydantic_core.core_schema import SerializationInfo
 
 
 class OperativeDataIn(BaseModel):

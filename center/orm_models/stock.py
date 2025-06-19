@@ -25,7 +25,7 @@ class OrganizationStockORM(TimestampMixin, ActiveMixin, Base):
         comment='Остаток продукта на складе.',
     )
     min_level: Mapped[float] = mapped_column(
-        server_default=literal("0"),
+        server_default=literal(0),
         comment='Уровень, ниже которого остаток опускаться не должен.',
     )
     max_level: Mapped[float] = mapped_column(
@@ -46,7 +46,7 @@ class OrganizationStockORM(TimestampMixin, ActiveMixin, Base):
     )
 
     __table_args__ = (
-        CheckConstraint('in_stock > 0', name='in_stock_positive'),
+        CheckConstraint('in_stock >= 0', name='in_stock_positive'),
         CheckConstraint('min_level >= 0', name='min_level_positive'),
         CheckConstraint('max_level > 0', name='max_level_positive'),
         CheckConstraint('necessity > 0', name='necessity_level_positive'),

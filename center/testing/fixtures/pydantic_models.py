@@ -5,3 +5,4 @@ from center.testing import factories
 register_fixture(factories.CapabilityInFactory)
 register_fixture(factories.OrganizationUpdateInFactory)
 register_fixture(factories.OperativeDataInFactory)
+register_fixture(factories.OrganizationStockInFactory)
