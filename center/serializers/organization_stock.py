@@ -25,11 +25,15 @@ class OrganizationStockIn(BaseModel):
     max_level: Annotated[
         float | None,
         Field(gt=0, description='Максимальное кол-во продукта которе организация готова принять.')
-    ]
+    ] = None
     necessity: Annotated[
         float | None,
         Field(gt=0, description='Запрос продукта организацией.')
-    ]
+    ] = None
+    is_active: Annotated[
+        bool | None,
+        Field(description='Признак активности остатка.'),
+    ] = None
 
     @model_validator(mode='after')
     def check_passwords_match(self) -> Self:
