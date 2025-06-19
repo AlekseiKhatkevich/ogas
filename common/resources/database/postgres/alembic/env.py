@@ -35,10 +35,16 @@ target_metadata = Base.metadata
 # ... etc.
 
 
+def include_object(object, name, type_, reflected, compare_to):
+    excluded_tables = {'capability_prod', 'capability_cons', }
+    return not (name in excluded_tables)
+
+
 extra_common_kwargs = dict(
         compare_server_default=True,
         # process_revision_directives=writer,
-        user_module_prefix="common.orm_models.custom_types.",
+        user_module_prefix='common.orm_models.custom_types.',
+        include_object=include_object,
     )
 
 url = db.engine.url.render_as_string(hide_password=False)
