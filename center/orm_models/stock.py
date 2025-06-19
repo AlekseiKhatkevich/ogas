@@ -1,6 +1,6 @@
 import ulid
 from sqlalchemy import CheckConstraint, ForeignKey, literal, text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from common.orm_models.mixins import ActiveMixin, TimestampMixin
 from common.resources.database.postgres.alchemy_related import Base
@@ -35,11 +35,22 @@ class OrganizationStockORM(TimestampMixin, ActiveMixin, Base):
     necessity: Mapped[float | None] = mapped_column(
         comment='Нужна в продукте переданная от организации',
     )
+    organization: Mapped['OrganizationORM'] = relationship(
+        passive_deletes=True,
+        cascade='save-update',
+        innerjoin=True,
+        # lazy='joined',
+    )
+    product: Mapped['ProductORM'] = relationship(
+        passive_deletes=True,
+    )
+
     __table_args__ = (
         CheckConstraint('in_stock > 0', name='in_stock_positive'),
-        CheckConstraint('min_level > 0', name='min_level_positive'),
+        CheckConstraint('min_level >= 0', name='min_level_positive'),
         CheckConstraint('max_level > 0', name='max_level_positive'),
         CheckConstraint('necessity > 0', name='necessity_level_positive'),
+        CheckConstraint('min_level < max_level', name='min_max_level'),
     )
 
     def __repr__(self) -> str:

@@ -4,6 +4,7 @@ from center.repositories.postgres import (
     CapabilityPostgresRepository,
     OperativeDataPostgresRepository,
     OrganizationPostgresRepository,
+    OrganizationStockPostgresRepository,
 )
 
 
@@ -21,3 +22,7 @@ def organization_repo() -> OrganizationPostgresRepository:
 def operative_data_repo() -> OperativeDataPostgresRepository:
     return OperativeDataPostgresRepository()
 
+
+@pytest.fixture(scope='session')
+def organization_stock_repo() -> OrganizationStockPostgresRepository:
+    return OrganizationStockPostgresRepository()

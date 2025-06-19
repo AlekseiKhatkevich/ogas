@@ -7,6 +7,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from common import settings
 from common.orm_models import *  # Do not remove !!!
 from center.orm_models import *
 from common.orm_models.custom_types import ULID
@@ -48,6 +49,7 @@ extra_common_kwargs = dict(
     )
 
 url = db.engine.url.render_as_string(hide_password=False)
+# url = str(settings.POSTGRES_TEST_DSN)
 
 
 def check_all_column_comments() -> None:

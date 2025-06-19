@@ -7,11 +7,17 @@ from center.testing import factories
 from constants import ORGANIZATION_TEST_TOKEN
 
 if TYPE_CHECKING:
-    from center.orm_models import OrganizationORM, CapabilityORM, OperativeDataORM
+    from center.orm_models import (
+        OrganizationORM,
+        CapabilityORM,
+        OperativeDataORM,
+        OrganizationStockORM,
+    )
 
 register_fixture(factories.OrganizationFactory)
 register_fixture(factories.CapabilityFactory)
 register_fixture(factories.OperativeDataFactory)
+register_fixture(factories.OrganizationStockFactory)
 
 
 @pytest.fixture
@@ -27,6 +33,14 @@ async def organization_in_db(save_in_db, organization_factory: factories.Organiz
 @pytest.fixture
 async def capability_in_db(save_in_db, capability_factory: factories.CapabilityFactory) -> 'CapabilityORM':
     return await save_in_db(capability_factory)
+
+
+@pytest.fixture
+async def organization_stock_in_db(
+        save_in_db,
+        organization_stock_factory: factories.OrganizationStockFactory,
+) -> 'OrganizationStockORM':
+    return await save_in_db(organization_stock_factory)
 
 
 @pytest.fixture(scope='session')

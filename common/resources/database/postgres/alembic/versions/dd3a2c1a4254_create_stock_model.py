@@ -1,8 +1,8 @@
 """Create Stock model
 
-Revision ID: 7dd54e178493
+Revision ID: dd3a2c1a4254
 Revises: 9ec443634d2a
-Create Date: 2025-06-19 13:23:19.453202
+Create Date: 2025-06-19 14:17:05.558563
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ import common.orm_models.custom_types
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '7dd54e178493'
+revision: str = 'dd3a2c1a4254'
 down_revision: Union[str, None] = '9ec443634d2a'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -34,7 +34,8 @@ def upgrade() -> None:
     sa.Column('is_active', sa.Boolean(), server_default=sa.text('true'), nullable=False, comment='Признак активности.'),
     sa.CheckConstraint('in_stock > 0', name=op.f('ck_organizationstock_in_stock_positive')),
     sa.CheckConstraint('max_level > 0', name=op.f('ck_organizationstock_max_level_positive')),
-    sa.CheckConstraint('min_level > 0', name=op.f('ck_organizationstock_min_level_positive')),
+    sa.CheckConstraint('min_level < max_level', name=op.f('ck_organizationstock_min_max_level')),
+    sa.CheckConstraint('min_level >= 0', name=op.f('ck_organizationstock_min_level_positive')),
     sa.CheckConstraint('necessity > 0', name=op.f('ck_organizationstock_necessity_level_positive')),
     sa.ForeignKeyConstraint(['organization_id'], ['organization.id'], name=op.f('fk_organizationstock_organization_id_organization'), ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['product_id'], ['product.id'], name=op.f('fk_organizationstock_product_id_product'), ondelete='CASCADE'),
