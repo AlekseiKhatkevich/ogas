@@ -1,10 +1,9 @@
 from typing import TYPE_CHECKING
 
-from fast_depends import Depends
 from faststream import apply_types
 
-from center.faststream.dependencies import CurrentOrganizationDep, organization
-from center.orm_models import OrganizationORM
+from center.faststream.dependencies import CurrentOrganizationDep
+from center.repositories.postgres import OrganizationStockPostgresRepository
 from common.usecases.common import AbstractUseCase
 from utils.common import AsyncObj
 
@@ -21,7 +20,7 @@ class OrganizationStockSaveUseCase(AsyncObj, AbstractUseCase):
     ):
         self.stock = stock
         self.current_organization = current_organization
+        self.repository = OrganizationStockPostgresRepository()
 
     async def execute(self):
-        1+1
-        pass
+        await self.repository.insert_stock(self.stock, self.current_organization)
