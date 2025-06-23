@@ -60,3 +60,4 @@ class OperativeDataInFactory(CustomFactory[OperativeDataIn]):
 
 class OrganizationStockInFactory(CustomFactory[OrganizationStockIn]):
     min_level = max_level = necessity = None
+    is_active = True

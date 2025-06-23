@@ -39,7 +39,7 @@ class OrganizationStockORM(TimestampMixin, ActiveMixin, Base):
         passive_deletes=True,
         cascade='save-update',
         innerjoin=True,
-        # lazy='joined',
+        lazy='joined',
     )
     product: Mapped['ProductORM'] = relationship(
         passive_deletes=True,
