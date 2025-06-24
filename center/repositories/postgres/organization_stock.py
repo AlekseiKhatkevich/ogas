@@ -1,9 +1,12 @@
+import datetime
 from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
 
-from center.orm_models import OrganizationORM, OrganizationStockORM
+from center.enums import Period
+from center.orm_models import CapabilityORM, OperativeDataORM, OperativeDataORM1HourView, OrganizationORM, \
+    OrganizationStockORM
 from common.repositories.postgres import CommonPostgresRepository
 
 if TYPE_CHECKING:
@@ -41,7 +44,8 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
             },
             where=sa.or_(
                 self._model.in_stock.is_distinct_from(insert_stmt.excluded.in_stock),
-                *update_where_elements)
+                *update_where_elements,
+            )
         ).returning(
             self._model,
         )
@@ -50,3 +54,43 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
             await session.commit()
 
         return instance
+
+    async def get_info_for_schedule(
+            self,
+            od_avg_interval: int = 21,
+            cap_period: Period = Period.DAY,
+    ):
+        oper_data = pg.select(
+           sa.func.avg(sa.func.coalesce(OperativeDataORM1HourView.negative_diff), 0).label('cons_per_hour'),
+        ).where(
+            self._model.product_id == OperativeDataORM1HourView.product_id,
+            self._model.organization_id == OperativeDataORM1HourView.organization_id,
+            OperativeDataORM1HourView.hour_bucket >= sa.func.now() - pg.INTERVAL(od_avg_interval, 'DAY'),
+        ).lateral()
+
+        stmt = pg.select(
+            self._model.product_id,
+            CapabilityORM.role,
+            sa.func.sum(self._model.in_stock).label('in_stock'),
+            sa.func.sum(oper_data.c.cons_per_hour).label('cons_per_hour'),
+            sa.func.sum(self._model.necessity).label('necessity'),
+            sa.func.sum(CapabilityORM.value).label('capability_per_day'),
+        ).join(
+            CapabilityORM,
+            sa.and_(
+                self._model.product_id == CapabilityORM.product_id,
+                self._model.organization_id == CapabilityORM.organization_id,
+                self._model.is_active == sa.true(),
+                CapabilityORM.period == cap_period,
+            ),
+        ).join_from(
+            self._model, oper_data
+        ).group_by(
+            self._model.product_id,
+            CapabilityORM.role,
+        )
+
+        async with self._db.async_session as session:
+            res = await session.execute(stmt)
+            return res.all()
+
