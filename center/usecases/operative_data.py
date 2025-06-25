@@ -1,13 +1,13 @@
-import itertools
+import asyncio
+from collections import deque
 
 from center.serializers import OperativeDataIn
-from common.repositories.postgres import CommonPostgresRepository, InfoForSchedule
+from common.repositories.postgres import CommonPostgresRepository
 from common.resources.database.redis import RedisDAO, redis_container
 from common.usecases.common import AbstractUseCase
 from utils.common import AsyncObj
-from ..enums import Role
 from ..orm_models import OperativeDataORM, OrganizationORM
-from ..repositories.postgres import OperativeDataPostgresRepository
+from ..repositories.postgres import OperativeDataPostgresRepository, OrganizationStockPostgresRepository
 
 
 class OperativeDataInSaveUseCase(AsyncObj, AbstractUseCase):
@@ -33,14 +33,26 @@ class OperativeDataInSaveUseCase(AsyncObj, AbstractUseCase):
 
 
 class PlanCalculationUseCase(AbstractUseCase):
-    def __init__(self, data: tuple[InfoForSchedule, ...]) -> None:
-        self.data = data
+    def __init__(self, repository: OrganizationStockPostgresRepository = OrganizationStockPostgresRepository, ) -> None:
+        self.repository = repository()
+        self.queue = deque(maxlen=2)
 
     async def execute(self):
-        for product_id, product_data in itertools.groupby(self.data, lambda d: d.product_id):
-            for data in product_data:
-                producer_data = consumer_data = None
-                if data.role == Role.PRODUCER:
-                    producer_data = data
-                elif data.role == Role.CONSUMER:
-                    consumer_data = data
+        data_pipeline = self.repository.get_info_for_schedule()
+        prev_element = None
+        async for element in data_pipeline:
+            if prev_element is None:
+                prev_element = element
+                continue
+            elif prev_element.product_id == element.product_id:
+                await self.calculate_regular_demand([prev_element, element])
+                prev_element = None
+            else:
+                await self.calculate_demand_for_case_without_producer(prev_element)
+                prev_element = element
+
+    async def calculate_regular_demand(self, elements):
+        pass
+
+    async def calculate_demand_for_case_without_producer(self, element):
+        pass

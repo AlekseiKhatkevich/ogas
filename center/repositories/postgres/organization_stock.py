@@ -1,5 +1,5 @@
 import datetime
-from typing import TYPE_CHECKING
+from typing import AsyncGenerator, TYPE_CHECKING
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql as pg
@@ -59,7 +59,7 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
             self,
             od_avg_interval: datetime.timedelta = datetime.timedelta(seconds=60 * 60 * 24 * 21),
             cap_period: Period = Period.DAY,
-    ) -> tuple[InfoForSchedule, ...]:
+    ) -> AsyncGenerator[InfoForSchedule]:
         # noinspection PyTypeChecker,PyUnresolvedReferences
         oper_data = sa.select(
            sa.func.avg(sa.func.coalesce(OperativeDataORM1HourView.negative_diff, 0)).label('cons_per_hour'),
@@ -92,13 +92,12 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
             CapabilityORM.role,
         ).order_by(
             self._model.product_id,
-            # CapabilityORM.role,
         )
 
         async with self._db.async_session as session:
-            res = await session.stream(stmt.execution_options(stream_results=True, yield_per=1000))
+            #  https://docs.sqlalchemy.org/en/20/orm/queryguide/api.html#fetching-large-result-sets-with-yield-per
+            res = await session.stream(stmt.execution_options(stream_results=True, yield_per=100))
             async for partition in res.partitions():
-                for row in partition:
-                    print(f"{row}")
-            # noinspection PyTypeChecker
-            # return tuple(InfoForSchedule(*r, cap_period, od_avg_interval) for r in res)
+                for element in partition:
+                    # noinspection PyTypeChecker
+                    yield InfoForSchedule(*element, cap_period, od_avg_interval)
