@@ -92,10 +92,13 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
             CapabilityORM.role,
         ).order_by(
             self._model.product_id,
-            CapabilityORM.role,
+            # CapabilityORM.role,
         )
 
         async with self._db.async_session as session:
-            res = await session.execute(stmt)
+            res = await session.stream(stmt.execution_options(stream_results=True, yield_per=1000))
+            async for partition in res.partitions():
+                for row in partition:
+                    print(f"{row}")
             # noinspection PyTypeChecker
-            return tuple(InfoForSchedule(*r, cap_period, od_avg_interval) for r in res)
+            # return tuple(InfoForSchedule(*r, cap_period, od_avg_interval) for r in res)
