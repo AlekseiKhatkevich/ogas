@@ -1,8 +1,10 @@
+import datetime
 from abc import ABC
 from dataclasses import dataclass
 from typing import Any, ClassVar, TYPE_CHECKING
 
 import sqlalchemy as sa
+import ulid
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.sql._typing import ColumnExpressionArgument
 
@@ -10,12 +12,26 @@ from common.resources.database.postgres.database import Database, db
 
 if TYPE_CHECKING:
     from common.resources.database.postgres.alchemy_related import Base
+    from center.enums import Period, Role
 
 __all__ = (
     'AbstractPostgresRepository',
     'CommonPostgresRepository',
     'UpsertResult',
+    'InfoForSchedule',
 )
+
+
+@dataclass
+class InfoForSchedule:
+    product_id: ulid.ULID
+    role: 'Role'
+    in_stock: float
+    cons_per_hour: float | None
+    necessity: float | None
+    capability_per_interval: float
+    capability_interval: 'Period'
+    avg_interval: datetime.timedelta
 
 
 @dataclass

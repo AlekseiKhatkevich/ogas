@@ -7,7 +7,7 @@ from sqlalchemy.dialects import postgresql as pg
 from center.enums import Period
 from center.orm_models import CapabilityORM, OperativeDataORM, OperativeDataORM1HourView, OrganizationORM, \
     OrganizationStockORM
-from common.repositories.postgres import CommonPostgresRepository
+from common.repositories.postgres import CommonPostgresRepository, InfoForSchedule
 
 if TYPE_CHECKING:
     from center.serializers import OrganizationStockIn
@@ -57,25 +57,26 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
 
     async def get_info_for_schedule(
             self,
-            od_avg_interval: int = 21,
+            od_avg_interval: datetime.timedelta = datetime.timedelta(seconds=60 * 60 * 24 * 21),
             cap_period: Period = Period.DAY,
-    ):
-        oper_data = pg.select(
-           sa.func.avg(sa.func.coalesce(OperativeDataORM1HourView.negative_diff), 0).label('cons_per_hour'),
+    ) -> tuple[InfoForSchedule, ...]:
+        # noinspection PyTypeChecker,PyUnresolvedReferences
+        oper_data = sa.select(
+           sa.func.avg(sa.func.coalesce(OperativeDataORM1HourView.negative_diff, 0)).label('cons_per_hour'),
         ).where(
             self._model.product_id == OperativeDataORM1HourView.product_id,
             self._model.organization_id == OperativeDataORM1HourView.organization_id,
-            OperativeDataORM1HourView.hour_bucket >= sa.func.now() - pg.INTERVAL(od_avg_interval, 'DAY'),
+            OperativeDataORM1HourView.hour_bucket >= sa.func.now() - od_avg_interval,
         ).lateral()
 
-        stmt = pg.select(
+        stmt = sa.select(
             self._model.product_id,
             CapabilityORM.role,
             sa.func.sum(self._model.in_stock).label('in_stock'),
             sa.func.sum(oper_data.c.cons_per_hour).label('cons_per_hour'),
             sa.func.sum(self._model.necessity).label('necessity'),
-            sa.func.sum(CapabilityORM.value).label('capability_per_day'),
-        ).join(
+            sa.func.sum(CapabilityORM.value).label('capability_per_interval'),
+        ).outerjoin(
             CapabilityORM,
             sa.and_(
                 self._model.product_id == CapabilityORM.product_id,
@@ -83,14 +84,18 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
                 self._model.is_active == sa.true(),
                 CapabilityORM.period == cap_period,
             ),
-        ).join_from(
-            self._model, oper_data
+        ).join(
+            oper_data,
+            sa.true(),
         ).group_by(
+            self._model.product_id,
+            CapabilityORM.role,
+        ).order_by(
             self._model.product_id,
             CapabilityORM.role,
         )
 
         async with self._db.async_session as session:
             res = await session.execute(stmt)
-            return res.all()
-
+            # noinspection PyTypeChecker
+            return tuple(InfoForSchedule(*r, cap_period, od_avg_interval) for r in res)
