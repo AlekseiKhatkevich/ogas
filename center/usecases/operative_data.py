@@ -1,6 +1,3 @@
-import asyncio
-from collections import deque
-
 from center.serializers import OperativeDataIn
 from common.repositories.postgres import CommonPostgresRepository
 from common.resources.database.redis import RedisDAO, redis_container
@@ -39,8 +36,8 @@ class PlanCalculationUseCase(AbstractUseCase):
             repository: OrganizationStockPostgresRepository = OrganizationStockPostgresRepository,
             normal_level_hours: int = 24 * 2,
     ) -> None:
+        # noinspection PyCallingNonCallable
         self.repository = repository()
-        self.queue = deque(maxlen=2)
         self.normal_level_hours = normal_level_hours
 
     async def execute(self):
@@ -72,10 +69,7 @@ class PlanCalculationUseCase(AbstractUseCase):
 
         return producer, consumer
 
-    async def calculate_regular_demand(self, elements):
-        producer, consumer = self.get_consumer_and_producer(elements)
-
-        demanded_necessity = consumer.necessity
+    def calculate_base_case(self, producer, consumer):
         in_stock = consumer.in_stock
         cap_per_interval = consumer.capability_per_interval
         capability_interval = consumer.capability_interval
@@ -83,20 +77,22 @@ class PlanCalculationUseCase(AbstractUseCase):
         cons_per_hour = (
                 consumer.cons_per_hour or cap_per_interval / capability_interval.to_hours
         )
-
-        in_stock_at_producer = producer.in_stock
+        in_stock_at_producer = producer.in_stock if producer is not None else 0
 
         hours_to_min_level = max((in_stock - min_level), 0) / cons_per_hour
         hours_to_normal_level = self.normal_level_hours - hours_to_min_level
-        necessity_to_normal_level = (cons_per_hour * hours_to_normal_level) - demanded_necessity
+        necessity_to_normal_level = (cons_per_hour * hours_to_normal_level)
         to_produce = necessity_to_normal_level - in_stock_at_producer
 
         return to_produce
 
+    def calculate_regular_demand(self, elements):
+        producer, consumer = self.get_consumer_and_producer(elements)
+        to_produce = self.calculate_base_case(producer, consumer)
 
-        
+    def calculate_demand_for_case_without_producer(self, element):
+        if element.role == Role.PRODUCER:
+            return None
+        to_produce = self.calculate_base_case(producer=None, consumer=element)
 
 
-
-    async def calculate_demand_for_case_without_producer(self, element):
-        pass
