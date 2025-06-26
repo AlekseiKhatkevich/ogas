@@ -1,10 +1,10 @@
 import ulid
-from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint, text, func
+from sqlalchemy import CheckConstraint, ForeignKey, UniqueConstraint, func, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from center.enums import Period, Role
 from common.orm_models.mixins import TimestampMixin
-from common.resources.database.postgres.alchemy_related import Base, ULID_PK
+from common.resources.database.postgres.alchemy_related import Base
 
 __all__ = (
     'CapabilityORM',
@@ -56,6 +56,6 @@ class CapabilityORM(TimestampMixin, Base):
         'primary_key': ['id', ],
     }
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'Product {self.product_id} in {self.organization_id} per {self.period}.'
 
