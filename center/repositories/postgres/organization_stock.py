@@ -28,7 +28,7 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
         )
         update_where_elements = []
         extra_set_values = {}
-        for attr in ('min_level', 'max_level', 'necessity', 'is_active', ):
+        for attr in ('min_level', 'max_level', 'necessity', 'is_active',):
             if getattr(stock, attr) is not None:
                 model_attr = getattr(self._model, attr)
                 excluded_attr = getattr(insert_stmt.excluded, attr)
@@ -36,7 +36,7 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
                 update_where_elements.append(model_attr.is_distinct_from(excluded_attr))
 
         stmt = insert_stmt.on_conflict_do_update(
-            index_elements=('organization_id', 'product_id', ),
+            index_elements=('organization_id', 'product_id',),
             set_={
                 self._model.in_stock: insert_stmt.excluded.in_stock,
                 self._model.updated_at: sa.func.now(),
@@ -62,7 +62,7 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
     ) -> AsyncGenerator[InfoForSchedule]:
         # noinspection PyTypeChecker,PyUnresolvedReferences
         oper_data = sa.select(
-           sa.func.avg(sa.func.coalesce(OperativeDataORM1HourView.negative_diff, 0)).label('cons_per_hour'),
+            sa.func.avg(sa.func.coalesce(OperativeDataORM1HourView.negative_diff, 0)).label('cons_per_hour'),
         ).where(
             self._model.product_id == OperativeDataORM1HourView.product_id,
             self._model.organization_id == OperativeDataORM1HourView.organization_id,
@@ -74,7 +74,15 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
             CapabilityORM.role,
             sa.func.sum(self._model.in_stock).label('in_stock'),
             sa.func.sum(oper_data.c.cons_per_hour).label('cons_per_hour'),
-            sa.func.sum(self._model.necessity).label('necessity'),
+            sa.func.sum(
+                sa.func.least(
+                    sa.func.coalesce(
+                        self._model.necessity,
+                        sa.func.greatest(self._model.in_stock - self._model.min_level, 0),
+                    ),
+                    self._model.max_level,
+                )
+            ).label('necessity'),
             sa.func.sum(CapabilityORM.value).label('capability_per_interval'),
         ).outerjoin(
             CapabilityORM,
@@ -94,9 +102,10 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
             self._model.product_id,
         )
 
+        stmt = stmt.execution_options(stream_results=True, yield_per=1000)
         async with self._db.async_session as session:
             #  https://docs.sqlalchemy.org/en/20/orm/queryguide/api.html#fetching-large-result-sets-with-yield-per
-            res = await session.stream(stmt.execution_options(stream_results=True, yield_per=100))
+            res = await session.stream(stmt)
             async for partition in res.partitions():
                 for element in partition:
                     # noinspection PyTypeChecker

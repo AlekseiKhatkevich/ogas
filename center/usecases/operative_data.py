@@ -6,6 +6,7 @@ from common.repositories.postgres import CommonPostgresRepository
 from common.resources.database.redis import RedisDAO, redis_container
 from common.usecases.common import AbstractUseCase
 from utils.common import AsyncObj
+from ..enums import Role
 from ..orm_models import OperativeDataORM, OrganizationORM
 from ..repositories.postgres import OperativeDataPostgresRepository, OrganizationStockPostgresRepository
 
@@ -51,8 +52,21 @@ class PlanCalculationUseCase(AbstractUseCase):
                 await self.calculate_demand_for_case_without_producer(prev_element)
                 prev_element = element
 
+        else:
+            if prev_element is not None:
+                await self.calculate_demand_for_case_without_producer(prev_element)
+
     async def calculate_regular_demand(self, elements):
-        pass
+        producer = consumer = None
+        for element in elements:
+            if element.role == Role.PRODUCER:
+                producer = element
+            else:
+                consumer = element
+
+        
+
+
 
     async def calculate_demand_for_case_without_producer(self, element):
         pass
