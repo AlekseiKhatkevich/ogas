@@ -30,6 +30,7 @@ class InfoForSchedule:
     cons_per_hour: float | None
     necessity: float | None
     capability_per_interval: float
+    min_level: float
     capability_interval: 'Period'
     avg_interval: datetime.timedelta
 

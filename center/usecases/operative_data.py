@@ -34,9 +34,14 @@ class OperativeDataInSaveUseCase(AsyncObj, AbstractUseCase):
 
 
 class PlanCalculationUseCase(AbstractUseCase):
-    def __init__(self, repository: OrganizationStockPostgresRepository = OrganizationStockPostgresRepository, ) -> None:
+    def __init__(
+            self,
+            repository: OrganizationStockPostgresRepository = OrganizationStockPostgresRepository,
+            normal_level_hours: int = 24 * 2,
+    ) -> None:
         self.repository = repository()
         self.queue = deque(maxlen=2)
+        self.normal_level_hours = normal_level_hours
 
     async def execute(self):
         data_pipeline = self.repository.get_info_for_schedule()
@@ -56,13 +61,38 @@ class PlanCalculationUseCase(AbstractUseCase):
             if prev_element is not None:
                 await self.calculate_demand_for_case_without_producer(prev_element)
 
-    async def calculate_regular_demand(self, elements):
+    @staticmethod
+    def get_consumer_and_producer(elements):
         producer = consumer = None
         for element in elements:
             if element.role == Role.PRODUCER:
                 producer = element
             else:
                 consumer = element
+
+        return producer, consumer
+
+    async def calculate_regular_demand(self, elements):
+        producer, consumer = self.get_consumer_and_producer(elements)
+
+        demanded_necessity = consumer.necessity
+        in_stock = consumer.in_stock
+        cap_per_interval = consumer.capability_per_interval
+        capability_interval = consumer.capability_interval
+        min_level = consumer.min_level
+        cons_per_hour = (
+                consumer.cons_per_hour or cap_per_interval / capability_interval.to_hours
+        )
+
+        in_stock_at_producer = producer.in_stock
+
+        hours_to_min_level = max((in_stock - min_level), 0) / cons_per_hour
+        hours_to_normal_level = self.normal_level_hours - hours_to_min_level
+        necessity_to_normal_level = (cons_per_hour * hours_to_normal_level) - demanded_necessity
+        to_produce = necessity_to_normal_level - in_stock_at_producer
+
+        return to_produce
+
 
         
 
