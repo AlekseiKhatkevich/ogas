@@ -41,22 +41,25 @@ class PlanCalculationUseCase(AbstractUseCase):
         self.normal_level_hours = normal_level_hours
 
     async def execute(self):
-        data_pipeline = self.repository.get_info_for_schedule()
         prev_element = None
-        async for element in data_pipeline:
+        async for element in self.repository.get_info_for_schedule():
             if prev_element is None:
                 prev_element = element
                 continue
             elif prev_element.product_id == element.product_id:
-                await self.calculate_regular_demand([prev_element, element])
+                await self.calculate([prev_element, element])
                 prev_element = None
             else:
-                await self.calculate_demand_for_case_without_producer(prev_element)
+                await self.calculate([prev_element])
                 prev_element = element
 
         else:
             if prev_element is not None:
-                await self.calculate_demand_for_case_without_producer(prev_element)
+                await self.calculate([prev_element])
+
+    async def calculate(self, elements):
+        producer, consumer = self.get_consumer_and_producer(elements)
+        to_produce = self.calculate_base_case(producer, consumer)
 
     @staticmethod
     def get_consumer_and_producer(elements):
@@ -70,6 +73,9 @@ class PlanCalculationUseCase(AbstractUseCase):
         return producer, consumer
 
     def calculate_base_case(self, producer, consumer):
+        if consumer is None:
+            return 0
+
         in_stock = consumer.in_stock
         cap_per_interval = consumer.capability_per_interval
         capability_interval = consumer.capability_interval
@@ -80,19 +86,9 @@ class PlanCalculationUseCase(AbstractUseCase):
         in_stock_at_producer = producer.in_stock if producer is not None else 0
 
         hours_to_min_level = max((in_stock - min_level), 0) / cons_per_hour
-        hours_to_normal_level = self.normal_level_hours - hours_to_min_level
+        hours_to_normal_level = max(self.normal_level_hours - hours_to_min_level, 0)
         necessity_to_normal_level = (cons_per_hour * hours_to_normal_level)
-        to_produce = necessity_to_normal_level - in_stock_at_producer
+        to_produce = max(necessity_to_normal_level - in_stock_at_producer, 0)
 
         return to_produce
-
-    def calculate_regular_demand(self, elements):
-        producer, consumer = self.get_consumer_and_producer(elements)
-        to_produce = self.calculate_base_case(producer, consumer)
-
-    def calculate_demand_for_case_without_producer(self, element):
-        if element.role == Role.PRODUCER:
-            return None
-        to_produce = self.calculate_base_case(producer=None, consumer=element)
-
 
