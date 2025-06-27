@@ -97,6 +97,7 @@ async def test_insert_stock_update(
 @pytest.fixture
 async def create_operative_data_by_hour(
         prepare_base_case_data,
+        test_db,
 ):
     (
         product_in_db,
@@ -129,7 +130,7 @@ async def create_operative_data_by_hour(
 
     stmt = sa.insert(OperativeDataORM1HourView).values(data)
 
-    async with db.async_session as session:
+    async with test_db.async_session as session:
         await session.execute(stmt)
         await session.commit()
 
@@ -194,8 +195,7 @@ async def test_get_info_for_schedule_positive_base_case(
 
     avg_per_hour = create_operative_data_by_hour
 
-    info_gen = organization_stock_repo.get_info_for_schedule()
-    info = [info async for info in info_gen]
+    info = [info async for info in organization_stock_repo.get_info_for_schedule()]
 
     for i in info:
         assert isinstance(i, InfoForSchedule)
@@ -230,12 +230,43 @@ async def test_get_info_for_schedule_positive_no_operative_data(
         prepare_base_case_data,
         organization_stock_repo,
 ):
-    info_gen = organization_stock_repo.get_info_for_schedule()
-    info = [info async for info in info_gen]
+    info = [info async for info in organization_stock_repo.get_info_for_schedule()]
 
     assert len(info) == 2
     for i in info:
         assert i.cons_per_hour is None
 
 
-# async def test_get_info_for_schedule_positive_has_necessity(
+@pytest.mark.parametrize(
+    'necessity, max_level, expected',
+    [
+        (333, 1000, 333),
+        (3000, 1000, 1000),
+        (None, float('inf'), None),
+    ]
+)
+async def test_get_info_for_schedule_positive_has_necessity(
+    necessity,
+    max_level,
+    expected,
+    prepare_base_case_data,
+    organization_stock_repo,
+):
+    (
+        product_in_db,
+        organization_prod,
+        organization_cons,
+        os_prod,
+        os_cons,
+        cap_prod,
+        cap_cons,
+    ) = prepare_base_case_data
+    os_prod.necessity = os_cons.necessity = necessity
+    os_prod.max_level = os_cons.max_level = max_level
+    await organization_stock_repo.add_all([os_prod, os_cons])
+
+    info = [info async for info in organization_stock_repo.get_info_for_schedule()]
+
+    assert len(info) == 2
+    for i in info:
+        assert i.necessity == expected
