@@ -47,6 +47,7 @@ class OrganizationStockFactory(CustomFactory[OrganizationStockORM]):
     max_level: float = float('Infinity')
     necessity: float | None = None
     organization = Use(OrganizationFactory.build)
+    is_active: bool = True
 
 
 class NecessityFactory(CustomFactory[NecessityORM]):

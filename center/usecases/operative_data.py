@@ -1,5 +1,5 @@
 from center.serializers import OperativeDataIn
-from common.repositories.postgres import CommonPostgresRepository
+from common.repositories.postgres import CommonPostgresRepository, InfoForSchedule
 from common.resources.database.redis import RedisDAO, redis_container
 from common.usecases.common import AbstractUseCase
 from utils.common import AsyncObj
@@ -64,7 +64,7 @@ class PlanCalculationUseCase(AbstractUseCase):
             if prev_element is not None:
                 await self.calculate([prev_element])
 
-    async def calculate(self, elements: list[OperativeDataIn]) -> NecessityORM | None:
+    async def calculate(self, elements: list[InfoForSchedule]) -> NecessityORM | None:
         producer, consumer = self.get_consumer_and_producer(elements)
         necessity_instance = self.calculate_base_case(producer, consumer)
         if necessity_instance is not None:
@@ -72,8 +72,8 @@ class PlanCalculationUseCase(AbstractUseCase):
         return necessity_instance
 
     @staticmethod
-    def get_consumer_and_producer(elements: list[OperativeDataIn]) \
-            -> tuple[OperativeDataIn | None, OperativeDataIn | None]:
+    def get_consumer_and_producer(elements: list[InfoForSchedule]) \
+            -> tuple[InfoForSchedule | None, InfoForSchedule | None]:
         producer = consumer = None
         for element in elements:
             if element.role == Role.PRODUCER:

@@ -74,7 +74,9 @@ class OrganizationStockPostgresRepository(CommonPostgresRepository, model=Organi
             CapabilityORM.role,
             sa.func.sum(self._model.in_stock).label('in_stock'),
             sa.func.sum(oper_data.c.cons_per_hour).label('cons_per_hour'),
-            sa.func.sum(sa.func.least(self._model.necessity, self._model.max_level)).label('necessity'),
+            sa.func.sum(
+                sa.func.nullif(sa.func.least(self._model.necessity, self._model.max_level), float('inf'))
+            ).label('necessity'),
             sa.func.sum(CapabilityORM.value).label('capability_per_interval'),
             sa.func.sum(self._model.min_level).label('min_level'),
         ).outerjoin(
