@@ -4,8 +4,12 @@ from common.resources.database.redis import RedisDAO, redis_container
 from common.usecases.common import AbstractUseCase
 from utils.common import AsyncObj
 from ..enums import Role
-from ..orm_models import OperativeDataORM, OrganizationORM
-from ..repositories.postgres import OperativeDataPostgresRepository, OrganizationStockPostgresRepository
+from ..orm_models import NecessityORM, OperativeDataORM, OrganizationORM
+from ..repositories.postgres import (
+    NecessityPostgresRepository,
+    OperativeDataPostgresRepository,
+    OrganizationStockPostgresRepository,
+)
 
 
 class OperativeDataInSaveUseCase(AsyncObj, AbstractUseCase):
@@ -33,14 +37,17 @@ class OperativeDataInSaveUseCase(AsyncObj, AbstractUseCase):
 class PlanCalculationUseCase(AbstractUseCase):
     def __init__(
             self,
-            repository: OrganizationStockPostgresRepository = OrganizationStockPostgresRepository,
             normal_level_hours: int = 24 * 2,
+            repository: OrganizationStockPostgresRepository = OrganizationStockPostgresRepository,
+            necessity_repository: NecessityPostgresRepository = NecessityPostgresRepository,
     ) -> None:
         # noinspection PyCallingNonCallable
         self.repository = repository()
         self.normal_level_hours = normal_level_hours
+        # noinspection PyCallingNonCallable
+        self.necessity_repository = necessity_repository()
 
-    async def execute(self):
+    async def execute(self) -> None:
         prev_element = None
         async for element in self.repository.get_info_for_schedule():
             if prev_element is None:
@@ -57,12 +64,16 @@ class PlanCalculationUseCase(AbstractUseCase):
             if prev_element is not None:
                 await self.calculate([prev_element])
 
-    async def calculate(self, elements):
+    async def calculate(self, elements: list[OperativeDataIn]) -> NecessityORM | None:
         producer, consumer = self.get_consumer_and_producer(elements)
-        to_produce = self.calculate_base_case(producer, consumer)
+        necessity_instance = self.calculate_base_case(producer, consumer)
+        if necessity_instance is not None:
+            await self.necessity_repository.add_all([necessity_instance])
+        return necessity_instance
 
     @staticmethod
-    def get_consumer_and_producer(elements):
+    def get_consumer_and_producer(elements: list[OperativeDataIn]) \
+            -> tuple[OperativeDataIn | None, OperativeDataIn | None]:
         producer = consumer = None
         for element in elements:
             if element.role == Role.PRODUCER:
@@ -72,9 +83,13 @@ class PlanCalculationUseCase(AbstractUseCase):
 
         return producer, consumer
 
-    def calculate_base_case(self, producer, consumer):
+    def calculate_base_case(
+            self,
+            producer: OperativeDataIn | None,
+            consumer: OperativeDataIn | None,
+    ) -> NecessityORM | None:
         if consumer is None:
-            return 0
+            return None
 
         in_stock = consumer.in_stock
         cap_per_interval = consumer.capability_per_interval
@@ -90,5 +105,10 @@ class PlanCalculationUseCase(AbstractUseCase):
         necessity_to_normal_level = (cons_per_hour * hours_to_normal_level)
         to_produce = max(necessity_to_normal_level - in_stock_at_producer, 0)
 
-        return to_produce
+        return NecessityORM(
+            product_id=consumer.product_id,
+            to_produce=to_produce,
+            in_stock_at_consumer=in_stock,
+            in_stock_at_producer=in_stock_at_producer,
+        )
 
