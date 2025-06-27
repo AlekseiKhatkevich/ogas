@@ -12,6 +12,7 @@ from center.orm_models import OperativeDataORM1HourView
 from center.usecases.operative_data import PlanCalculationUseCase
 from common.repositories.postgres import InfoForSchedule
 from common.resources.database.postgres import db
+from common.testing.fixtures.orm_models import product_in_db
 
 
 async def test_insert_stock_minimal_data(
@@ -39,10 +40,10 @@ async def test_insert_stock_minimal_data(
 @pytest.mark.parametrize(
     ['min_level', 'max_level', 'necessity', 'is_active'],
     [
-        (1, float('inf'),  None, True,),
-        (1, 1000,  None, True,),
-        (1, 1000,  25, True,),
-        (1, 1000,  25, False,),
+        (1, float('inf'), None, True,),
+        (1, 1000, None, True,),
+        (1, 1000, 25, True,),
+        (1, 1000, 25, False,),
     ]
 )
 async def test_insert_stock_more_data(
@@ -92,12 +93,21 @@ async def test_insert_stock_update(
     assert instance.updated_at is not None
 
 
+# noinspection PyUnresolvedReferences
+@pytest.fixture
 async def create_operative_data_by_hour(
-    product_id: ulid.ULID,
-    organization_prod_id: ulid.ULID,
-    organization_cons_id: ulid.ULID,
-    od_avg_interval_hours: int = 24 * 21,
+        prepare_base_case_data,
 ):
+    (
+        product_in_db,
+        organization_prod,
+        organization_cons,
+        os_prod,
+        os_cons,
+        cap_prod,
+        cap_cons,
+    ) = prepare_base_case_data
+    od_avg_interval_hours: int = 24 * 21
     now_bucket = datetime.datetime.now(tz=datetime.UTC).replace(minute=0, second=0, microsecond=0)
     data = []
     negative_diffs = []
@@ -105,15 +115,15 @@ async def create_operative_data_by_hour(
         negative_diffs.append(negative_diff := random.uniform(0, 1000))
 
         common_data = {
-                OperativeDataORM1HourView.hour_bucket: now_bucket - datetime.timedelta(hours=minus_hours),
-                OperativeDataORM1HourView.product_id: product_id,
-                OperativeDataORM1HourView.positive_diff: 0,
-                OperativeDataORM1HourView.negative_diff: negative_diff
-            }
+            OperativeDataORM1HourView.hour_bucket: now_bucket - datetime.timedelta(hours=minus_hours),
+            OperativeDataORM1HourView.product_id: product_in_db.id,
+            OperativeDataORM1HourView.positive_diff: 0,
+            OperativeDataORM1HourView.negative_diff: negative_diff,
+        }
         data.extend(
             [
-                {**common_data, OperativeDataORM1HourView.organization_id: organization_prod_id},
-                {**common_data, OperativeDataORM1HourView.organization_id: organization_cons_id}
+                {**common_data, OperativeDataORM1HourView.organization_id: organization_prod.id},
+                {**common_data, OperativeDataORM1HourView.organization_id: organization_cons.id}
             ]
         )
 
@@ -126,18 +136,30 @@ async def create_operative_data_by_hour(
     return statistics.mean(negative_diffs)
 
 
-async def test_get_info_for_schedule_positive_base_case(
-    organization_stock_repo,
-    organization_stock_factory,
-    organization_factory,
-    capability_factory,
-    product_in_db,
-    save_in_db,
-    save_in_db_batch,
+# noinspection PyArgumentList
+@pytest.fixture
+async def prepare_base_case_data(
+        organization_stock_repo,
+        organization_stock_factory,
+        organization_factory,
+        capability_factory,
+        product_in_db,
+        save_in_db,
+        save_in_db_batch,
 ):
     organization_prod, organization_cons = await save_in_db_batch(organization_factory, batch_size=2)
-    os_prod = await save_in_db(organization_stock_factory, organization=organization_prod, product=product_in_db, is_active=True)
-    os_cons = await save_in_db(organization_stock_factory, organization=organization_cons, product=product_in_db, is_active=True)
+    os_prod = await save_in_db(
+        organization_stock_factory,
+        organization=organization_prod,
+        product=product_in_db,
+        is_active=True,
+    )
+    os_cons = await save_in_db(
+        organization_stock_factory,
+        organization=organization_cons,
+        product=product_in_db,
+        is_active=True,
+    )
     cap_prod = await save_in_db(
         capability_factory,
         organization=organization_prod,
@@ -152,7 +174,25 @@ async def test_get_info_for_schedule_positive_base_case(
         period=Period.DAY,
         role=Role.CONSUMER,
     )
-    avg_per_hour = await create_operative_data_by_hour(product_in_db.id, organization_prod.id, organization_cons.id)
+    return product_in_db, organization_prod, organization_cons, os_prod, os_cons, cap_prod, cap_cons
+
+
+async def test_get_info_for_schedule_positive_base_case(
+        prepare_base_case_data,
+        organization_stock_repo,
+        create_operative_data_by_hour,
+):
+    (
+        product_in_db,
+        organization_prod,
+        organization_cons,
+        os_prod,
+        os_cons,
+        cap_prod,
+        cap_cons,
+    ) = prepare_base_case_data
+
+    avg_per_hour = create_operative_data_by_hour
 
     info_gen = organization_stock_repo.get_info_for_schedule()
     info = [info async for info in info_gen]
@@ -184,3 +224,18 @@ async def test_get_info_for_schedule_positive_base_case(
     assert producer.capability_interval == consumer.capability_interval == Period.DAY
 
     assert producer.avg_interval == consumer.avg_interval == datetime.timedelta(seconds=60 * 60 * 24 * 21)
+
+
+async def test_get_info_for_schedule_positive_no_operative_data(
+        prepare_base_case_data,
+        organization_stock_repo,
+):
+    info_gen = organization_stock_repo.get_info_for_schedule()
+    info = [info async for info in info_gen]
+
+    assert len(info) == 2
+    for i in info:
+        assert i.cons_per_hour is None
+
+
+# async def test_get_info_for_schedule_positive_has_necessity(
