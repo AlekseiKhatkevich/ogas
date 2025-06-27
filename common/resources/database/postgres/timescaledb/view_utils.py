@@ -6,20 +6,18 @@ from sqlalchemy import DDLElement
 from sqlalchemy.ext import compiler
 from sqlalchemy_utils.view import CreateView, DropView
 
+from common.resources.database.postgres.timescaledb.common_utils import BaseTimescaleORMMixin
+
 DEFAULT_TIMESCALE_OPTIONS = {'timescaledb.continuous': True}
 
 
-class BaseMatViewORMMixin:
+class BaseMatViewORMMixin(BaseTimescaleORMMixin):
     selectable: sa.Select = None
     __table__: sa.Table = None
-    timescale_options = None
-    retention_policy: datetime.timedelta
-    retention_interval: datetime.timedelta
     is_view = True
     continuous_aggregate_start_offset: datetime.timedelta
     continuous_aggregate_end_offset: datetime.timedelta
     continuous_aggregate_schedule_interval: datetime.timedelta
-    columnstore_policy_interval: datetime.timedelta
 
     @classmethod
     def create(cls, op: Operations) -> None:
@@ -58,11 +56,6 @@ class BaseMatViewORMMixin:
             idx.create(op.get_bind())
 
     @classmethod
-    def add_retention_policy(cls, op: Operations) -> None:
-        policy_sql = AddRetentionPolicy(cls.__table__.fullname, cls.retention_policy, cls.retention_interval)
-        op.execute(policy_sql)
-
-    @classmethod
     def remove_retention_policy(cls, op: Operations) -> None:
         op.execute(RemoveRetentionPolicy(cls.__table__.fullname))
 
@@ -79,46 +72,6 @@ class BaseMatViewORMMixin:
     @classmethod
     def remove_continuous_aggregate_policy(cls, op: Operations) -> None:
         op.execute(RemoveContinuousAggregatePolicy(cls.__table__.fullname))
-
-    @classmethod
-    def add_columnstore_policy(cls, op: Operations) -> None:
-        op.execute(AddColumnstorePolicy(cls.__table__.fullname, cls.columnstore_policy_interval))
-
-    @classmethod
-    def remove_columnstore_policy(cls, op: Operations) -> None:
-        op.execute(RemoveColumnstorePolicy(cls.__table__.fullname,))
-
-
-class RemoveColumnstorePolicy(DDLElement):
-    def __init__(self, name: str) -> None:
-        self.name = name
-
-
-@compiler.compiles(RemoveColumnstorePolicy)
-def compile_remove_columnstore_policy(
-        element: RemoveColumnstorePolicy,
-        compiler: compiler,
-        **kw,
-) -> str:
-    return "CALL remove_columnstore_policy('{}');".format(element.name)
-
-
-class AddColumnstorePolicy(DDLElement):
-    def __init__(self, name: str, interval: datetime.timedelta) -> None:
-        self.name = name
-        self.interval = interval
-
-
-@compiler.compiles(AddColumnstorePolicy)
-def compile_add_columnstore_policy(
-        element: AddColumnstorePolicy,
-        compiler: compiler,
-        **kw,
-) -> str:
-    return "CALL add_columnstore_policy('{}', after => INTERVAL '{} SECONDS');;".format(
-        element.name,
-        element.interval.total_seconds(),
-    )
 
 
 class RemoveContinuousAggregatePolicy(DDLElement):
@@ -173,22 +126,6 @@ class RemoveRetentionPolicy(DDLElement):
 @compiler.compiles(RemoveRetentionPolicy)
 def compile_remove_retention_policy(element: RemoveRetentionPolicy, compiler: compiler, **kw) -> str:
     return "SELECT remove_retention_policy('{}');".format(element.name)
-
-
-class AddRetentionPolicy(DDLElement):
-    def __init__(self, name, drop_after: datetime.timedelta, retention_interval: datetime.timedelta) -> None:
-        self.name = name
-        self.drop_after = drop_after
-        self.retention_interval = retention_interval
-
-
-@compiler.compiles(AddRetentionPolicy)
-def compile_add_retention_policy(element: AddRetentionPolicy, compiler: compiler, **kw) -> str:
-    return "SELECT add_retention_policy('{}', INTERVAL '{} seconds', schedule_interval := INTERVAL '{}');".format(
-        element.name,
-        element.drop_after.total_seconds(),
-        element.retention_interval.total_seconds(),
-    )
 
 
 class CreateTimescaleView(CreateView):

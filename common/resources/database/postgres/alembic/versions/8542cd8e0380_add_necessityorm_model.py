@@ -33,6 +33,8 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['product_id'], ['product.id'], name=op.f('fk_necessity_product_id_product'), ondelete='CASCADE')
     )
     NecessityORM.convert_table_to_hypertable(op)
+    NecessityORM.add_retention_policy(op)
+    NecessityORM.add_columnstore_policy(op)
     # ### end Alembic commands ###
 
 

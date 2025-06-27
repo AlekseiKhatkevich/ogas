@@ -48,7 +48,7 @@ def upgrade() -> None:
         SELECT add_retention_policy('operativedata', INTERVAL '1 hour',  schedule_interval := INTERVAL '1 hour 5 minutes');
         """
     )
-# columnstore policy!!!
+
 
 def downgrade() -> None:
     """Downgrade schema."""

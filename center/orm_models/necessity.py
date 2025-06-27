@@ -19,15 +19,14 @@ class NecessityORM(BaseTimescaleORMMixin, Base):
            'timescaledb.enable_columnstore': True,
            'timescaledb.orderby': 'created_at DESC',
            'timescaledb.segmentby': 'product_id',
-           'timescaledb.chunk_interval': '7 DAYS',
+           'timescaledb.chunk_interval': '2 DAYS',
     }
-    # retention_policy: datetime.timedelta
-    # retention_interval: datetime.timedelta
-    # columnstore_policy_interval: datetime.timedelta
+    retention_policy = datetime.timedelta(days=45)
+    retention_interval = datetime.timedelta(days=1)
+    columnstore_policy_interval = datetime.timedelta(days=2, hours=1)
     partition_by = 'created_at'
-    partition_interval = datetime.timedelta(days=7)
+    partition_interval = datetime.timedelta(days=2)
 
-    # id: Mapped[ULID_PK]
     product_id: Mapped[ulid.ULID] = mapped_column(
         ForeignKey('product.id', ondelete='CASCADE', ),
         comment='Продукт.',
