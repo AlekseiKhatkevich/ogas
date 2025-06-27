@@ -5,7 +5,13 @@ from center.repositories.postgres import (
     OperativeDataPostgresRepository,
     OrganizationPostgresRepository,
     OrganizationStockPostgresRepository,
+    NecessityPostgresRepository,
 )
+
+
+@pytest.fixture(scope='session')
+def necessity_repo() -> NecessityPostgresRepository:
+    return NecessityPostgresRepository()
 
 
 @pytest.fixture(scope='session')

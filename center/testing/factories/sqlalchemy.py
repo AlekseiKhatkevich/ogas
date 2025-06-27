@@ -4,6 +4,7 @@ from polyfactory import Use
 
 from center.orm_models import (
     CapabilityORM,
+    NecessityORM,
     OperativeDataORM,
     OrganizationORM,
     OrganizationStockORM,
@@ -15,6 +16,7 @@ __all__ = (
     'CapabilityFactory',
     'OperativeDataFactory',
     'OrganizationStockFactory',
+    'NecessityFactory',
 )
 
 
@@ -45,3 +47,10 @@ class OrganizationStockFactory(CustomFactory[OrganizationStockORM]):
     max_level: float = float('Infinity')
     necessity: float | None = None
     organization = Use(OrganizationFactory.build)
+
+
+class NecessityFactory(CustomFactory[NecessityORM]):
+    __set_relationships__ = True
+    to_produce: float = Use(CustomFactory.__faker__.pyfloat, positive=True)
+    in_stock_at_consumer: float = Use(CustomFactory.__faker__.pyfloat, positive=True)
+    in_stock_at_producer: float = Use(CustomFactory.__faker__.pyfloat, positive=True)

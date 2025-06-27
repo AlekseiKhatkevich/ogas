@@ -12,12 +12,19 @@ if TYPE_CHECKING:
         CapabilityORM,
         OperativeDataORM,
         OrganizationStockORM,
+        NecessityORM,
     )
 
 register_fixture(factories.OrganizationFactory)
 register_fixture(factories.CapabilityFactory)
 register_fixture(factories.OperativeDataFactory)
 register_fixture(factories.OrganizationStockFactory)
+register_fixture(factories.NecessityFactory)
+
+
+@pytest.fixture
+async def necessity_data_in(save_in_db, necessity_factory: factories.NecessityFactory) -> 'NecessityORM':
+    return await save_in_db(necessity_factory)
 
 
 @pytest.fixture
