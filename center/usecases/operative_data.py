@@ -46,6 +46,7 @@ class PlanCalculationUseCase(AbstractUseCase):
         self.normal_level_hours = normal_level_hours
         # noinspection PyCallingNonCallable
         self.necessity_repository = necessity_repository()
+        self._last_created_instance: NecessityORM
 
     async def execute(self) -> None:
         prev_element = None
@@ -68,7 +69,7 @@ class PlanCalculationUseCase(AbstractUseCase):
         producer, consumer = self.get_consumer_and_producer(elements)
         necessity_instance = self.calculate_base_case(producer, consumer)
         if necessity_instance is not None:
-            await self.necessity_repository.add_all([necessity_instance])
+            self._last_created_instance, *_ = await self.necessity_repository.add_all([necessity_instance])
         return necessity_instance
 
     @staticmethod
