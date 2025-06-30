@@ -114,3 +114,11 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
             session.add_all(instances)
             await session.commit()
             return instances
+
+    async def fetch_one(self, _id: Any = None) -> M | None:
+        stmt = sa.select(self._model)
+        if _id is not None:
+            stmt = stmt.where(self._model.id == _id)
+        async with self._db.async_session as session:
+            res = await session.scalars(stmt)
+            return res.first()

@@ -24,6 +24,7 @@ pytest_plugins = [
     'center.testing.fixtures.orm_models',
     'center.testing.fixtures.pydantic_models',
     'center.testing.fixtures.repositories',
+    'center.testing.fixtures._test_data',
 ]
 
 
