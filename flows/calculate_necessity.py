@@ -1,9 +1,5 @@
 from prefect import flow, serve, task
 
-__all__ = (
-    'calc_necessities_and_plan_deploy',
-)
-
 
 @task
 async def calculate_necessities() -> None:

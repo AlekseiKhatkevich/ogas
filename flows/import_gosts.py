@@ -2,11 +2,6 @@ from prefect import flow, serve
 from sqlalchemy import text
 
 
-__all__ = (
-    'import_gosts_deploy',
-)
-
-
 @flow(retries=12, retry_delay_seconds=60)
 async def import_gosts() -> None:
     """
