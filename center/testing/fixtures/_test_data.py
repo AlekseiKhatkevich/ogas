@@ -20,12 +20,14 @@ async def base_case_data_for_get_info_for_schedule(
         organization=organization_prod,
         product=product_in_db,
         is_active=True,
+        in_stock=0,
     )
     os_cons = await save_in_db(
         organization_stock_factory,
         organization=organization_cons,
         product=product_in_db,
         is_active=True,
+        in_stock=0,
     )
     cap_prod = await save_in_db(
         capability_factory,

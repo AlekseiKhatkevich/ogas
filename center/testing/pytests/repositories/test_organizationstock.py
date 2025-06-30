@@ -94,7 +94,7 @@ async def test_insert_stock_update(
 # noinspection PyUnresolvedReferences
 @pytest.fixture
 async def create_operative_data_by_hour(
-        prepare_base_case_data,
+        base_case_data_for_get_info_for_schedule,
         test_db,
 ):
     (
@@ -105,7 +105,7 @@ async def create_operative_data_by_hour(
         os_cons,
         cap_prod,
         cap_cons,
-    ) = prepare_base_case_data
+    ) = base_case_data_for_get_info_for_schedule
     od_avg_interval_hours: int = 24 * 21
     now_bucket = datetime.datetime.now(tz=datetime.UTC).replace(minute=0, second=0, microsecond=0)
     data = []
@@ -136,7 +136,7 @@ async def create_operative_data_by_hour(
 
 
 async def test_get_info_for_schedule_positive_base_case(
-        prepare_base_case_data,
+        base_case_data_for_get_info_for_schedule,
         organization_stock_repo,
         create_operative_data_by_hour,
 ):
@@ -148,7 +148,7 @@ async def test_get_info_for_schedule_positive_base_case(
         os_cons,
         cap_prod,
         cap_cons,
-    ) = prepare_base_case_data
+    ) = base_case_data_for_get_info_for_schedule
 
     avg_per_hour = create_operative_data_by_hour
 
@@ -184,7 +184,7 @@ async def test_get_info_for_schedule_positive_base_case(
 
 
 async def test_get_info_for_schedule_positive_no_operative_data(
-        prepare_base_case_data,
+        base_case_data_for_get_info_for_schedule,
         organization_stock_repo,
 ):
     info = [info async for info in organization_stock_repo.get_info_for_schedule()]
@@ -206,7 +206,7 @@ async def test_get_info_for_schedule_positive_has_necessity(
     necessity,
     max_level,
     expected,
-    prepare_base_case_data,
+    base_case_data_for_get_info_for_schedule,
     organization_stock_repo,
 ):
     (
@@ -217,7 +217,7 @@ async def test_get_info_for_schedule_positive_has_necessity(
         os_cons,
         cap_prod,
         cap_cons,
-    ) = prepare_base_case_data
+    ) = base_case_data_for_get_info_for_schedule
     os_prod.necessity = os_cons.necessity = necessity
     os_prod.max_level = os_cons.max_level = max_level
     await organization_stock_repo.add_all([os_prod, os_cons])
