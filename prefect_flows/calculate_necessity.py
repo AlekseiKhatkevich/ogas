@@ -13,7 +13,7 @@ async def calculate_manufacturing_plan() -> None:
     print('Calculating Manufacturing plan')
 
 
-@flow
+@flow(timeout_seconds=60 * 2, log_prints=True)
 async def calc_necessities_and_plan() -> None:
     await calculate_necessities()
     await calculate_manufacturing_plan()
