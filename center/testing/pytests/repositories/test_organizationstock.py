@@ -8,7 +8,7 @@ import sqlalchemy as sa
 
 from center.enums import Period, Role
 from center.orm_models import OperativeDataORM1HourView
-from center.usecases.operative_data import PlanCalculationUseCase
+from center.usecases.operative_data import NecessityCalculationUseCase
 from common.repositories.postgres import InfoForSchedule
 from common.testing.fixtures.orm_models import product_in_db
 
@@ -158,7 +158,7 @@ async def test_get_info_for_schedule_positive_base_case(
         assert isinstance(i, InfoForSchedule)
         assert i.product_id == product_in_db.id
 
-    producer, consumer = PlanCalculationUseCase.get_consumer_and_producer(info)
+    producer, consumer = NecessityCalculationUseCase.get_consumer_and_producer(info)
 
     assert producer.role == Role.PRODUCER
     assert consumer.role == Role.CONSUMER

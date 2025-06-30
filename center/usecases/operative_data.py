@@ -34,7 +34,7 @@ class OperativeDataInSaveUseCase(AsyncObj, AbstractUseCase):
         return await self.repository.insert_data(to_insert)
 
 
-class PlanCalculationUseCase(AbstractUseCase):
+class NecessityCalculationUseCase(AbstractUseCase):
     def __init__(
             self,
             normal_level_hours: int = 24 * 2,

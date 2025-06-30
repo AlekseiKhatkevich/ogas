@@ -1,12 +1,12 @@
 import pytest
 
 from center.enums import Role
-from center.usecases.operative_data import PlanCalculationUseCase
+from center.usecases.operative_data import NecessityCalculationUseCase
 
 
 @pytest.fixture
-def use_case() -> PlanCalculationUseCase:
-    return PlanCalculationUseCase()
+def use_case() -> NecessityCalculationUseCase:
+    return NecessityCalculationUseCase()
 
 
 async def test_plan_calculation_use_case_positive_2_element_same_product(

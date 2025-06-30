@@ -2,6 +2,11 @@ from prefect import flow, serve
 from sqlalchemy import text
 
 
+__all__ = (
+    'import_gosts_deploy',
+)
+
+
 @flow(retries=12, retry_delay_seconds=60)
 async def import_gosts() -> None:
     """
@@ -17,12 +22,13 @@ async def import_gosts() -> None:
         await session.commit()
 
 
-if __name__ == '__main__':
-    import_gosts_deploy = import_gosts.to_deployment(
+import_gosts_deploy = import_gosts.to_deployment(
         name='import_gosts',
         cron='0 14 * * *',
         tags=['import', 'csv', 'OGAS', ],
         description='Скачивает и помещает в БД данные о ГОСТах',
         version='0.0.11',
     )
+
+if __name__ == '__main__':
     serve(import_gosts_deploy, )
