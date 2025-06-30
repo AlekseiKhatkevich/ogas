@@ -1,7 +1,34 @@
+import functools
+from typing import Callable
+
+import asyncpg
 from prefect import flow, serve, task
 
 
-@task
+def retry_on(*exceptions) -> Callable:
+    def _handler(task, task_run, state) -> bool:
+        try:
+            state.result()
+        except tuple(*exceptions):
+            return True
+        else:
+            return False
+    return _handler
+
+
+retry_on_db_failures = functools.partial(
+    retry_on,
+    ConnectionRefusedError,
+    asyncpg.PostgresConnectionError,
+)
+
+
+@task(
+    retries=6,
+    retry_condition_fn=retry_on_db_failures,
+    retry_delay_seconds=60 * 5,
+    timeout_seconds=60 * 2,
+)
 async def calculate_necessities() -> None:
     from center.usecases.operative_data import NecessityCalculationUseCase
     use_case = NecessityCalculationUseCase()
@@ -13,7 +40,9 @@ async def calculate_manufacturing_plan() -> None:
     print('Calculating Manufacturing plan')
 
 
-@flow(timeout_seconds=60 * 2, log_prints=True)
+@flow(
+    log_prints=True,
+)
 async def calc_necessities_and_plan() -> None:
     await calculate_necessities()
     await calculate_manufacturing_plan()
