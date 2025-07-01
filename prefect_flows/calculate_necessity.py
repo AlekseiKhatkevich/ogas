@@ -3,6 +3,7 @@ from typing import Callable
 
 import asyncpg
 from prefect import flow, serve, task
+from prefect.logging import get_run_logger
 
 
 def retry_on(*exceptions) -> Callable:
@@ -37,12 +38,11 @@ async def calculate_necessities() -> None:
 
 @task
 async def calculate_manufacturing_plan() -> None:
-    print('Calculating Manufacturing plan')
+    logger = get_run_logger()
+    logger.info('Calculating Manufacturing plan')
 
 
-@flow(
-    log_prints=True,
-)
+@flow
 async def calc_necessities_and_plan() -> None:
     await calculate_necessities()
     await calculate_manufacturing_plan()
