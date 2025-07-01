@@ -1,7 +1,9 @@
 from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
+from sqlalchemy import Select
 from sqlalchemy.dialects import postgresql as pg
+from sqlalchemy.orm import aliased
 
 from center.orm_models import CapabilityORM, OrganizationORM
 from common.repositories.postgres import CommonPostgresRepository, UpsertResult
@@ -58,7 +60,7 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
                 )
 
                 stmt = insert_stmt.on_conflict_do_update(
-                    index_elements=('organization_id', 'product_id', 'period', 'role', ),
+                    index_elements=('organization_id', 'product_id', 'period', 'role',),
                     set_={
                         self._model.value: insert_stmt.excluded.value,
                         self._model.updated_at: sa.func.now(),
@@ -79,3 +81,20 @@ class CapabilityPostgresRepository(CommonPostgresRepository, model=CapabilityORM
                         created.append(_ulid)
 
         return UpsertResult(created, updated)
+
+    @property
+    def warehouses(self) -> Select[CapabilityORM]:
+        from center.enums import Role
+        cap2 = aliased(self._model)
+        stmt = sa.select(
+            self._model,
+        ).join(
+            cap2,
+            sa.and_(
+                self._model.organization_id == cap2.organization_id,
+                self._model.product_id == cap2.product_id,
+                self._model.role == Role.PRODUCER,
+                cap2.role == Role.CONSUMER,
+            )
+        )
+        return stmt

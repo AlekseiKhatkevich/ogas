@@ -89,3 +89,57 @@ async def test_no_update_with_same_value(capability_in_db, repo):
         capability_in_db.id,
         where=model.updated_at.is_not_distinct_from(None),
     )
+
+
+async def test_warehouses_positive(
+    repo,
+    organization_in_db,
+    product_in_db,
+    capability_factory,
+    save_in_db,
+    test_db,
+):
+    cap_prod = await save_in_db(
+        capability_factory,
+        organization=organization_in_db,
+        product=product_in_db,
+        role=Role.PRODUCER,
+    )
+    await save_in_db(
+        capability_factory,
+        organization=organization_in_db,
+        product=product_in_db,
+        role=Role.CONSUMER,
+    )
+
+    async with test_db.async_session as session:
+        warehouse = await session.scalar(repo.warehouses)
+
+    assert warehouse == cap_prod
+
+
+# noinspection PyArgumentList
+async def test_warehouses_negative(
+    repo,
+    organization_in_db,
+    product_in_db,
+    capability_factory,
+    save_in_db,
+    test_db,
+):
+    await save_in_db(
+        capability_factory,
+        organization=organization_in_db,
+        product=product_in_db,
+        role=Role.PRODUCER,
+    )
+    await save_in_db(
+        capability_factory,
+        product=product_in_db,
+        role=Role.CONSUMER,
+    )
+
+    async with test_db.async_session as session:
+        warehouse = await session.scalar(repo.warehouses)
+
+    assert warehouse is None
