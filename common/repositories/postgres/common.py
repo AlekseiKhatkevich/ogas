@@ -1,7 +1,7 @@
 import datetime
 from abc import ABC
 from dataclasses import dataclass
-from typing import Any, ClassVar, TYPE_CHECKING
+from typing import Any, ClassVar, Optional, TYPE_CHECKING
 
 import sqlalchemy as sa
 import ulid
@@ -19,7 +19,23 @@ __all__ = (
     'CommonPostgresRepository',
     'UpsertResult',
     'InfoForSchedule',
+    'InfoForPlanning',
 )
+
+
+@dataclass
+class InfoForPlanning:
+    product_id: ulid.ULID
+    to_produce: float
+    fact_time: datetime.datetime
+    producer_id: ulid.ULID | None
+    capability: float | None
+    capability_interval: Optional['Period']
+    is_warehouse: bool
+
+    @property
+    def no_producer(self) -> bool:
+        return self.producer_id is None
 
 
 @dataclass
