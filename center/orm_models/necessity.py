@@ -48,6 +48,13 @@ class NecessityORM(BaseTimescaleORMMixin, Base):
     product: Mapped['ProductORM'] = relationship(
         passive_deletes=True,
     )
+    capabilities: Mapped[list['CapabilityORM']] = relationship(
+        'CapabilityORM',
+        primaryjoin='NecessityORM.product_id == CapabilityORM.product_id',
+        foreign_keys=product_id,
+        viewonly=True,
+        uselist=True,
+    )
 
     __mapper_args__ = {
         'primary_key': ['product_id', 'created_at', ],
