@@ -153,6 +153,15 @@ wheels = [
 ]
 
 [[package]]
+name = "asyncstdlib"
+version = "3.13.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/50/e1/72e388631c85233a2fd890d024fc20a8a9961dbba8614d78266636218f1f/asyncstdlib-3.13.1.tar.gz", hash = "sha256:f47564b9a3566f8f9172631d88c75fe074b0ce2127963b7265d310df9aeed03a", size = 49752, upload-time = "2025-03-09T07:52:51.587Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b9/4a/c86c045bc7bb0244044935ba80c83998f1fdee4f4cef64c6b078e043b0e6/asyncstdlib-3.13.1-py3-none-any.whl", hash = "sha256:a64da68176af1da8c699026cad98f70b184f82b4cb39739e0b9701a2a7541cf9", size = 43993, upload-time = "2025-03-09T07:52:50.108Z" },
+]
+
+[[package]]
 name = "attrs"
 version = "25.3.0"
 source = { registry = "https://pypi.org/simple" }
@@ -792,6 +801,7 @@ dependencies = [
     { name = "alembic-postgresql-enum" },
     { name = "alembic-utils" },
     { name = "asyncpg" },
+    { name = "asyncstdlib" },
     { name = "dishka" },
     { name = "faststream", extra = ["cli", "kafka", "otel", "prometheus"] },
     { name = "more-itertools" },
@@ -820,6 +830,7 @@ requires-dist = [
     { name = "alembic-postgresql-enum", specifier = ">=1.7.0" },
     { name = "alembic-utils", specifier = ">=0.8.8" },
     { name = "asyncpg", specifier = ">=0.30.0" },
+    { name = "asyncstdlib", specifier = ">=3.13.1" },
     { name = "dishka", specifier = ">=1.6.0" },
     { name = "faststream", extras = ["cli", "kafka", "otel", "prometheus"], specifier = ">=0.5.40" },
     { name = "more-itertools", specifier = ">=10.7.0" },

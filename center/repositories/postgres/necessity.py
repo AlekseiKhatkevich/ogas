@@ -21,6 +21,7 @@ class NecessityPostgresRepository(CommonPostgresRepository, model=NecessityORM):
         warehouses_cte = CapabilityPostgresRepository().warehouses.cte()
         warehouses = aliased(CapabilityORM, warehouses_cte, name='warehouses')
 
+        from center.enums import Period
         stmt = sa.select(
             self._model.product_id,
             self._model.to_produce,
@@ -50,7 +51,14 @@ class NecessityPostgresRepository(CommonPostgresRepository, model=NecessityORM):
         ).order_by(
             self._model.product_id,
             CapabilityORM.organization_id,
-            CapabilityORM.period,
+            sa.case(
+                (CapabilityORM.period == Period.DAY, 2),
+                (CapabilityORM.period == Period.WEEK, 3),
+                (CapabilityORM.period == Period.MONTH, 4),
+                (CapabilityORM.period == Period.QUARTER, 5),
+                (CapabilityORM.period == Period.YEAR, 6),
+                else_=7,
+            ),
             self._model.created_at.desc(),
         )
 
