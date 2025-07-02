@@ -34,8 +34,5 @@ class ManufacturingPlanUseCase(AbstractUseCase):
         common_cap_per_hour = math.fsum(r.capability_per_hour for r in with_real_producers)
         for info in with_real_producers:
             info.common_capacity_per_hour = common_cap_per_hour
-        1+1
-
-# round
 
 
