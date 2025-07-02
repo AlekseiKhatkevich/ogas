@@ -1,7 +1,11 @@
+import math
+
 from asyncstdlib import groupby
 
 from center.repositories.postgres import NecessityPostgresRepository
 from common.usecases.common import AbstractUseCase
+from dataclasses import dataclass
+
 
 
 class ManufacturingPlanUseCase(AbstractUseCase):
@@ -26,21 +30,12 @@ class ManufacturingPlanUseCase(AbstractUseCase):
         if not with_real_producers:
             return
                     # все склады и импорт -> импорт
-        record, *_ = with_real_producers
-        to_produce = record.to_produce
-        fact_time = record.fact_time
 
-        cap_per_hour_each = {
-            r.producer_id: r.capability / r.capability_interval.to_hours
-            for r in with_real_producers
-        }
-        common_cap_per_hour = sum(cap_per_hour_each.values())
-        # hours_to_produce = to_produce / common_cap_per_hour
-        share_each = {
-            producer_id: cap_per_hour / common_cap_per_hour
-            for producer_id, cap_per_hour in cap_per_hour_each.items()
-        }
-        plan_each = {product_id: to_produce * share for product_id, share in share_each.items()}
+        common_cap_per_hour = math.fsum(r.capability_per_hour for r in with_real_producers)
+        for info in with_real_producers:
+            info.common_capacity_per_hour = common_cap_per_hour
+        1+1
+
 # round
 
 

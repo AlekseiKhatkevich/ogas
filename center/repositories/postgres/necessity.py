@@ -5,6 +5,7 @@ from sqlalchemy.orm import aliased
 
 from center.enums import Role
 from center.orm_models import CapabilityORM, NecessityORM
+from common.orm_models import ProductORM
 from common.repositories.postgres import CommonPostgresRepository, InfoForPlanning
 import sqlalchemy as sa
 
@@ -32,7 +33,10 @@ class NecessityPostgresRepository(CommonPostgresRepository, model=NecessityORM):
             sa.case(
                 (warehouses.organization_id.is_not(None), sa.true()),
                 else_=sa.false(),
-            ).label('is_warehouse')
+            ).label('is_warehouse'),
+            ProductORM.unit.label('product_unit'),
+        ).join(
+            self._model.product,
         ).outerjoin(
             self._model.capabilities.and_(
                 CapabilityORM.role == Role.PRODUCER,

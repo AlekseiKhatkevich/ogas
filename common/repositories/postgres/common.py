@@ -8,11 +8,13 @@ import ulid
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.sql._typing import ColumnExpressionArgument
 
+from common.enums.product import ProductUnit
 from common.resources.database.postgres.database import Database, db
 
 if TYPE_CHECKING:
     from common.resources.database.postgres.alchemy_related import Base
     from center.enums import Period, Role
+
 
 __all__ = (
     'AbstractPostgresRepository',
@@ -32,6 +34,22 @@ class InfoForPlanning:
     capability: float | None
     capability_interval: Optional['Period']
     is_warehouse: bool
+    product_unit: ProductUnit
+    common_capacity_per_hour: float | None = None
+
+    @property
+    def plan(self) -> float | int:
+        raw_plan = self.to_produce * self.share
+        if self.product_unit != ProductUnit.IN_BULK:
+            plan = round(raw_plan)
+        else:
+            plan = raw_plan
+
+        return plan
+
+    @property
+    def share(self) -> float:
+        return self.capability_per_hour / self.common_capacity_per_hour
 
     @property
     def no_producer(self) -> bool:
@@ -40,6 +58,10 @@ class InfoForPlanning:
     @property
     def can_not_produce(self) -> bool:
         return self.no_producer or self.is_warehouse
+
+    @property
+    def capability_per_hour(self) -> float:
+        return self.capability / self.capability_interval.to_hours
 
 
 @dataclass
