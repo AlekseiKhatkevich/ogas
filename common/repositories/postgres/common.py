@@ -37,6 +37,10 @@ class InfoForPlanning:
     def no_producer(self) -> bool:
         return self.producer_id is None
 
+    @property
+    def can_not_produce(self) -> bool:
+        return self.no_producer or self.is_warehouse
+
 
 @dataclass
 class InfoForSchedule:
