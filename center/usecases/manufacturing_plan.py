@@ -1,9 +1,13 @@
 import asyncio
 import math
+import sys
 from typing import AsyncIterator, TYPE_CHECKING
+from weakref import WeakKeyDictionary
 
+from faststream_serve import broker
 import ulid
 from asyncstdlib import groupby
+from pydantic_core import to_jsonable_python
 
 from center.orm_models import PlanORM
 from center.repositories.postgres import NecessityPostgresRepository, PlanPostgresRepository
@@ -15,6 +19,9 @@ if TYPE_CHECKING:
 
 
 class ManufacturingPlanUseCase(AbstractUseCase):
+    """
+    https://stackoverflow.com/questions/66724841/using-a-semaphore-with-asyncio-in-python
+    """
     # noinspection PyCallingNonCallable
     def __init__(
             self,
@@ -24,39 +31,47 @@ class ManufacturingPlanUseCase(AbstractUseCase):
     ) -> None:
         self.plan_repository = plan_repository()
         self.necessity_repository = necessity_repository()
-        self._background_tasks = set()
+        self._background_tasks = WeakKeyDictionary()
         self.semaphore = asyncio.Semaphore(insert_concurrency)
 
-    async def save_in_db(self, plan: list[PlanORM]) -> None:
+    async def save_in_db(self, plan: list[PlanORM], prodict_id: ulid.ULID) -> None:
         try:
             await self.plan_repository.add_all(plan)
         finally:
             self.semaphore.release()
+            #  _background_tasks чиститься за счет слабых ссылок
+            #  (prodict_id нужен, хоть и не используется напрямую)
 
-    async def send_to_kafka(self, plan: list[PlanORM]) -> None:
-        topic_prefix = 'plan_out_'
-        for individual_plan in plan:
-            if (p_id := individual_plan.product_id) is None:
-                topic = topic_prefix + 'import'
-            else:
-                topic = topic_prefix + str(p_id)
-            message = individual_plan.to_dict(exclude=['created_at', ])
+    # async def send_to_kafka(self, plan: list[PlanORM]) -> None:
+    #     topic_prefix = 'plan_out_'
+    #     for individual_plan in plan:
+    #         if (p_id := individual_plan.product_id) is None:
+    #             topic = topic_prefix + 'import'
+    #         else:
+    #             topic = topic_prefix + str(p_id)
+    #         message = to_jsonable_python(
+    #             individual_plan.to_dict(exclude=['created_at', ]),
+    #             serialize_unknown=True,
+    #         )
+    #         await broker.connect()
+    #         await broker.publish(message, topic)
 
     async def execute(self) -> None:
         async for prodict_id, necessity_iter in groupby(
-            self.necessity_repository.get_necessities_for_planing(),
-            key=lambda n: n.product_id,
+                self.necessity_repository.get_necessities_for_planing(),
+                key=lambda n: n.product_id,
         ):
             await self.semaphore.acquire()
             plan = await self.calculate_plan(prodict_id, necessity_iter)
-            plan_task = asyncio.create_task(self.save_in_db(plan))
-            plan_task.add_done_callback(self._background_tasks.discard)
+            plan_task = asyncio.create_task(self.save_in_db(plan, prodict_id))
+            self._background_tasks[prodict_id] = plan_task
 
-        for coro in asyncio.as_completed(self._background_tasks, timeout=60 * 1):
+        for coro in asyncio.as_completed(self._background_tasks.values()):
             try:
                 await coro
             except Exception as exc:
                 print(f'We have an exception {exc}! Surprise motherfucker!!')
+
 
     @staticmethod
     async def calculate_plan(
@@ -71,7 +86,7 @@ class ManufacturingPlanUseCase(AbstractUseCase):
                 value=necessities[0].to_produce,
                 fact_time=necessities[0].fact_time,
             )
-            return [instance,]
+            return [instance, ]
 
         common_cap_per_hour = math.fsum(r.capability_per_hour for r in with_real_producers)
         for info in with_real_producers:
