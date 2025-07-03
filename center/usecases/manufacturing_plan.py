@@ -34,7 +34,13 @@ class ManufacturingPlanUseCase(AbstractUseCase):
             self.semaphore.release()
 
     async def send_to_kafka(self, plan: list[PlanORM]) -> None:
-        pass
+        topic_prefix = 'plan_out_'
+        for individual_plan in plan:
+            if (p_id := individual_plan.product_id) is None:
+                topic = topic_prefix + 'import'
+            else:
+                topic = topic_prefix + str(p_id)
+            message = individual_plan.to_dict(exclude=['created_at', ])
 
     async def execute(self) -> None:
         async for prodict_id, necessity_iter in groupby(

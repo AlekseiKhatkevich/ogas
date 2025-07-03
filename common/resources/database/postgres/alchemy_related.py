@@ -1,6 +1,6 @@
 import datetime
 import enum
-import typing
+from typing import Any, Container, Iterable, Literal
 
 import ulid
 from sqlalchemy import MetaData, TEXT, func, inspect
@@ -37,7 +37,7 @@ class Base(AsyncAttrs, DeclarativeBase):
         ulid.ULID: ULID_TYPE_FIELD,  # pgx_ulid
         list[str]: MutableList.as_mutable(postgresql.ARRAY(TEXT)),
         enum.Enum: postgresql.ENUM(validate_strings=True),
-        typing.Literal: postgresql.ENUM(validate_strings=True),
+        Literal: postgresql.ENUM(validate_strings=True),
     }
 
     # noinspection PyNestedDecorators
@@ -52,6 +52,16 @@ class Base(AsyncAttrs, DeclarativeBase):
         return self.pk_values == other.pk_values
 
     @property
-    def pk_values(self) -> list[typing.Any]:
+    def pk_values(self) -> list[Any]:
         primary_key = inspect(self.__class__).primary_key
         return [getattr(self, key.name) for key in primary_key]
+
+    def to_dict(self, include: Iterable[str] | None = None, exclude: Iterable[str] | None = None) -> dict[str, Any]:
+        data = {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+        if include:
+            return {key: data[key] for key in include if key in data}
+        if exclude:
+            return {key: value for key, value in data.items() if key not in exclude}
+
+        return data
