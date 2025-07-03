@@ -24,25 +24,33 @@ class ManufacturingPlanUseCase(AbstractUseCase):
     ) -> None:
         self.plan_repository = plan_repository()
         self.necessity_repository = necessity_repository()
-        self.insert_concurrency = insert_concurrency
         self._background_tasks = set()
-        self.sem = asyncio.Semaphore(self.insert_concurrency)
+        self.semaphore = asyncio.Semaphore(insert_concurrency)
 
-    def _cleanup_after_insert(self, future):
-        self._background_tasks.discard(future)
-        self.sem.release()
+    async def save_in_db(self, plan: list[PlanORM]) -> None:
+        try:
+            await self.plan_repository.add_all(plan)
+        finally:
+            self.semaphore.release()
+
+    async def send_to_kafka(self, plan: list[PlanORM]) -> None:
+        pass
 
     async def execute(self) -> None:
         async for prodict_id, necessity_iter in groupby(
             self.necessity_repository.get_necessities_for_planing(),
             key=lambda n: n.product_id,
         ):
+            await self.semaphore.acquire()
             plan = await self.calculate_plan(prodict_id, necessity_iter)
-            await self.sem.acquire()
-            plan_insert_task = asyncio.create_task(self.plan_repository.add_all(plan))
-            self._background_tasks.add(plan_insert_task)
-            plan_insert_task.add_done_callback(self._cleanup_after_insert)
-            await plan_insert_task
+            plan_task = asyncio.create_task(self.save_in_db(plan))
+            plan_task.add_done_callback(self._background_tasks.discard)
+
+        for coro in asyncio.as_completed(self._background_tasks, timeout=60 * 1):
+            try:
+                await coro
+            except Exception as exc:
+                print(f'We have an exception {exc}! Surprise motherfucker!!')
 
     @staticmethod
     async def calculate_plan(
@@ -71,5 +79,3 @@ class ManufacturingPlanUseCase(AbstractUseCase):
                 fact_time=info.fact_time,
             ) for info in with_real_producers
         ]
-
-
