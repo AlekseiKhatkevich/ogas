@@ -11,7 +11,7 @@ class ULID(UserDefinedType):
 
     def bind_processor(self, dialect):
         def process(value):
-            return str(value)
+            return str(value) if value is not None else value
 
         return process
 
