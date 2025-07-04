@@ -47,6 +47,8 @@ class NecessityORM(BaseTimescaleORMMixin, Base):
     )
     product: Mapped['ProductORM'] = relationship(
         passive_deletes=True,
+        innerjoin=True,
+        lazy='joined',
     )
     capabilities: Mapped[list['CapabilityORM']] = relationship(
         'CapabilityORM',

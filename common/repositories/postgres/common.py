@@ -24,7 +24,7 @@ __all__ = (
     'InfoForPlanning',
 )
 
-
+#  todo тесты на этот функционал
 @dataclass
 class InfoForPlanning:
     product_id: ulid.ULID

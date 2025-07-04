@@ -29,7 +29,7 @@ class OrganizationFactory(CustomFactory[OrganizationORM]):
 class CapabilityFactory(CustomFactory[CapabilityORM]):
     __set_relationships__ = True
     __allow_none_optionals__ = False
-    value: int = Use(CustomFactory.__faker__.random_int, min=0)
+    value: int = Use(CustomFactory.__faker__.random_int, min=1)
 
 
 class OperativeDataFactory(CustomFactory[OperativeDataORM]):

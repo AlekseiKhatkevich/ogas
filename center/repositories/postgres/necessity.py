@@ -18,11 +18,11 @@ __all__ = (
 class NecessityPostgresRepository(CommonPostgresRepository, model=NecessityORM):
 
     async def get_necessities_for_planing(self) -> AsyncGenerator[InfoForPlanning]:
+        from center.enums import Period
         from center.repositories.postgres import CapabilityPostgresRepository
         warehouses_cte = CapabilityPostgresRepository().warehouses.cte()
         warehouses = aliased(CapabilityORM, warehouses_cte, name='warehouses')
 
-        from center.enums import Period
         stmt = sa.select(
             self._model.product_id,
             self._model.to_produce,
