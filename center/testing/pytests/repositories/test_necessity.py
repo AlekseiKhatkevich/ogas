@@ -138,4 +138,38 @@ async def test_test_get_necessities_for_planing_no_duplicates_by_period(
         assert e.capability_interval == Period.DAY
 
 
-async def test_test_get_necessities_for_planing_sorting
+@pytest.mark.parametrize(
+    ('periods', 'expected',),
+    [
+        [(Period.HOUR, Period.DAY, Period.WEEK, Period.MONTH, Period.QUARTER, Period.YEAR), Period.DAY],
+        [(Period.HOUR, Period.WEEK, Period.MONTH, Period.QUARTER, Period.YEAR), Period.WEEK],
+        [(Period.HOUR, Period.MONTH, Period.QUARTER, Period.YEAR), Period.MONTH],
+        [(Period.HOUR, Period.QUARTER, Period.YEAR), Period.QUARTER],
+        [(Period.HOUR, Period.YEAR), Period.YEAR],
+        [(Period.HOUR,), Period.HOUR],
+    ]
+)
+async def test_test_get_necessities_for_planing_sorting(
+        periods,
+        expected,
+        necessity_repo,
+        save_in_db_session,
+        capability_factory,
+        necessity_data_in,
+        organization_in_db,
+):
+    capabilities = []
+    for p in periods:
+        capabilities.append(capability_factory.build(
+            role=Role.PRODUCER,
+            product=necessity_data_in.product,
+            organization=organization_in_db,
+            period=p,
+        ))
+    await save_in_db_session(capabilities)
+
+    entries = [e async for e in necessity_repo.get_necessities_for_planing()]
+
+    assert len(entries) == 1
+    entry = entries[0]
+    assert entry.capability_interval == expected
