@@ -1,10 +1,8 @@
 import asyncio
 import math
-import sys
 from typing import AsyncIterator, TYPE_CHECKING
 from weakref import WeakKeyDictionary
 
-from faststream_serve import broker
 import ulid
 from asyncstdlib import groupby
 from pydantic_core import to_jsonable_python
@@ -13,6 +11,7 @@ from center.orm_models import PlanORM
 from center.repositories.postgres import NecessityPostgresRepository, PlanPostgresRepository
 from common.repositories.postgres import InfoForPlanning
 from common.usecases.common import AbstractUseCase
+from faststream_serve import broker
 
 if TYPE_CHECKING:
     from common.repositories.postgres import InfoForPlanning
@@ -28,33 +27,44 @@ class ManufacturingPlanUseCase(AbstractUseCase):
             plan_repository: PlanPostgresRepository = PlanPostgresRepository,
             necessity_repository: NecessityPostgresRepository = NecessityPostgresRepository,
             insert_concurrency: int = 10,
+            insert_and_sent_timeout_sec: int = 5
     ) -> None:
         self.plan_repository = plan_repository()
         self.necessity_repository = necessity_repository()
         self._background_tasks = WeakKeyDictionary()
         self.semaphore = asyncio.Semaphore(insert_concurrency)
+        self.insert_and_sent_timeout_sec = insert_and_sent_timeout_sec
+        self._broker = broker
 
     async def save_in_db(self, plan: list[PlanORM], prodict_id: ulid.ULID) -> None:
         try:
-            await self.plan_repository.add_all(plan)
+            async with asyncio.timeout(self.insert_and_sent_timeout_sec), asyncio.TaskGroup() as tg:
+                tg.create_task(self.plan_repository.add_all(plan))
+                tg.create_task(self.send_to_kafka(plan))
         finally:
             self.semaphore.release()
             #  _background_tasks чиститься за счет слабых ссылок
             #  (prodict_id нужен, хоть и не используется напрямую)
 
-    # async def send_to_kafka(self, plan: list[PlanORM]) -> None:
-    #     topic_prefix = 'plan_out_'
-    #     for individual_plan in plan:
-    #         if (p_id := individual_plan.product_id) is None:
-    #             topic = topic_prefix + 'import'
-    #         else:
-    #             topic = topic_prefix + str(p_id)
-    #         message = to_jsonable_python(
-    #             individual_plan.to_dict(exclude=['created_at', ]),
-    #             serialize_unknown=True,
-    #         )
-    #         await broker.connect()
-    #         await broker.publish(message, topic)
+    async def get_broker(self):
+        # noinspection PyProtectedMember
+        if self._broker._connection is None:
+            await self._broker.connect()
+        return self._broker
+
+    async def send_to_kafka(self, plan: list[PlanORM]) -> None:
+        topic_prefix = 'plan_out_'
+        for individual_plan in plan:
+            if (p_id := individual_plan.product_id) is None:
+                topic = topic_prefix + 'import'
+            else:
+                topic = topic_prefix + str(p_id)
+            message = to_jsonable_python(
+                individual_plan.to_dict(exclude=['created_at', ]),
+                serialize_unknown=True,
+            )
+            broker_inst = await self.get_broker()
+            await broker_inst.publish(message, topic)
 
     async def execute(self) -> None:
         async for prodict_id, necessity_iter in groupby(
@@ -71,7 +81,6 @@ class ManufacturingPlanUseCase(AbstractUseCase):
                 await coro
             except Exception as exc:
                 print(f'We have an exception {exc}! Surprise motherfucker!!')
-
 
     @staticmethod
     async def calculate_plan(
