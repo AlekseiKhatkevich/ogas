@@ -160,12 +160,14 @@ async def test_test_get_necessities_for_planing_sorting(
 ):
     capabilities = []
     for p in periods:
-        capabilities.append(capability_factory.build(
-            role=Role.PRODUCER,
-            product=necessity_data_in.product,
-            organization=organization_in_db,
-            period=p,
-        ))
+        capabilities.append(
+            capability_factory.build(
+                role=Role.PRODUCER,
+                product=necessity_data_in.product,
+                organization=organization_in_db,
+                period=p,
+            )
+        )
     await save_in_db_session(capabilities)
 
     entries = [e async for e in necessity_repo.get_necessities_for_planing()]

@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 
 pytest_plugins = [
     'common.testing.fixtures.orm_models',
+    'common.testing.fixtures.dataclasses',
     'common.testing.fixtures.repositories',
     'common.testing.fixtures.faststream',
     'center.testing.fixtures.orm_models',
@@ -115,4 +116,3 @@ def event_loop() -> Generator[AbstractEventLoop]:
 
 def pytest_sessionfinish(session: 'Session', exitstatus: int) -> None:
     asyncio.get_event_loop().close()
-

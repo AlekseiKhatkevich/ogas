@@ -1,20 +1,19 @@
 import datetime
 from abc import ABC
 from dataclasses import dataclass
-from typing import Any, ClassVar, Optional, TYPE_CHECKING
+from typing import Any, ClassVar, TYPE_CHECKING
 
 import sqlalchemy as sa
 import ulid
 from sqlalchemy.dialects import postgresql as pg
 from sqlalchemy.sql._typing import ColumnExpressionArgument
 
+from center.enums import Period, Role
 from common.enums.product import ProductUnit
 from common.resources.database.postgres.database import Database, db
 
 if TYPE_CHECKING:
     from common.resources.database.postgres.alchemy_related import Base
-    from center.enums import Period, Role
-
 
 __all__ = (
     'AbstractPostgresRepository',
@@ -24,7 +23,7 @@ __all__ = (
     'InfoForPlanning',
 )
 
-#  todo тесты на этот функционал
+
 @dataclass
 class InfoForPlanning:
     product_id: ulid.ULID
@@ -32,7 +31,7 @@ class InfoForPlanning:
     fact_time: datetime.datetime
     producer_id: ulid.ULID | None
     capability: float | None
-    capability_interval: Optional['Period']
+    capability_interval: Period | None
     is_warehouse: bool
     product_unit: ProductUnit
     common_capacity_per_hour: float | None = None
