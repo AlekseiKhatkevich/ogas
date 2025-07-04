@@ -5,16 +5,17 @@ from weakref import WeakKeyDictionary
 
 import ulid
 from asyncstdlib import groupby
+
 from pydantic_core import to_jsonable_python
 
 from center.orm_models import PlanORM
 from center.repositories.postgres import NecessityPostgresRepository, PlanPostgresRepository
-from common.repositories.postgres import InfoForPlanning
 from common.usecases.common import AbstractUseCase
 from faststream_serve import broker
 
 if TYPE_CHECKING:
     from common.repositories.postgres import InfoForPlanning
+    from faststream.kafka import KafkaBroker
 
 
 class ManufacturingPlanUseCase(AbstractUseCase):
@@ -46,7 +47,7 @@ class ManufacturingPlanUseCase(AbstractUseCase):
             #  _background_tasks чиститься за счет слабых ссылок
             #  (prodict_id нужен, хоть и не используется напрямую)
 
-    async def get_broker(self):
+    async def get_broker(self) -> 'KafkaBroker':
         # noinspection PyProtectedMember
         if self._broker._connection is None:
             await self._broker.connect()
@@ -73,8 +74,8 @@ class ManufacturingPlanUseCase(AbstractUseCase):
         ):
             await self.semaphore.acquire()
             plan = await self.calculate_plan(prodict_id, necessity_iter)
-            plan_task = asyncio.create_task(self.save_in_db(plan, prodict_id))
-            self._background_tasks[prodict_id] = plan_task
+            write_plan_and_send_to_kafka_task = asyncio.create_task(self.save_in_db(plan, prodict_id))
+            self._background_tasks[prodict_id] = write_plan_and_send_to_kafka_task
 
         for coro in asyncio.as_completed(self._background_tasks.values()):
             try:
