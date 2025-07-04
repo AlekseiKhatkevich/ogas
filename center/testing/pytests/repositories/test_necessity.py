@@ -25,24 +25,6 @@ async def extra_capabilities(
 
 # noinspection PyArgumentList
 @pytest.fixture
-async def necessity_full_monty(
-        necessity_data_in,
-        capability_factory,
-        save_in_db_batch,
-):
-    capabilities = await save_in_db_batch(
-        capability_factory,
-        batch_size=2,
-        role=Role.PRODUCER,
-        product=necessity_data_in.product,
-        period=Period.DAY,
-    )
-
-    return necessity_data_in, capabilities
-
-
-# noinspection PyArgumentList
-@pytest.fixture
 async def capability_duplicate(
         necessity_full_monty,
         save_in_db,

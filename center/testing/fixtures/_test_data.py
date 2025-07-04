@@ -44,3 +44,21 @@ async def base_case_data_for_get_info_for_schedule(
         role=Role.CONSUMER,
     )
     return product_in_db, organization_prod, organization_cons, os_prod, os_cons, cap_prod, cap_cons
+
+
+# noinspection PyArgumentList
+@pytest.fixture
+async def necessity_full_monty(
+        necessity_data_in,
+        capability_factory,
+        save_in_db_batch,
+):
+    capabilities = await save_in_db_batch(
+        capability_factory,
+        batch_size=2,
+        role=Role.PRODUCER,
+        product=necessity_data_in.product,
+        period=Period.DAY,
+    )
+
+    return necessity_data_in, capabilities

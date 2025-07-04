@@ -76,9 +76,8 @@ async def test_calculate_plan_no_real_producers(
         info_for_planing_iter,
 ):
     product_id = necessity_data_in.product_id
-    info_for_planing_iter_backup, info_for_planing_iter_curr = tee(info_for_planing_iter(is_warehouse=True), 2)
 
-    plans = await use_case.calculate_plan(product_id, info_for_planing_iter_curr)
+    plans = await use_case.calculate_plan(product_id, info_for_planing_iter(is_warehouse=True))
 
     assert len(plans) == 1
     plan = only(plans)
@@ -87,3 +86,16 @@ async def test_calculate_plan_no_real_producers(
     assert plan.value == necessity_data_in.to_produce
     assert plan.fact_time == necessity_data_in.created_at
 
+
+async def test_calculate_plan_execute(
+        use_case,
+        necessity_full_monty,
+        plan_repo,
+        kafka_broker,
+):
+    necessity_in_db, capabilities = necessity_full_monty
+
+    await use_case.execute()
+
+    assert await plan_repo.count() == len(capabilities)
+# todo monkeypatch broker

@@ -136,7 +136,7 @@ class CommonPostgresRepository[M:'Base'](AbstractPostgresRepository):
             is_active: bool = True,
             where: ColumnExpressionArgument | None = None,
     ) -> int:
-        query = sa.select(sa.func.count(sa.literal('*')))
+        query = sa.select(sa.func.count()).select_from(self._model)
         if is_active and self.has_is_active:
             query = query.where(self._model.is_active == sa.true())
         if where is not None:

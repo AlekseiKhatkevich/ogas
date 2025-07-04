@@ -6,6 +6,7 @@ from center.repositories.postgres import (
     OrganizationPostgresRepository,
     OrganizationStockPostgresRepository,
     NecessityPostgresRepository,
+    PlanPostgresRepository,
 )
 
 
@@ -32,3 +33,8 @@ def operative_data_repo() -> OperativeDataPostgresRepository:
 @pytest.fixture(scope='session')
 def organization_stock_repo() -> OrganizationStockPostgresRepository:
     return OrganizationStockPostgresRepository()
+
+
+@pytest.fixture(scope='session')
+def plan_repo() -> PlanPostgresRepository:
+    return PlanPostgresRepository()
