@@ -34,16 +34,25 @@ retry_on_db_failures = functools.partial(
 async def calculate_necessities() -> None:
     from center.usecases.operative_data import NecessityCalculationUseCase
     use_case = NecessityCalculationUseCase()
+    logger = get_run_logger()
+    logger.info('Calculating Necessity')
     async with concurrency("database", occupy=1, strict=True):
         await use_case.execute()
 
 
-@task
+@task(
+    retries=6,
+    retry_condition_fn=retry_on_db_failures,
+    retry_delay_seconds=60 * 5,
+    timeout_seconds=60 * 5,
+)
 async def calculate_manufacturing_plan() -> None:
+    from center.usecases.manufacturing_plan import ManufacturingPlanUseCase
+    use_case = ManufacturingPlanUseCase()
     logger = get_run_logger()
     logger.info('Calculating Manufacturing plan')
     async with concurrency("database", occupy=1, strict=True):
-        pass
+        await use_case.execute()
 
 
 @flow

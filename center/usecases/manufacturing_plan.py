@@ -61,7 +61,7 @@ class ManufacturingPlanUseCase(AbstractUseCase):
             else:
                 topic = topic_prefix + str(org_id)
             message = to_jsonable_python(
-                individual_plan.to_dict(exclude=['created_at', ]),
+                individual_plan.to_dict(exclude=['created_at', 'id', ]),
                 serialize_unknown=True,
             )
             broker_inst = await self.get_broker()

@@ -1,8 +1,9 @@
+from unittest.mock import AsyncMock
+
 import pytest
 from asyncstdlib import tee
 from more_itertools import only
-from unittest.mock import AsyncMock, MagicMock
-from center.enums import Role
+
 from center.orm_models import PlanORM
 from center.usecases.manufacturing_plan import ManufacturingPlanUseCase
 
