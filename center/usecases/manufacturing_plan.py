@@ -56,10 +56,10 @@ class ManufacturingPlanUseCase(AbstractUseCase):
     async def send_to_kafka(self, plan: list[PlanORM]) -> None:
         topic_prefix = 'plan_out_'
         for individual_plan in plan:
-            if (p_id := individual_plan.product_id) is None:
+            if (org_id := individual_plan.organization_id) is None:
                 topic = topic_prefix + 'import'
             else:
-                topic = topic_prefix + str(p_id)
+                topic = topic_prefix + str(org_id)
             message = to_jsonable_python(
                 individual_plan.to_dict(exclude=['created_at', ]),
                 serialize_unknown=True,

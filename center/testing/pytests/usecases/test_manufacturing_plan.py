@@ -1,7 +1,7 @@
 import pytest
 from asyncstdlib import tee
 from more_itertools import only
-
+from unittest.mock import AsyncMock, MagicMock
 from center.enums import Role
 from center.orm_models import PlanORM
 from center.usecases.manufacturing_plan import ManufacturingPlanUseCase
@@ -10,25 +10,6 @@ from center.usecases.manufacturing_plan import ManufacturingPlanUseCase
 @pytest.fixture
 def use_case():
     return ManufacturingPlanUseCase()
-
-
-@pytest.fixture
-async def necessities_iter(
-        necessity_data_in,
-        capability_factory,
-        save_in_db_batch,
-):
-    # noinspection PyArgumentList
-    async def _generator():
-        for capability in await save_in_db_batch(
-                capability_factory,
-                batch_size=5,
-                role=Role.PRODUCER,
-                product=necessity_data_in.product,
-        ):
-            yield capability
-
-    return _generator()
 
 
 @pytest.fixture
@@ -91,11 +72,27 @@ async def test_calculate_plan_execute(
         use_case,
         necessity_full_monty,
         plan_repo,
-        kafka_broker,
 ):
     necessity_in_db, capabilities = necessity_full_monty
+    use_case._broker.publish = AsyncMock()
 
     await use_case.execute()
 
     assert await plan_repo.count() == len(capabilities)
-# todo monkeypatch broker
+    assert use_case._broker.publish.call_count == len(capabilities)
+
+    call_1 = use_case._broker.publish.call_args_list[0]
+    call_2 = use_case._broker.publish.call_args_list[1]
+    assert call_1.args[-1] == f'plan_out_{capabilities[0].organization_id}'
+    assert call_2.args[-1] == f'plan_out_{capabilities[1].organization_id}'
+
+    assert call_1.args[0]['organization_id'] == capabilities[0].organization_id
+    assert call_2.args[0]['organization_id'] == capabilities[1].organization_id
+
+    assert call_1.args[0]['product_id'] == call_2.args[0]['product_id'] == capabilities[0].product_id
+
+    assert call_1.args[0]['value']
+    assert call_2.args[0]['value']
+
+    assert (call_1.args[0]['fact_time'] == call_2.args[0]['fact_time'] ==
+            necessity_in_db.created_at.isoformat().replace('+00:00', 'Z'))

@@ -1,6 +1,7 @@
+import asyncio
 import functools
 from typing import Callable
-
+from prefect.concurrency.asyncio import concurrency
 import asyncpg
 from prefect import flow, serve, task
 from prefect.logging import get_run_logger
@@ -33,13 +34,16 @@ retry_on_db_failures = functools.partial(
 async def calculate_necessities() -> None:
     from center.usecases.operative_data import NecessityCalculationUseCase
     use_case = NecessityCalculationUseCase()
-    await use_case.execute()
+    async with concurrency("database", occupy=1, strict=True):
+        await use_case.execute()
 
 
 @task
 async def calculate_manufacturing_plan() -> None:
     logger = get_run_logger()
     logger.info('Calculating Manufacturing plan')
+    async with concurrency("database", occupy=1, strict=True):
+        pass
 
 
 @flow
