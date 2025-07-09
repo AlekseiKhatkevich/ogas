@@ -2,7 +2,7 @@ import asyncio
 import os
 from typing import Callable, Never
 
-from faststream import Logger
+from faststream import Context, ContextRepo, Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
 from faststream.kafka.prometheus import KafkaPrometheusMiddleware
@@ -74,8 +74,16 @@ app = AsgiFastStream(
 
 
 @app.on_startup
-def start_prometheus_server() -> None:
-    start_http_server(8001, 'localhost')
+def start_prometheus_server(context: ContextRepo) -> None:
+    server, t = start_http_server(8001, 'localhost')
+    context.set_global('promet_srv_pair', (server, t, ))
+
+
+@app.on_shutdown
+def stop_prometheus_server(promet_srv_pair: tuple = Context()) -> None:
+    server, t = promet_srv_pair
+    server.shutdown()
+    t.join()
 
 
 @app.on_startup
