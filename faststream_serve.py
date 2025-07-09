@@ -5,24 +5,18 @@ from typing import Callable, Never
 from faststream import Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
-
 from faststream.kafka.prometheus import KafkaPrometheusMiddleware
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from prometheus_client import CollectorRegistry, make_asgi_app
+from prometheus_client import CollectorRegistry, make_asgi_app, start_http_server
 from prometheus_client.multiprocess import MultiProcessCollector
 
-from center.faststream import (
-    capabilities,
-    organization,
-    operative_data,
-    organization_stock,
-)
-from common.faststream import product
+from center.faststream import (capabilities, operative_data, organization, organization_stock)
 from common import settings
+from common.faststream import product
 
 __all__ = (
     'broker',
@@ -72,11 +66,16 @@ app = AsgiFastStream(
     asyncapi_path='/docs/asyncapi',
     asgi_routes=[
         ('/metrics', make_asgi_app(registry)),  # для prometheus faststream
-        ('/metrics_else', make_metrics_app()),
+        # ('/metrics_else', make_metrics_app()),
     ],
     title='OGAS',
     version='0.1.1',
 )
+
+
+@app.on_startup
+def start_prometheus_server() -> None:
+    start_http_server(8001, 'localhost')
 
 
 @app.on_startup
