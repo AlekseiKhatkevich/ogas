@@ -1,5 +1,6 @@
 import asyncio
-from typing import Never
+import os
+from typing import Callable, Never
 
 from faststream import Logger
 from faststream.asgi import AsgiFastStream
@@ -12,6 +13,7 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from prometheus_client import CollectorRegistry, make_asgi_app
+from prometheus_client.multiprocess import MultiProcessCollector
 
 from center.faststream import (
     capabilities,
@@ -49,11 +51,23 @@ broker.include_router(organization.router)
 broker.include_router(operative_data.router)
 broker.include_router(organization_stock.router)
 
+
+def make_metrics_app() -> Callable:
+    os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(settings.PROMETHEUS_MULTIPROC_DIR)
+    registry = CollectorRegistry()
+    MultiProcessCollector(registry)
+    return make_asgi_app(registry=registry)
+
+
+metrics_app = make_metrics_app()
+
+
 app = AsgiFastStream(
     broker,
     asyncapi_path='/docs/asyncapi',
     asgi_routes=[
-        ('/metrics', make_asgi_app(registry)),  # для prometheus
+        ('/metrics', make_asgi_app(registry)),  # для prometheus faststream
+        ('/metrics_else', metrics_app),
     ],
     title='OGAS',
     version='0.1.1',

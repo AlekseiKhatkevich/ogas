@@ -14,3 +14,9 @@ class CommonSettings(BaseSettings):
             default_factory=lambda: pathlib.Path.cwd(),
             exclude=True,
         )]
+    PROMETHEUS_MULTIPROC_DIR: Annotated[
+        pathlib.Path,
+        Field(
+            frozen=True,
+            description='Prometheus использует для работы в многопроцессорном режиме.',
+        )]

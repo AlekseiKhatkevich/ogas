@@ -74,3 +74,10 @@ kafka_ui_server_stop: ## Stop Kafka UI server
 
 faststream: ## Run faststream
 	uv run faststream run faststream_serve:app $(reload) --workers $(workers)
+
+prometheus_metrics_endpoint: ## Prometheus metric`s endpoint
+	xdg-open http://localhost:8000/metrics
+
+prometheus_ui: ## Prometheus UI browser
+	xdg-open http://localhost:9090/
+
