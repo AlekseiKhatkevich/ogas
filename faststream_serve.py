@@ -5,7 +5,7 @@ from typing import Callable, Never
 from faststream import Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
-from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
+
 from faststream.kafka.prometheus import KafkaPrometheusMiddleware
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
@@ -53,13 +53,18 @@ broker.include_router(organization_stock.router)
 
 
 def make_metrics_app() -> Callable:
-    os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(settings.PROMETHEUS_MULTIPROC_DIR)
+    """
+    https://prometheus.github.io/client_python/multiprocess/
+    """
+    path = settings.PROMETHEUS_MULTIPROC_DIR
+    path.mkdir(parents=True, exist_ok=True)
+    for file in path.iterdir():
+        if file.is_file():
+            file.unlink()
+    os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(path)
     registry = CollectorRegistry()
     MultiProcessCollector(registry)
     return make_asgi_app(registry=registry)
-
-
-metrics_app = make_metrics_app()
 
 
 app = AsgiFastStream(
@@ -67,7 +72,7 @@ app = AsgiFastStream(
     asyncapi_path='/docs/asyncapi',
     asgi_routes=[
         ('/metrics', make_asgi_app(registry)),  # для prometheus faststream
-        ('/metrics_else', metrics_app),
+        ('/metrics_else', make_metrics_app()),
     ],
     title='OGAS',
     version='0.1.1',
