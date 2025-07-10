@@ -36,7 +36,6 @@ broker = KafkaBroker(
     settings.KAFKA_DSN,
     middlewares=(
         KafkaPrometheusMiddleware(registry=registry),
-        # KafkaTelemetryMiddleware(tracer_provider=tracer_provider),
     )
 )
 broker.include_router(capabilities.router)
@@ -68,17 +67,20 @@ app = AsgiFastStream(
 
 
 @app.on_startup
-def make_prometheus_multiproc_dir():
+def make_prometheus_multiproc_dir(logger: Logger) -> None:
     path = settings.PROMETHEUS_MULTIPROC_DIR
+    logger.info(f'Creating a dir. for Prometheus multiproc mode  @ {path}')
     path.mkdir(parents=True, exist_ok=True)
     for file in path.iterdir():
         if file.is_file():
             file.unlink()
+            logger.info(f'Deleting file {file.name}.')
     os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(path)
 
 
 @app.on_startup
-def start_prometheus_server(context: ContextRepo) -> None:
+def start_prometheus_server(context: ContextRepo, logger: Logger) -> None:
+    logger.info(f'Starting Prometheus server on port {settings.PROMETHEUS_HTTP_SERVER_PORT}.')
     server, t = start_http_server(
         settings.PROMETHEUS_HTTP_SERVER_PORT,
         'localhost',
@@ -87,14 +89,15 @@ def start_prometheus_server(context: ContextRepo) -> None:
 
 
 @app.on_shutdown
-def stop_prometheus_server(promet_srv_pair: tuple = Context()) -> None:
+def stop_prometheus_server(logger: Logger, promet_srv_pair: tuple = Context()) -> None:
+    logger.info('Stopping Prometheus server.')
     server, t = promet_srv_pair
     server.shutdown()
     t.join()
 
 
 @app.on_startup
-async def sanity_check(logger: Logger):
+async def sanity_check(logger: Logger) -> None:
     from utils.common import get_all_subclasses
     from common.resources.interfaces import HealthCheckable
     from common.exceptions.external_services import ExternalServiceNotReady

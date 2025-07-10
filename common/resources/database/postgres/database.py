@@ -3,6 +3,7 @@ from typing import AsyncGenerator
 
 import pydantic_core
 import ulid
+from prometheus_client import Counter
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
@@ -15,7 +16,6 @@ from sqlalchemy.ext.asyncio import (
 
 from common import settings
 from common.resources.interfaces import HealthCheckable
-from prometheus_client import Counter
 
 
 class Database(HealthCheckable):
