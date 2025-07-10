@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from common.settings.common import CommonSettings
 from common.settings.kafka import KafkaSettings
 from common.settings.postgres import PostgresSettings
+from common.settings.prometheus import PrometheusSettings
 from common.settings.redis import RedisSettings
 
 __all__ = (
@@ -16,6 +17,7 @@ class GeneralSettings(
     PostgresSettings,
     KafkaSettings,
     CommonSettings,
+    PrometheusSettings,
     BaseSettings,
 ):
     model_config = SettingsConfigDict(
@@ -24,6 +26,7 @@ class GeneralSettings(
             'env/postgres.env',
             'env/kafka.env',
             'env/.env',
+            'env/prometheus.env',
         ),
         env_file_encoding='utf-8',
         extra='ignore',

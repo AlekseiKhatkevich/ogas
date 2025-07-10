@@ -74,19 +74,6 @@ app = AsgiFastStream(
 
 
 @app.on_startup
-def start_prometheus_server(context: ContextRepo) -> None:
-    server, t = start_http_server(8001, 'localhost')
-    context.set_global('promet_srv_pair', (server, t, ))
-
-
-@app.on_shutdown
-def stop_prometheus_server(promet_srv_pair: tuple = Context()) -> None:
-    server, t = promet_srv_pair
-    server.shutdown()
-    t.join()
-
-
-@app.on_startup
 async def sanity_check(logger: Logger):
     from utils.common import get_all_subclasses
     from common.resources.interfaces import HealthCheckable
@@ -103,6 +90,22 @@ async def sanity_check(logger: Logger):
             logger.info(
                 f'Service "{instance.service_name}" is ready.'
             )
+
+
+@app.on_startup
+def start_prometheus_server(context: ContextRepo) -> None:
+    server, t = start_http_server(
+        settings.PROMETHEUS_HTTP_SERVER_PORT,
+        'localhost',
+    )
+    context.set_global('promet_srv_pair', (server, t, ))
+
+
+@app.on_shutdown
+def stop_prometheus_server(promet_srv_pair: tuple = Context()) -> None:
+    server, t = promet_srv_pair
+    server.shutdown()
+    t.join()
 
 
 async def main() -> Never:
