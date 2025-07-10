@@ -3,7 +3,7 @@ from typing import AsyncGenerator
 
 import pydantic_core
 import ulid
-from prometheus_client import Counter
+from prometheus_client import Counter, Histogram
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import (
@@ -26,6 +26,14 @@ class Database(HealthCheckable):
     health_check_exc_cnt = Counter(
         'postgres_healthcheck_exceptions',
         'Счетчик ошибок связи с Postgres во время старта приложения.'
+    )
+    session_histogram = Histogram(
+        'db_request_latency_seconds',
+        'Description of histogram',
+        buckets=(
+            0.005, 0.007, 0.01, 0.015, 0.020, 0.025,
+            0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, float('inf'),
+        )
     )
 
     def __init__(self, connection: AsyncConnection | None = None, **kwargs) -> None:
@@ -71,7 +79,8 @@ class Database(HealthCheckable):
     @asynccontextmanager
     async def async_session(self) -> AsyncGenerator[AsyncSession]:
         async with aclosing(self.async_sessionmaker()) as async_session:
-            yield async_session
+            with self.session_histogram.time():
+                yield async_session
 
     async def check_health(self) -> bool:
         try:
