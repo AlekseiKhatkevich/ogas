@@ -15,12 +15,17 @@ from sqlalchemy.ext.asyncio import (
 
 from common import settings
 from common.resources.interfaces import HealthCheckable
+from prometheus_client import Counter
 
 
 class Database(HealthCheckable):
     _sessionmaker_kwargs = dict(
         expire_on_commit=False,
         join_transaction_mode='create_savepoint',
+    )
+    health_check_exc_cnt = Counter(
+        'postgres_healthcheck_exceptions',
+        'Счетчик ошибок связи с Postgres во время старта приложения.'
     )
 
     def __init__(self, connection: AsyncConnection | None = None, **kwargs) -> None:
@@ -70,9 +75,10 @@ class Database(HealthCheckable):
 
     async def check_health(self) -> bool:
         try:
-            async with self.async_session as session:
-                await session.execute(text('SELECT 1'))
-            return True
+            with self.health_check_exc_cnt.count_exceptions((SQLAlchemyError, OSError)):
+                async with self.async_session as session:
+                    await session.execute(text('SELECT 1'))
+                return True
         except (SQLAlchemyError, OSError) as e:
             print(f'Database health check failed: {e}')
             return False

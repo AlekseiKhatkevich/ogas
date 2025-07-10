@@ -50,12 +50,6 @@ def make_metrics_app() -> Callable:
     """
     https://prometheus.github.io/client_python/multiprocess/
     """
-    path = settings.PROMETHEUS_MULTIPROC_DIR
-    path.mkdir(parents=True, exist_ok=True)
-    for file in path.iterdir():
-        if file.is_file():
-            file.unlink()
-    os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(path)
     registry = CollectorRegistry()
     MultiProcessCollector(registry)
     return make_asgi_app(registry=registry)
@@ -71,6 +65,32 @@ app = AsgiFastStream(
     title='OGAS',
     version='0.1.1',
 )
+
+
+@app.on_startup
+def make_prometheus_multiproc_dir():
+    path = settings.PROMETHEUS_MULTIPROC_DIR
+    path.mkdir(parents=True, exist_ok=True)
+    for file in path.iterdir():
+        if file.is_file():
+            file.unlink()
+    os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(path)
+
+
+@app.on_startup
+def start_prometheus_server(context: ContextRepo) -> None:
+    server, t = start_http_server(
+        settings.PROMETHEUS_HTTP_SERVER_PORT,
+        'localhost',
+    )
+    context.set_global('promet_srv_pair', (server, t, ))
+
+
+@app.on_shutdown
+def stop_prometheus_server(promet_srv_pair: tuple = Context()) -> None:
+    server, t = promet_srv_pair
+    server.shutdown()
+    t.join()
 
 
 @app.on_startup
@@ -90,22 +110,6 @@ async def sanity_check(logger: Logger):
             logger.info(
                 f'Service "{instance.service_name}" is ready.'
             )
-
-
-@app.on_startup
-def start_prometheus_server(context: ContextRepo) -> None:
-    server, t = start_http_server(
-        settings.PROMETHEUS_HTTP_SERVER_PORT,
-        'localhost',
-    )
-    context.set_global('promet_srv_pair', (server, t, ))
-
-
-@app.on_shutdown
-def stop_prometheus_server(promet_srv_pair: tuple = Context()) -> None:
-    server, t = promet_srv_pair
-    server.shutdown()
-    t.join()
 
 
 async def main() -> Never:
