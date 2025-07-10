@@ -1,7 +1,7 @@
 import functools
 import operator
 from typing import Optional, TYPE_CHECKING
-
+from prometheus_client import Counter
 import cachetools
 import sqlalchemy as sa
 
@@ -23,14 +23,25 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
     maxsize = 1024
     cache = cachetools.TTLCache(maxsize=maxsize, ttl=ttl)
 
+    auth_attempt_c = Counter(
+        'auth_attempt',
+        'Попытка аутентификации организации.',
+    )
+    auth_attempt_cache_miss_c = Counter(
+        'auth_attempt_cache_miss',
+        'Аутентификация организации из БД.',
+    )
+
     async def get_organization_by_token(
             self,
             _id: Optional['ULID'],
             name: str | None,
             token: str,
     ) -> OrganizationORM | None:
+        self.auth_attempt_c.inc()
         organization = self.cache.get(_id) or self.cache.get(name)
         if organization is None:
+            self.auth_attempt_cache_miss_c.inc()
             async with self._db.async_session as session:
                 # noinspection PyTypeChecker
                 organization = await session.scalar(
@@ -48,8 +59,10 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
         auth_query_conditions = []
         for data in auth_data:
             if data.auth_pair is not None:
+                self.auth_attempt_c.inc()
                 data.organization = self.cache.get(data.identifier)
                 if data.organization is None:
+                    self.auth_attempt_cache_miss_c.inc()
                     token = data.auth_pair['token'].get_secret_value()
                     name = data.auth_pair.get('organization_name')
                     _id = data.auth_pair.get('organization_id')
