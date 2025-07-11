@@ -30,13 +30,13 @@ exporter = OTLPSpanExporter(endpoint='http://localhost:4317')
 processor = BatchSpanProcessor(exporter)
 tracer_provider.add_span_processor(processor)
 
-registry = CollectorRegistry()
+# registry = CollectorRegistry()
 
 broker = KafkaBroker(
     settings.KAFKA_DSN,
-    middlewares=(
-        KafkaPrometheusMiddleware(registry=registry),
-    )
+    # middlewares=(
+    #     KafkaPrometheusMiddleware(registry=registry),
+    # )
 )
 broker.include_router(capabilities.router)
 broker.include_router(product.router)
@@ -58,8 +58,8 @@ app = AsgiFastStream(
     broker,
     asyncapi_path='/docs/asyncapi',
     asgi_routes=[
-        ('/metrics', make_asgi_app(registry)),  # для prometheus faststream
-        # ('/metrics_else', make_metrics_app()),
+        # ('/metrics', make_asgi_app(registry)),  # для prometheus faststream
+        ('/metrics_else', make_asgi_app(disable_compression=True)),
     ],
     title='OGAS',
     version='0.1.1',
@@ -80,21 +80,22 @@ def make_prometheus_multiproc_dir(logger: Logger) -> None:
 
 @app.on_startup
 def start_prometheus_server(context: ContextRepo, logger: Logger) -> None:
-    logger.info(f'Starting Prometheus server on port {settings.PROMETHEUS_HTTP_SERVER_PORT}.')
-    server, t = start_http_server(
-        settings.PROMETHEUS_HTTP_SERVER_PORT,
-        'localhost',
-    )
-    context.set_global('promet_srv_pair', (server, t, ))
+    # logger.info(f'Starting Prometheus server on port {settings.PROMETHEUS_HTTP_SERVER_PORT}.')
+    # server, t = start_http_server(
+    #     settings.PROMETHEUS_HTTP_SERVER_PORT,
+    #     'localhost',
+    # )
+    # context.set_global('promet_srv_pair', (server, t, ))
+    pass
 
 
-@app.on_shutdown
-def stop_prometheus_server(logger: Logger, promet_srv_pair: tuple = Context()) -> None:
-    logger.info('Stopping Prometheus server.')
-    server, t = promet_srv_pair
-    server.shutdown()
-    t.join()
-
+# @app.on_shutdown
+# def stop_prometheus_server(logger: Logger, promet_srv_pair: tuple = Context()) -> None:
+#     logger.info('Stopping Prometheus server.')
+#     server, t = promet_srv_pair
+#     server.shutdown()
+#     t.join()
+#
 
 @app.on_startup
 async def sanity_check(logger: Logger) -> None:
