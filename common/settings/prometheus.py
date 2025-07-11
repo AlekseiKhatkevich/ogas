@@ -12,7 +12,3 @@ class PrometheusSettings(BaseSettings):
             frozen=True,
             description='Prometheus использует для работы в многопроцессорном режиме.',
         )]
-    PROMETHEUS_HTTP_SERVER_PORT: Annotated[
-        int,
-        Field(description='Порт сервера Prometheus.'),
-    ] = 8001

@@ -2,7 +2,7 @@ import asyncio
 import os
 from typing import Callable, Never
 
-from faststream import Context, ContextRepo, Logger
+from faststream import Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
 from faststream.kafka.prometheus import KafkaPrometheusMiddleware
@@ -11,8 +11,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from prometheus_client import CollectorRegistry, REGISTRY, make_asgi_app, multiprocess, start_http_server
-from prometheus_client.multiprocess import MultiProcessCollector
+from prometheus_client import CollectorRegistry, make_asgi_app, multiprocess
 
 from center.faststream import (capabilities, operative_data, organization, organization_stock)
 from common import settings
@@ -68,12 +67,20 @@ app = AsgiFastStream(
 
 
 @app.on_shutdown
+def child_exit(logger: Logger) -> None:
+    """Для работы Прометея в многопроцессорном режиме."""
+    ppid = os.getpid()
+    multiprocess.mark_process_dead(ppid)
+    logger.info(f'Marking process with PID {ppid} as dead.')
+
+
+@app.on_shutdown
 def empty_prometheus_multiproc_dir(logger: Logger) -> None:
     """Очистка папки с метриками прометеуса."""
     path = settings.PROMETHEUS_MULTIPROC_DIR
     for file in path.iterdir():
         if file.is_file():
-            file.unlink()
+            file.unlink(missing_ok=True)
             logger.info(f'Deleting file {file.name}.')
 
 
