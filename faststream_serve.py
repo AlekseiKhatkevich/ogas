@@ -31,7 +31,6 @@ processor = BatchSpanProcessor(exporter)
 tracer_provider.add_span_processor(processor)
 
 registry = CollectorRegistry()
-registry2 = CollectorRegistry()
 
 broker = KafkaBroker(
     settings.KAFKA_DSN,
@@ -46,12 +45,14 @@ broker.include_router(operative_data.router)
 broker.include_router(organization_stock.router)
 
 
-def make_metrics_app():
+def make_metrics_app() -> Callable:
+    """Для работы в мультипроцессорном режиме."""
     path = settings.PROMETHEUS_MULTIPROC_DIR
     os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(path)
     path.mkdir(parents=True, exist_ok=True)
-    multiprocess.MultiProcessCollector(registry2)
-    return make_asgi_app(registry=registry2)
+    multiprocess.MultiProcessCollector(registry)
+    return make_asgi_app(registry=registry)
+
 
 metrics_app = make_metrics_app()
 
@@ -59,8 +60,7 @@ app = AsgiFastStream(
     broker,
     asyncapi_path='/docs/asyncapi',
     asgi_routes=[
-        ('/metrics', make_asgi_app(registry)),  # для prometheus faststream
-        ('/metrics_else', metrics_app),  # для всего остального
+        ('/metrics', metrics_app),
     ],
     title='OGAS',
     version='0.1.1',
