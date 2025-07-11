@@ -11,7 +11,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from prometheus_client import CollectorRegistry, make_asgi_app, start_http_server
+from prometheus_client import CollectorRegistry, REGISTRY, make_asgi_app, multiprocess, start_http_server
 from prometheus_client.multiprocess import MultiProcessCollector
 
 from center.faststream import (capabilities, operative_data, organization, organization_stock)
@@ -31,6 +31,7 @@ processor = BatchSpanProcessor(exporter)
 tracer_provider.add_span_processor(processor)
 
 registry = CollectorRegistry()
+registry2 = CollectorRegistry()
 
 broker = KafkaBroker(
     settings.KAFKA_DSN,
@@ -45,57 +46,38 @@ broker.include_router(operative_data.router)
 broker.include_router(organization_stock.router)
 
 
-# def make_metrics_app() -> Callable:
-#     """
-#     https://prometheus.github.io/client_python/multiprocess/
-#     """
-#     registry = CollectorRegistry()
-#     MultiProcessCollector(registry)
-#     return make_asgi_app(registry=registry)
+def make_metrics_app():
+    path = settings.PROMETHEUS_MULTIPROC_DIR
+    os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(path)
+    path.mkdir(parents=True, exist_ok=True)
+    multiprocess.MultiProcessCollector(registry2)
+    return make_asgi_app(registry=registry2)
 
+metrics_app = make_metrics_app()
 
 app = AsgiFastStream(
     broker,
     asyncapi_path='/docs/asyncapi',
     asgi_routes=[
         ('/metrics', make_asgi_app(registry)),  # для prometheus faststream
-        ('/metrics_else', make_asgi_app(disable_compression=True)),
+        ('/metrics_else', metrics_app),  # для всего остального
     ],
     title='OGAS',
     version='0.1.1',
 )
 
 
-@app.on_startup
-def make_prometheus_multiproc_dir(logger: Logger) -> None:
-    path = settings.PROMETHEUS_MULTIPROC_DIR
-    logger.info(f'Creating a dir. for Prometheus multiproc mode  @ {path}')
-    path.mkdir(parents=True, exist_ok=True)
-    for file in path.iterdir():
-        if file.is_file():
-            file.unlink()
-            logger.info(f'Deleting file {file.name}.')
-    os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(path)
-
-
 # @app.on_startup
-# def start_prometheus_server(context: ContextRepo, logger: Logger) -> None:
-#     # logger.info(f'Starting Prometheus server on port {settings.PROMETHEUS_HTTP_SERVER_PORT}.')
-#     # server, t = start_http_server(
-#     #     settings.PROMETHEUS_HTTP_SERVER_PORT,
-#     #     'localhost',
-#     # )
-#     # context.set_global('promet_srv_pair', (server, t, ))
-#     pass
+# def make_prometheus_multiproc_dir(logger: Logger) -> None:
+#     path = settings.PROMETHEUS_MULTIPROC_DIR
+#     logger.info(f'Creating a dir. for Prometheus multiproc mode  @ {path}')
+#     path.mkdir(parents=True, exist_ok=True)
+#     for file in path.iterdir():
+#         if file.is_file():
+#             file.unlink()
+#             logger.info(f'Deleting file {file.name}.')
+#     os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(path)
 
-
-# @app.on_shutdown
-# def stop_prometheus_server(logger: Logger, promet_srv_pair: tuple = Context()) -> None:
-#     logger.info('Stopping Prometheus server.')
-#     server, t = promet_srv_pair
-#     server.shutdown()
-#     t.join()
-#
 
 @app.on_startup
 async def sanity_check(logger: Logger) -> None:
