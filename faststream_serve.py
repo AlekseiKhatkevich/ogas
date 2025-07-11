@@ -67,16 +67,14 @@ app = AsgiFastStream(
 )
 
 
-# @app.on_startup
-# def make_prometheus_multiproc_dir(logger: Logger) -> None:
-#     path = settings.PROMETHEUS_MULTIPROC_DIR
-#     logger.info(f'Creating a dir. for Prometheus multiproc mode  @ {path}')
-#     path.mkdir(parents=True, exist_ok=True)
-#     for file in path.iterdir():
-#         if file.is_file():
-#             file.unlink()
-#             logger.info(f'Deleting file {file.name}.')
-#     os.environ['PROMETHEUS_MULTIPROC_DIR'] = str(path)
+@app.on_shutdown
+def empty_prometheus_multiproc_dir(logger: Logger) -> None:
+    """Очистка папки с метриками прометеуса."""
+    path = settings.PROMETHEUS_MULTIPROC_DIR
+    for file in path.iterdir():
+        if file.is_file():
+            file.unlink()
+            logger.info(f'Deleting file {file.name}.')
 
 
 @app.on_startup
