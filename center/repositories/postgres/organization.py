@@ -8,6 +8,7 @@ import sqlalchemy as sa
 from center.orm_models import OrganizationORM
 from common import settings
 from common.repositories.postgres import CommonPostgresRepository
+from common.resources.database.prometheus.instrumenting import auth_state
 
 if TYPE_CHECKING:
     from ulid import ULID
@@ -31,6 +32,7 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
         'auth_attempt_cache_miss',
         'Аутентификация организации из БД.',
     )
+    auth_state_m = auth_state.labels('faststeam', )
 
     async def get_organization_by_token(
             self,
@@ -56,6 +58,7 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
 
     async def get_organizations_by_token(self, auth_data: list['AuthStatus']) -> list['AuthStatus']:
         #  Заполнили организации из кеша.
+        self.auth_state_m.state('from_cache')
         auth_query_conditions = []
         for data in auth_data:
             if data.auth_pair is not None:
@@ -71,6 +74,7 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
                         (self._model.token == sa.func.crypt(token, self._model.token))
                     )
         #  Получим те, которых нет в кеше из БД.
+        self.auth_state_m.state('from_db')
         if auth_query_conditions:
             query = self.select_active.where(functools.reduce(operator.or_, auth_query_conditions))
             async with self._db.async_session as session:
@@ -78,10 +82,12 @@ class OrganizationPostgresRepository(CommonPostgresRepository, model=Organizatio
                 organizations = res.all()
 
             #  Обновим кеш этими организациями из БД.
+            self.auth_state_m.state('update_cache')
             for organization in organizations:
                 self.cache.update({organization.name: organization, organization.id: organization})
 
             #  Проставим организации которых изначально не было в кеше и их получили из БД.
+            self.auth_state_m.state('auth_organizations')
             for data in auth_data:
                 if data.organization is None and data.auth_pair:
                     data.organization = self.cache.get(data.header.organization_id) or \

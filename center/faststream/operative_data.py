@@ -1,7 +1,8 @@
 from faststream.kafka import KafkaRouter
-from prometheus_client import Summary
+
 from center.faststream.dependencies import CurrentOrganizationDepBatch
 from common.faststream.filters import contentype_json
+from common.resources.database.prometheus.instrumenting import handler_latency
 from ..serializers import OperativeDataIn
 from ..usecases.operative_data import OperativeDataInSaveUseCase
 
@@ -10,11 +11,6 @@ __all__ = (
 )
 
 router = KafkaRouter(prefix='operative_data_', )
-
-handler_summary = Summary(
-    'receive_operative_data_latency_seconds',
-    'Кумулятивное время работы обработчика receive_operative_data.',
-)
 
 
 @router.subscriber(
@@ -27,7 +23,7 @@ handler_summary = Summary(
     auto_commit_interval_ms=1000 * 1,
     group_id='operative_data_in_group',
 )
-@handler_summary.time()
+@handler_latency.labels('receive_operative_data', ).time()
 async def receive_operative_data(op_info: list[OperativeDataIn],
                                  organizations: CurrentOrganizationDepBatch,
                                  ) -> None:
