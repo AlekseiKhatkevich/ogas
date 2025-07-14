@@ -28,3 +28,15 @@ class RavenDBDocumentStore:
         with self.store.open_session() as session:
             yield session
 
+
+raven_db_store = RavenDBDocumentStore()
+
+
+
+def foo(x):
+    print(x)
+    print (x.__dict__)
+    print(type(x))
+    # {
+    #     'type_of_change': < DocumentChangeType.PUT: 'Put' >, 'key': '19375b1f-0608-4bb3-8d64-98c8917a1c4e', 'collection_name': 'settings', 'change_vector': 'A:8930-XLLKVHXsQUyEgQ1hZ9BRBw'}
+
