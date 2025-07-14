@@ -81,3 +81,8 @@ prometheus_metrics_endpoint: ## Prometheus metric`s endpoint
 prometheus_ui: ## Prometheus UI browser
 	xdg-open http://localhost:9090/
 
+raven_ui: ## RavenDB user interface
+	xdg-open http://127.0.0.1:8081/studio/index.html
+
+
+

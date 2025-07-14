@@ -4,6 +4,7 @@ from common.settings.common import CommonSettings
 from common.settings.kafka import KafkaSettings
 from common.settings.postgres import PostgresSettings
 from common.settings.prometheus import PrometheusSettings
+from common.settings.ravendb import RavenDBSettings
 from common.settings.redis import RedisSettings
 
 __all__ = (
@@ -13,6 +14,7 @@ __all__ = (
 
 
 class GeneralSettings(
+    RavenDBSettings,
     RedisSettings,
     PostgresSettings,
     KafkaSettings,
@@ -27,6 +29,7 @@ class GeneralSettings(
             'env/kafka.env',
             'env/.env',
             'env/prometheus.env',
+            'env/ravendb.env',
         ),
         env_file_encoding='utf-8',
         extra='ignore',
