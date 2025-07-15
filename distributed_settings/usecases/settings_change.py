@@ -44,9 +44,14 @@ class UpsertProductUseCase(AbstractUseCase):
             message = settings_from_db.model_dump_json().encode('utf-8')
             await self.send_settings_to_kafka([KafkaMessage(topic, message)])
 
-    def on_startup(self):
+    async def on_startup(self):
         settings_from_db = self.load_whole_collection()
         log.info(f'Startup::Fetched settings entry -- {settings_from_db} from RavenDB.')
+        payload = [
+            KafkaMessage(self._construct_topic(setting.app), setting.model_dump_json().encode('utf-8'))
+            for setting in settings_from_db
+        ]
+        await self.send_settings_to_kafka(payload)
 
     def load_settings(self, key: str) -> 'SettingsOut':
         return self.repository.load(key)
