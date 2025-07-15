@@ -1,8 +1,5 @@
 from abc import ABC, abstractmethod
-
 from typing import Any, Callable, TYPE_CHECKING
-
-
 
 from common.resources.database.ravendb.store import RavenDBDocumentStore, raven_db_store
 

@@ -1,4 +1,5 @@
 import contextlib
+import dataclasses
 from typing import Any, AsyncGenerator, TYPE_CHECKING
 
 from aiokafka import AIOKafkaProducer
@@ -14,7 +15,14 @@ if TYPE_CHECKING:
 __all__ = (
     'KafkaBroker',
     'kafka_broker',
+    'KafkaMessage',
 )
+
+
+@dataclasses.dataclass
+class KafkaMessage:
+    topic: str
+    content: bytes
 
 
 class KafkaBroker(HealthCheckable):
@@ -41,9 +49,10 @@ class KafkaBroker(HealthCheckable):
         yield producer
         await producer.stop()
 
-    async def send_one(self, topic: str, message: bytes) -> None:
+    async def send(self, messages: list[KafkaMessage]) -> None:
         async with self._get_running_producer() as producer:
-            await producer.send_and_wait(topic, message)
+            for message in messages:
+                await producer.send_and_wait(message.topic, message.content)
 
 
 kafka_broker = KafkaBroker(settings.KAFKA_DSN)

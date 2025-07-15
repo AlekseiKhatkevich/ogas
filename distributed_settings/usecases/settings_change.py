@@ -1,10 +1,11 @@
 from typing import TYPE_CHECKING
 
 import structlog
+
 from ravendb.changes.types import DocumentChange, DocumentChangeType
 
 from common import settings
-from common.resources.database.kafka import KafkaBroker, kafka_broker
+from common.resources.database.kafka import KafkaBroker, KafkaMessage, kafka_broker
 from common.usecases.common import AbstractUseCase
 from distributed_settings.repositories.ravendb import SettingsRavenDBRepository
 
@@ -34,13 +35,14 @@ class UpsertProductUseCase(AbstractUseCase):
     def _construct_topic(app: str) -> str:
         return f'{settings.KAFKA_DISTRIBUTED_SETTINGS_TOPIC_PREFIX}_{app.lower()}'
 
-    def on_change(self, change: DocumentChange):
+    async def on_change(self, change: DocumentChange):
         log.info(f'Got change -- {change} from RavenDB')
         if change.type_of_change in self._tracking_states:
-            settings = self.load_settings(change.key)
+            settings_from_db = self.load_settings(change.key)
             log.info(f'Fetched settings entry -- {settings} from RavenDB.')
-            topic = self._construct_topic(settings.app)
-            message = settings.model_dump_json().encode('utf-8')
+            topic = self._construct_topic(settings_from_db.app)
+            message = settings_from_db.model_dump_json().encode('utf-8')
+            await self.send_settings_to_kafka(topic, message)
 
     def on_startup(self):
         settings = self.load_whole_collection()
@@ -55,4 +57,4 @@ class UpsertProductUseCase(AbstractUseCase):
         self.repository.track_changes(self.on_change)
 
     async def send_settings_to_kafka(self, topic: str, message: bytes) -> None:
-        pass
+        await self._kafka_broker.send([KafkaMessage(topic, message), ])
