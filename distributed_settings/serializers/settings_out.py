@@ -31,7 +31,8 @@ class MetadataOut(BaseModel):
 class SettingsOut(BaseModel):
     app: Annotated[
         str,
-        Field(AfterValidator(lambda v: v.lower()), description='Название аппа.',)
+        AfterValidator(lambda v: v.lower()),
+        Field(description='Название аппа.',)
     ]
     settings: Annotated[
         dict[str, Any],

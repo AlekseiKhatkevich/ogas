@@ -1,7 +1,7 @@
 import pathlib
 from typing import Annotated
 
-from pydantic import Field
+from pydantic import AfterValidator, Field
 from pydantic_settings import BaseSettings
 
 
@@ -14,3 +14,8 @@ class CommonSettings(BaseSettings):
             default_factory=lambda: pathlib.Path.cwd(),
             exclude=True,
         )]
+    APP_NAME: Annotated[
+        str,
+        AfterValidator(lambda v: v.lower()),
+        Field(description='Наименование сервиса.'),
+    ]
