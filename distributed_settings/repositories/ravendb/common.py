@@ -1,3 +1,4 @@
+import asyncio
 from abc import ABC, abstractmethod
 from typing import Any, Callable, TYPE_CHECKING
 
@@ -43,5 +44,5 @@ class CommonRavenDBRepository[OT](AbstractRavenDBRepository):
         self.store.store.changes().for_documents_in_collection(
             self._collection,
         ).subscribe(
-            on_next_callback=callback_f,
+            on_next_callback=lambda change: asyncio.run(callback_f(change)),
         )

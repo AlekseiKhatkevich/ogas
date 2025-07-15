@@ -39,13 +39,14 @@ class UpsertProductUseCase(AbstractUseCase):
         log.info(f'Got change -- {change} from RavenDB')
         if change.type_of_change in self._tracking_states:
             settings_from_db = self.load_settings(change.key)
-            log.info(f'Fetched settings entry -- {settings} from RavenDB.')
+            log.info(f'Fetched settings entry -- {settings_from_db} from RavenDB.')
             topic = self._construct_topic(settings_from_db.app)
             message = settings_from_db.model_dump_json().encode('utf-8')
-            await self.send_settings_to_kafka(topic, message)
+            await self.send_settings_to_kafka([KafkaMessage(topic, message)])
 
     def on_startup(self):
-        settings = self.load_whole_collection()
+        settings_from_db = self.load_whole_collection()
+        log.info(f'Startup::Fetched settings entry -- {settings_from_db} from RavenDB.')
 
     def load_settings(self, key: str) -> 'SettingsOut':
         return self.repository.load(key)
@@ -56,5 +57,6 @@ class UpsertProductUseCase(AbstractUseCase):
     def track_changes(self) -> None:
         self.repository.track_changes(self.on_change)
 
-    async def send_settings_to_kafka(self, topic: str, message: bytes) -> None:
-        await self._kafka_broker.send([KafkaMessage(topic, message), ])
+    async def send_settings_to_kafka(self, messages: list[KafkaMessage]) -> None:
+        log.info(f'Passing message to kafka, {messages}')
+        await self._kafka_broker.send(messages)

@@ -1,16 +1,16 @@
 import contextlib
 import dataclasses
-from typing import Any, AsyncGenerator, TYPE_CHECKING
+from typing import AsyncGenerator, TYPE_CHECKING
 
+import structlog
 from aiokafka import AIOKafkaProducer
-from asyncstdlib.functools import cached_property
 
 from common import settings
 from common.resources.interfaces import HealthCheckable
 
 if TYPE_CHECKING:
     pass
-
+log = structlog.get_logger()
 
 __all__ = (
     'KafkaBroker',
@@ -24,12 +24,15 @@ class KafkaMessage:
     topic: str
     content: bytes
 
+    def __str__(self):
+        return f'Topic: {self.topic}, message: {self.content[:50]}'
+
 
 class KafkaBroker(HealthCheckable):
     def __init__(self, bootstrap_server: str) -> None:
         self.bootstrap_server = bootstrap_server
 
-    @cached_property
+    @property
     async def producer(self) -> AIOKafkaProducer:
         return AIOKafkaProducer(
             bootstrap_servers=self.bootstrap_server,
@@ -50,8 +53,10 @@ class KafkaBroker(HealthCheckable):
         await producer.stop()
 
     async def send(self, messages: list[KafkaMessage]) -> None:
+        log.info(f'Kafka, got messages {messages}')
         async with self._get_running_producer() as producer:
             for message in messages:
+                log.info(f'Kafka, sending message {message}')
                 await producer.send_and_wait(message.topic, message.content)
 
 
