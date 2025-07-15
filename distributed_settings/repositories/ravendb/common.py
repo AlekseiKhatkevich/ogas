@@ -1,11 +1,14 @@
 from abc import ABC, abstractmethod
 
-from typing import TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING
+
+
 
 from common.resources.database.ravendb.store import RavenDBDocumentStore, raven_db_store
 
 if TYPE_CHECKING:
     from ravendb import DocumentQuery
+    from ravendb.changes.types import DocumentChange
 
 __all__ = (
     'CommonRavenDBRepository',
@@ -38,3 +41,10 @@ class CommonRavenDBRepository[OT](AbstractRavenDBRepository):
     def query_collection(self) -> 'DocumentQuery[OT]':
         with self.store.session as session:
             return session.query_collection(self._collection, self._object_type)
+
+    def track_changes(self, callback_f: Callable[['DocumentChange'], Any]) -> None:
+        self.store.store.changes().for_documents_in_collection(
+            self._collection,
+        ).subscribe(
+            on_next_callback=callback_f,
+        )

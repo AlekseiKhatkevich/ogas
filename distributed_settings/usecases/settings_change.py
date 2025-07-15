@@ -1,10 +1,6 @@
-from ravendb.changes.types import DocumentChange, DocumentChangeType
-
-from common.usecases.common import AbstractUseCase
-from distributed_settings.repositories.ravendb import SettingsRavenDBRepository
-from typing import TYPE_CHECKING
 from typing import TYPE_CHECKING
 
+import structlog
 from ravendb.changes.types import DocumentChange, DocumentChangeType
 
 from common.usecases.common import AbstractUseCase
@@ -14,8 +10,7 @@ if TYPE_CHECKING:
     from distributed_settings.repositories.ravendb.common import CommonRavenDBRepository
     from distributed_settings.serializers.settings_out import SettingsOut
 
-
-# {'app': 'test', 'setting1': 0, '@metadata': {'@collection': 'settings', '@change-vector': 'A:8944-XLLKVHXsQUyEgQ1hZ9BRBw', '@id': 'settings/test', '@last-modified': '2025-07-14T13:28:18.0174209Z'}}
+log = structlog.get_logger()
 
 
 # noinspection PyCallingNonCallable
@@ -25,12 +20,15 @@ class UpsertProductUseCase(AbstractUseCase):
     def __init__(self, repository: 'CommonRavenDBRepository' = SettingsRavenDBRepository):
         self.repository = repository()
 
-    async def execute(self):
-        pass
+    async def execute(self) -> None:
+        self.on_startup()
+        self.track_changes()
 
     def on_change(self, change: DocumentChange):
+        log.info(f'Got change -- {change} from RavenDB')
         if change.type_of_change in self._tracking_states:
-            payload = self.load_settings(change.key)
+            settings = self.load_settings(change.key)
+            log.info(f'Fetched settings entry -- {settings} from RavenDB.')
 
     def on_startup(self):
         settings = self.load_whole_collection()
@@ -41,3 +39,5 @@ class UpsertProductUseCase(AbstractUseCase):
     def load_whole_collection(self) -> tuple['SettingsOut']:
         return tuple(self.repository.query_collection())
 
+    def track_changes(self) -> None:
+        self.repository.track_changes(self.on_change)

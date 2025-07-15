@@ -22,6 +22,7 @@ dependencies = [
     "redis>=6.2.0",
     "sqlalchemy-utils>=0.41.2",
     "sqlalchemy[asyncio]>=2.0.40",
+    "structlog>=25.4.0",
 ]
 
 [dependency-groups]
