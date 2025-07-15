@@ -1,6 +1,7 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from common.settings.common import CommonSettings
+from common.settings.distributed_settings import DistributedSettings
 from common.settings.kafka import KafkaSettings
 from common.settings.postgres import PostgresSettings
 from common.settings.prometheus import PrometheusSettings
@@ -20,6 +21,7 @@ class GeneralSettings(
     KafkaSettings,
     CommonSettings,
     PrometheusSettings,
+    DistributedSettings,
     BaseSettings,
 ):
     model_config = SettingsConfigDict(
