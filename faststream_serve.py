@@ -69,9 +69,9 @@ app = AsgiFastStream(
 @app.on_shutdown
 def child_exit(logger: Logger) -> None:
     """Для работы Прометея в многопроцессорном режиме."""
-    ppid = os.getpid()
-    multiprocess.mark_process_dead(ppid)
-    logger.info(f'Marking process with PID {ppid} as dead.')
+    pid = os.getpid()
+    multiprocess.mark_process_dead(pid)
+    logger.info(f'Marking process with PID {pid} as dead.')
 
 
 @app.on_shutdown

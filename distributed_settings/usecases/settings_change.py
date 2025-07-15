@@ -5,7 +5,9 @@ from ravendb.tools.utils import DynamicStructure
 
 from common.resources.database.ravendb.store import RavenDBDocumentStore, raven_db_store
 from common.usecases.common import AbstractUseCase
-DynamicStructure
+
+# todo pydantic dataclass
+# {'app': 'test', 'setting1': 0, '@metadata': {'@collection': 'settings', '@change-vector': 'A:8944-XLLKVHXsQUyEgQ1hZ9BRBw', '@id': 'settings/test', '@last-modified': '2025-07-14T13:28:18.0174209Z'}}
 
 
 class UpsertProductUseCase(AbstractUseCase):
@@ -25,6 +27,5 @@ class UpsertProductUseCase(AbstractUseCase):
     def load_settings(self, key: str) -> dict[str, Any]:
         with self.store.session as session:
             settings = session.load(key)
-        payload = {k: v for k, v in vars(settings).items() if k != self._metadata}
-        return payload
+        return vars(settings)
 
