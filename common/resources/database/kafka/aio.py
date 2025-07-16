@@ -1,10 +1,10 @@
 import contextlib
 import dataclasses
-from typing import Any, AsyncGenerator, Mapping, Sequence, TYPE_CHECKING, TypeAlias
+from typing import AsyncGenerator, Mapping, Sequence, TYPE_CHECKING, TypeAlias
 
 import pydantic_core
 import structlog
-from aiokafka import AIOKafkaProducer
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 from pydantic import BaseModel
 
 from common import settings
@@ -57,6 +57,13 @@ class KafkaBroker(HealthCheckable):
             compression_type='gzip',
         )
 
+    @property
+    async def consumer(self) -> AIOKafkaConsumer:
+        return AIOKafkaConsumer(
+            f'{settings.KAFKA_DISTRIBUTED_SETTINGS_TOPIC_PREFIX}_{settings.APP_NAME}',
+            bootstrap_servers=self.bootstrap_server,
+        )
+
     async def service_name(self) -> str:
         return 'Kafka_on_distributed_settings'
 
@@ -69,6 +76,13 @@ class KafkaBroker(HealthCheckable):
         await producer.start()
         yield producer
         await producer.stop()
+
+    @contextlib.asynccontextmanager
+    async def _get_running_consumer(self) -> AsyncGenerator[AIOKafkaConsumer]:
+        consumer = await self.consumer
+        await consumer.start()
+        yield consumer
+        await consumer.stop()
 
     async def send(self, messages: list[KafkaMessage]) -> None:
         log.info(f'Kafka, got messages {messages}')

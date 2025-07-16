@@ -104,13 +104,13 @@ async def sanity_check(logger: Logger) -> None:
             )
 
 
-@app.on_startup
-async def distributed_settings_handle(logger: Logger) -> None:
-    from distributed_settings.usecases.settings_change import DistributedSettingsHandlingUseCase
-    use_case = DistributedSettingsHandlingUseCase()
-    logger.info('Starting distributed settings handling.')
-    await use_case.execute()
-    logger.info('Distributed settings have sent, subscription has applied.')
+# @app.on_startup
+# async def distributed_settings_handle(logger: Logger) -> None:
+#     from distributed_settings.usecases.settings_change import DistributedSettingsHandlingUseCase
+#     use_case = DistributedSettingsHandlingUseCase()
+#     logger.info('Starting distributed settings handling.')
+#     await use_case.execute()
+#     logger.info('Distributed settings have sent, subscription has applied.')
 
 
 async def main() -> Never:
