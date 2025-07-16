@@ -25,10 +25,11 @@ class MetadataOut(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         extra='ignore',
+        validate_by_name=True,
     )
 
 
-class SettingsOut(BaseModel):
+class SettingsSerializer(BaseModel):
     app: Annotated[
         str,
         AfterValidator(lambda v: v.lower()),
@@ -46,4 +47,5 @@ class SettingsOut(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         extra='ignore',
+        validate_by_name=True,
     )

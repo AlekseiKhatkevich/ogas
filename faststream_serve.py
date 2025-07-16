@@ -15,7 +15,7 @@ from prometheus_client import CollectorRegistry, make_asgi_app, multiprocess
 
 from center.faststream import (capabilities, operative_data, organization, organization_stock)
 from common import settings
-from common.faststream import product
+from common.faststream import product, settings as settings_routes
 
 __all__ = (
     'broker',
@@ -42,6 +42,7 @@ broker.include_router(product.router)
 broker.include_router(organization.router)
 broker.include_router(operative_data.router)
 broker.include_router(organization_stock.router)
+broker.include_router(settings_routes.router)
 
 
 def make_metrics_app() -> Callable:

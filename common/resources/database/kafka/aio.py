@@ -11,7 +11,7 @@ from common import settings
 from common.resources.interfaces import HealthCheckable
 
 if TYPE_CHECKING:
-    from distributed_settings.serializers.settings_out import SettingsOut
+    from distributed_settings.serializers.settings_out import SettingsSerializer
 
 
 log = structlog.get_logger()
@@ -28,7 +28,7 @@ __all__ = (
 @dataclasses.dataclass
 class KafkaMessage:
     topic: str
-    content: 'SettingsOut'
+    content: 'SettingsSerializer'
 
     def __str__(self):
         return f'Topic: {self.topic}, message: {self.content}'
@@ -74,8 +74,8 @@ class KafkaBroker(HealthCheckable):
         log.info(f'Kafka, got messages {messages}')
         async with self._get_running_producer() as producer:
             for message in messages:
-                log.info(f'Kafka, sending message {message}')
-                await producer.send_and_wait(message.topic, message.content)
+                # log.info(f'Kafka, sending message {message}')
+                await producer.send_and_wait(f'ds_{message.content.app}', message.content)
 
 
 kafka_broker = KafkaBroker(settings.KAFKA_DSN)

@@ -11,7 +11,7 @@ from distributed_settings.repositories.ravendb import SettingsRavenDBRepository
 
 if TYPE_CHECKING:
     from distributed_settings.repositories.ravendb.common import CommonRavenDBRepository
-    from distributed_settings.serializers.settings_out import SettingsOut
+    from distributed_settings.serializers.settings_out import SettingsSerializer
 
 log = structlog.get_logger()
 
@@ -28,8 +28,8 @@ class DistributedSettingsHandlingUseCase(AbstractUseCase):
         self._kafka_broker = _kafka_broker
 
     async def execute(self) -> None:
-        await self.on_startup()
         self.track_changes()
+        await self.on_startup()
 
     @staticmethod
     def _construct_topic(app: str) -> str:
@@ -52,10 +52,10 @@ class DistributedSettingsHandlingUseCase(AbstractUseCase):
         ]
         await self.send_settings_to_kafka(payload)
 
-    def load_settings(self, key: str) -> 'SettingsOut':
+    def load_settings(self, key: str) -> 'SettingsSerializer':
         return self.repository.load(key)
 
-    def load_whole_collection(self) -> tuple['SettingsOut']:
+    def load_whole_collection(self) -> tuple['SettingsSerializer']:
         return tuple(self.repository.query_collection())
 
     def track_changes(self) -> None:
