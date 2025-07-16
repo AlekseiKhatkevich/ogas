@@ -74,8 +74,12 @@ class KafkaBroker(HealthCheckable):
         log.info(f'Kafka, got messages {messages}')
         async with self._get_running_producer() as producer:
             for message in messages:
-                # log.info(f'Kafka, sending message {message}')
-                await producer.send_and_wait(f'ds_{message.content.app}', message.content)
+                log.info(f'Kafka, sending message {message}')
+                await producer.send_and_wait(
+                    message.topic,
+                    message.content,
+                    key=message.content.app.encode('utf-8'),
+                )
 
 
 kafka_broker = KafkaBroker(settings.KAFKA_DSN)

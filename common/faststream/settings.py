@@ -3,7 +3,7 @@ from faststream.kafka import KafkaRouter
 from common import settings
 from distributed_settings.serializers.settings_out import SettingsSerializer
 
-router = KafkaRouter(prefix='ds_')
+router = KafkaRouter(prefix=f'{settings.KAFKA_DISTRIBUTED_SETTINGS_TOPIC_PREFIX}_')
 
 
 @router.subscriber(settings.APP_NAME, title='settings-in',)
