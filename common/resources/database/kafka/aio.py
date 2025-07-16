@@ -34,14 +34,14 @@ class KafkaMessage:
         return f'Topic: {self.topic}, message: {self.content}'
 
 
-def serializer(value: JSON_ro | BaseModel) -> bytes:
+def serializer(value: JSON_ro | BaseModel | bytes) -> bytes:
     match value:
         case BaseModel():
             return value.model_dump_json().encode('utf-8')
-        case JSON_ro():
-            return pydantic_core.to_json(value)
+        case bytes():
+            return value
         case _:
-            raise NotImplemented()
+            return pydantic_core.to_json(value)
 
 
 class KafkaBroker(HealthCheckable):

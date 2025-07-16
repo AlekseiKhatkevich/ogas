@@ -17,7 +17,7 @@ log = structlog.get_logger()
 
 
 # noinspection PyCallingNonCallable
-class UpsertProductUseCase(AbstractUseCase):
+class DistributedSettingsHandlingUseCase(AbstractUseCase):
     _tracking_states = frozenset([DocumentChangeType.PUT, ])
 
     def __init__(self,
@@ -59,6 +59,7 @@ class UpsertProductUseCase(AbstractUseCase):
         return tuple(self.repository.query_collection())
 
     def track_changes(self) -> None:
+        log.info('Start tracking changes on "settings" collection in ravenDB.')
         self.repository.track_changes(self.on_change)
 
     async def send_settings_to_kafka(self, messages: list[KafkaMessage]) -> None:
