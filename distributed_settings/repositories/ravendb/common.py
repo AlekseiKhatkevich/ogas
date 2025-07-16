@@ -1,6 +1,6 @@
 import asyncio
 from abc import ABC, abstractmethod
-from typing import Any, Callable, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING
 
 from common.resources.database.ravendb.store import RavenDBDocumentStore, raven_db_store
 
@@ -40,7 +40,7 @@ class CommonRavenDBRepository[OT](AbstractRavenDBRepository):
         with self.store.session as session:
             return session.query_collection(self._collection, self._object_type)
 
-    def track_changes(self, callback_f: Callable[['DocumentChange'], Any]) -> None:
+    def track_changes(self, callback_f: Callable[['DocumentChange'], None]) -> None:
         self.store.store.changes().for_documents_in_collection(
             self._collection,
         ).subscribe(

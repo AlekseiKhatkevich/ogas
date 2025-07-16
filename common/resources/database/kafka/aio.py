@@ -1,16 +1,22 @@
 import contextlib
 import dataclasses
-from typing import AsyncGenerator, TYPE_CHECKING
+from typing import Any, AsyncGenerator, Mapping, Sequence, TYPE_CHECKING, TypeAlias
 
+import pydantic_core
 import structlog
 from aiokafka import AIOKafkaProducer
+from pydantic import BaseModel
 
 from common import settings
 from common.resources.interfaces import HealthCheckable
 
 if TYPE_CHECKING:
-    pass
+    from distributed_settings.serializers.settings_out import SettingsOut
+
+
 log = structlog.get_logger()
+
+JSON_ro: TypeAlias = Mapping[str, "JSON_ro"] | Sequence["JSON_ro"] | str | int | float | bool | None
 
 __all__ = (
     'KafkaBroker',
@@ -22,10 +28,20 @@ __all__ = (
 @dataclasses.dataclass
 class KafkaMessage:
     topic: str
-    content: bytes
+    content: 'SettingsOut'
 
     def __str__(self):
-        return f'Topic: {self.topic}, message: {self.content[:50]}'
+        return f'Topic: {self.topic}, message: {self.content}'
+
+
+def serializer(value: JSON_ro | BaseModel) -> bytes:
+    match value:
+        case BaseModel():
+            return value.model_dump_json().encode('utf-8')
+        case JSON_ro():
+            return pydantic_core.to_json(value)
+        case _:
+            raise NotImplemented()
 
 
 class KafkaBroker(HealthCheckable):
@@ -37,6 +53,8 @@ class KafkaBroker(HealthCheckable):
         return AIOKafkaProducer(
             bootstrap_servers=self.bootstrap_server,
             enable_idempotence=True,
+            value_serializer=serializer,
+            compression_type='gzip',
         )
 
     async def service_name(self) -> str:
