@@ -1,18 +1,15 @@
 import contextlib
 import dataclasses
-from typing import AsyncGenerator, Mapping, Sequence, TYPE_CHECKING, TypeAlias
+from typing import AsyncGenerator, Mapping, Sequence, TypeAlias
 
 import pydantic_core
 import structlog
-from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
-from pydantic import BaseModel
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer, TopicPartition
+from pydantic import BaseModel, ValidationError
 
 from common import settings
 from common.resources.interfaces import HealthCheckable
-
-if TYPE_CHECKING:
-    from distributed_settings.serializers.settings_out import SettingsSerializer
-
+from distributed_settings.serializers.settings_out import SettingsSerializer
 
 log = structlog.get_logger()
 
@@ -44,9 +41,14 @@ def serializer(value: JSON_ro | BaseModel | bytes) -> bytes:
             return pydantic_core.to_json(value)
 
 
+def deserializer(value: bytes) -> 'SettingsSerializer':
+    return SettingsSerializer.model_validate_json(value)
+
+
 class KafkaBroker(HealthCheckable):
     def __init__(self, bootstrap_server: str) -> None:
         self.bootstrap_server = bootstrap_server
+        self.topic = f'{settings.KAFKA_DISTRIBUTED_SETTINGS_TOPIC_PREFIX}_{settings.APP_NAME}'
 
     @property
     async def producer(self) -> AIOKafkaProducer:
@@ -60,8 +62,10 @@ class KafkaBroker(HealthCheckable):
     @property
     async def consumer(self) -> AIOKafkaConsumer:
         return AIOKafkaConsumer(
-            f'{settings.KAFKA_DISTRIBUTED_SETTINGS_TOPIC_PREFIX}_{settings.APP_NAME}',
+            self.topic,
             bootstrap_servers=self.bootstrap_server,
+            auto_offset_reset='latest',
+            value_deserializer=deserializer,
         )
 
     async def service_name(self) -> str:
@@ -94,6 +98,25 @@ class KafkaBroker(HealthCheckable):
                     message.content,
                     key=message.content.app.encode('utf-8'),
                 )
+
+    async def fetch_last_message(self) -> SettingsSerializer | None:
+        log.info(f'Fetching a message in last offset in topic -- {self.topic}.')
+        async with kafka_broker._get_running_consumer() as consumer:
+            tp = TopicPartition(self.topic, 0)
+            end_offset = await consumer.end_offsets([tp])
+            last_message_offset = end_offset[tp] - 1
+            if last_message_offset < 0:  # нет сообщений
+                log.error(f'There is no any messages in topic {self.topic}')
+                return None
+            else:
+                consumer.seek(tp, end_offset[tp] - 1)
+                try:
+                    record = await consumer.getone()
+                except ValidationError as err:
+                    log.error(f'Can not deserialize record. Exception -- {err.json()}')
+                else:
+                    return record.value
+            return None
 
 
 kafka_broker = KafkaBroker(settings.KAFKA_DSN)
