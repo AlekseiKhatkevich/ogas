@@ -67,6 +67,7 @@ class KafkaBroker(HealthCheckable):
             auto_offset_reset='latest',
             value_deserializer=deserializer,
             enable_auto_commit=False,
+            request_timeout_ms=2 * 1000,
         )
 
     async def service_name(self) -> str:

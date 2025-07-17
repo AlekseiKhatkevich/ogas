@@ -5,7 +5,6 @@ from typing import Any
 from pydantic.fields import FieldInfo
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict
 
-
 from common.settings.common import CommonSettings
 from common.settings.distributed_settings import DistributedSettings
 from common.settings.kafka import KafkaSettings
@@ -21,28 +20,17 @@ __all__ = (
 
 
 class KafkaSettingsSource(PydanticBaseSettingsSource):
+    """Получаем настойки из кафки из последнего сообщения в очереди."""
 
     @cached_property
-    def _last_settings_from_kafka(self):
+    def _last_settings_from_kafka(self) -> dict[str, str]:
         from common.resources.database.kafka.aio import kafka_broker
+
         settings_ser = asyncio.run(kafka_broker.fetch_last_message())
-        if settings_ser is not None:
-            settings = settings_ser.settings
-        else:
-            settings = {}
-        return settings
+        return settings_ser.settings if settings_ser is not None else {}
 
-    def get_field_value(
-            self, field: FieldInfo,
-            field_name: str
-    ) -> tuple[Any, str, bool]:
-
+    def get_field_value(self, field: FieldInfo, field_name: str) -> tuple[Any, str, bool]:
         return self._last_settings_from_kafka.get(field_name), field_name, False
-
-    def prepare_field_value(
-            self, field_name: str, field: FieldInfo, value: Any, value_is_complex: bool
-    ) -> Any:
-        return value
 
     def __call__(self) -> dict[str, Any]:
         d: dict[str, Any] = {}
