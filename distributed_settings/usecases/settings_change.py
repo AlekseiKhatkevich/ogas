@@ -1,6 +1,8 @@
+import contextlib
 from typing import TYPE_CHECKING
 
 import structlog
+
 
 from ravendb.changes.types import DocumentChange, DocumentChangeType
 
@@ -12,6 +14,7 @@ from distributed_settings.repositories.ravendb import SettingsRavenDBRepository
 if TYPE_CHECKING:
     from distributed_settings.repositories.ravendb.common import CommonRavenDBRepository
     from distributed_settings.serializers.settings_out import SettingsSerializer
+    from pydantic_settings import BaseSettings
 
 log = structlog.get_logger()
 
@@ -69,3 +72,13 @@ class DistributedSettingsHandlingUseCase(AbstractUseCase):
     async def fetch_last_setting(self) -> 'SettingsSerializer':
         log.info('Fetching last known settings from Kafka.')
         return await self._kafka_broker.fetch_last_message()
+
+    @staticmethod
+    def in_place_reload(old_settings: 'BaseSettings', new_settings: dict[str, str]) -> 'BaseSettings':
+        for name, value in new_settings.items():
+            with contextlib.suppress(ValueError):
+                setattr(old_settings, name, value)
+        return old_settings
+
+
+

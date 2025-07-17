@@ -9,6 +9,5 @@ class PrometheusSettings(BaseSettings):
     PROMETHEUS_MULTIPROC_DIR: Annotated[
         pathlib.Path,
         Field(
-            frozen=True,
             description='Prometheus использует для работы в многопроцессорном режиме.',
         )]

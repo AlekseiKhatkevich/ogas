@@ -5,6 +5,7 @@ from typing import AsyncGenerator, Mapping, Sequence, TypeAlias
 import pydantic_core
 import structlog
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer, TopicPartition
+from aiokafka.errors import KafkaConnectionError, KafkaTimeoutError
 from pydantic import BaseModel, ValidationError
 
 from common.resources.interfaces import HealthCheckable
@@ -105,7 +106,12 @@ class KafkaBroker:
         log.info(f'Fetching a message in last offset in topic -- {self.topic}.')
         async with kafka_broker._get_running_consumer() as consumer:
             tp = TopicPartition(self.topic, 0)
-            end_offset = await consumer.end_offsets([tp])
+            try:
+                end_offset = await consumer.end_offsets([tp])
+            except (KafkaConnectionError, KafkaTimeoutError) as err:
+                log.error(f'Can not connect to Kafka instance. Exception {err}.')
+                return None
+
             last_message_offset = end_offset[tp] - 1
             if last_message_offset < 0:  # нет сообщений
                 log.error(f'There is no any messages in topic {self.topic}')
@@ -116,9 +122,9 @@ class KafkaBroker:
                     record = await consumer.getone()
                 except ValidationError as err:
                     log.error(f'Can not deserialize record. Exception -- {err.json()}')
+                    return None
                 else:
                     return record.value
-            return None
 
 
 # noinspection PyTypeChecker, PyArgumentList
