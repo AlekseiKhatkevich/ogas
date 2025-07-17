@@ -26,7 +26,8 @@ class KafkaSettingsSource(PydanticBaseSettingsSource):
     def _last_settings_from_kafka(self) -> dict[str, str]:
         from common.resources.database.kafka.aio import kafka_broker
 
-        settings_ser = asyncio.run(kafka_broker.fetch_last_message())
+        loop = asyncio.get_event_loop()
+        settings_ser = loop.run_until_complete(kafka_broker.fetch_last_message())
         return settings_ser.settings if settings_ser is not None else {}
 
     def get_field_value(self, field: FieldInfo, field_name: str) -> tuple[Any, str, bool]:

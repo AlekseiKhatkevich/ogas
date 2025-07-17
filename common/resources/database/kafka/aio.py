@@ -45,7 +45,7 @@ def deserializer(value: bytes) -> 'SettingsSerializer':
     return SettingsSerializer.model_validate_json(value)
 
 
-class KafkaBroker(HealthCheckable):
+class KafkaBroker:
     def __init__(self, bootstrap_server: str) -> None:
         self.bootstrap_server = bootstrap_server
         self.topic = 'distset_ogas'
