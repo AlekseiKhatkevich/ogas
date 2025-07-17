@@ -7,8 +7,8 @@ import structlog
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer, TopicPartition
 from pydantic import BaseModel, ValidationError
 
-from common import settings
 from common.resources.interfaces import HealthCheckable
+from common.settings.kafka import KafkaSettings
 from distributed_settings.serializers.settings_out import SettingsSerializer
 
 log = structlog.get_logger()
@@ -48,7 +48,7 @@ def deserializer(value: bytes) -> 'SettingsSerializer':
 class KafkaBroker(HealthCheckable):
     def __init__(self, bootstrap_server: str) -> None:
         self.bootstrap_server = bootstrap_server
-        self.topic = f'{settings.KAFKA_DISTRIBUTED_SETTINGS_TOPIC_PREFIX}_{settings.APP_NAME}'
+        self.topic = 'distset_ogas'
 
     @property
     async def producer(self) -> AIOKafkaProducer:
@@ -66,6 +66,7 @@ class KafkaBroker(HealthCheckable):
             bootstrap_servers=self.bootstrap_server,
             auto_offset_reset='latest',
             value_deserializer=deserializer,
+            enable_auto_commit=False,
         )
 
     async def service_name(self) -> str:
@@ -119,4 +120,5 @@ class KafkaBroker(HealthCheckable):
             return None
 
 
-kafka_broker = KafkaBroker(settings.KAFKA_DSN)
+# noinspection PyTypeChecker, PyArgumentList
+kafka_broker = KafkaBroker(KafkaSettings().KAFKA_DSN)

@@ -65,3 +65,7 @@ class DistributedSettingsHandlingUseCase(AbstractUseCase):
     async def send_settings_to_kafka(self, messages: list[KafkaMessage]) -> None:
         log.info(f'Passing message to kafka, {messages}')
         await self._kafka_broker.send(messages)
+
+    async def fetch_last_setting(self) -> 'SettingsSerializer':
+        log.info('Fetching last known settings from Kafka.')
+        return await self._kafka_broker.fetch_last_message()
