@@ -3,9 +3,10 @@ import contextlib
 from ravendb import DocumentStore
 
 from common import settings
+from common.resources.interfaces import HealthCheckable
 
 
-class RavenDBDocumentStore:
+class RavenDBDocumentStore(HealthCheckable):
     def __init__(self,
                  url: str = settings.RAVEN_DB_SERVER_URL.unicode_string(),
                  db_name: str = settings.RAVEN_DB_DATABASE_NAME,
@@ -27,6 +28,16 @@ class RavenDBDocumentStore:
     def session(self):
         with self.store.open_session() as session:
             yield session
+
+    async def check_health(self):
+        with self.session as session, contextlib.suppress(RuntimeError):
+            session.load('test/huest')
+            return True
+        return False
+
+    @property
+    def service_name(self) -> str:
+        return 'RavenDB'
 
 
 raven_db_store = RavenDBDocumentStore()
