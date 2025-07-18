@@ -37,6 +37,10 @@ class KafkaSettingsSource(PydanticBaseSettingsSource):
     def __call__(self) -> dict[str, Any]:
         d: dict[str, Any] = {}
 
+        #  Если так GeneralSettings(_no_kafka_source=True), то пропускаем получение сеттингов из Кафки.
+        if self.current_state.get('_no_kafka_source', False):
+            return d
+
         for field_name, field in self.settings_cls.model_fields.items():
             field_value, field_key, value_is_complex = self.get_field_value(
                 field, field_name
@@ -73,6 +77,7 @@ class GeneralSettings(
         extra='allow',
         env_ignore_empty=True,
     )
+    _no_kafka_source: bool = PrivateAttr(default=False)
 
     @classmethod
     def settings_customise_sources(
