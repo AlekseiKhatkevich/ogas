@@ -1,6 +1,6 @@
 import asyncio
 from functools import cached_property
-from typing import Any, ClassVar
+from typing import Any
 
 from pydantic.fields import FieldInfo, PrivateAttr
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict

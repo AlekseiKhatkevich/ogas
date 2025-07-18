@@ -75,9 +75,10 @@ class DistributedSettingsHandlingUseCase(AbstractUseCase):
 
     @staticmethod
     def in_place_reload(old_settings: 'BaseSettings', new_settings: dict[str, str]) -> 'BaseSettings':
-        for name, value in new_settings.items():
-            with contextlib.suppress(ValueError):
-                setattr(old_settings, name, value)
+        old_settings.__init__(
+            _no_kafka_source=True,
+            **new_settings,
+        )
         return old_settings
 
 
