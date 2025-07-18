@@ -1,8 +1,8 @@
 import asyncio
 from functools import cached_property
-from typing import Any
+from typing import Any, ClassVar
 
-from pydantic.fields import FieldInfo
+from pydantic.fields import FieldInfo, PrivateAttr
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict
 
 from common.settings.common import CommonSettings
@@ -70,7 +70,8 @@ class GeneralSettings(
             'env/ravendb.env',
         ),
         env_file_encoding='utf-8',
-        extra='ignore',
+        extra='allow',
+        env_ignore_empty=True,
     )
 
     @classmethod
@@ -83,8 +84,8 @@ class GeneralSettings(
             file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
         return (
-            KafkaSettingsSource(settings_cls),
             init_settings,
+            KafkaSettingsSource(settings_cls),
             env_settings,
             dotenv_settings,
             file_secret_settings,
