@@ -1,11 +1,13 @@
 import contextlib
 import dataclasses
+import datetime
+import os
 from typing import AsyncGenerator, Mapping, Sequence, TypeAlias
 
 import pydantic_core
 import structlog
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer, TopicPartition
-from aiokafka.errors import KafkaConnectionError, KafkaTimeoutError
+from aiokafka.errors import KafkaConnectionError, KafkaError, KafkaTimeoutError
 from pydantic import BaseModel, ValidationError
 
 from common.resources.interfaces import HealthCheckable
@@ -46,8 +48,8 @@ def deserializer(value: bytes) -> 'SettingsSerializer':
     return SettingsSerializer.model_validate_json(value)
 
 
-class KafkaBroker:
-    def __init__(self, bootstrap_server: str) -> None:
+class KafkaBroker(HealthCheckable):
+    def __init__(self, bootstrap_server: str = KafkaSettings().KAFKA_DSN) -> None:
         self.bootstrap_server = bootstrap_server
         self.topic = 'distset_ogas'
 
@@ -75,7 +77,19 @@ class KafkaBroker:
         return 'Kafka_on_distributed_settings'
 
     async def check_health(self) -> bool:
-        return True
+        from common import settings
+        async with self._get_running_producer() as producer:
+            with contextlib.suppress(KafkaError):
+                await producer.send_and_wait(
+                    'health_check',
+                    dict(
+                        app=settings.APP_NAME,
+                        dt=datetime.datetime.now(tz=datetime.UTC).isoformat(),
+                        pid=os.getgid(),
+                    ),
+                )
+                return True
+            return False
 
     @contextlib.asynccontextmanager
     async def _get_running_producer(self) -> AsyncGenerator[AIOKafkaProducer]:
@@ -128,4 +142,4 @@ class KafkaBroker:
 
 
 # noinspection PyTypeChecker, PyArgumentList
-kafka_broker = KafkaBroker(KafkaSettings().KAFKA_DSN)
+kafka_broker = KafkaBroker()
