@@ -10,11 +10,3 @@ class LogfireSettings(BaseSettings):
         str,
         Field(repr=False, description='Logfire write token',),
     ]
-
-    # noinspection PyNestedDecorators
-    @field_validator('LOGFIRE_TOKEN', mode='after')
-    @classmethod
-    def set_env(cls, value: str) -> str:
-        if 'LOGFIRE_TOKEN' not in os.environ:
-            os.environ['LOGFIRE_TOKEN'] = value
-        return value

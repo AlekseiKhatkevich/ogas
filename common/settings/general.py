@@ -1,7 +1,9 @@
 import asyncio
+import pathlib
 from functools import cached_property
 from typing import Any
 
+from dotenv import load_dotenv
 from pydantic.fields import FieldInfo, PrivateAttr
 from pydantic_settings import BaseSettings, PydanticBaseSettingsSource, SettingsConfigDict
 
@@ -18,6 +20,12 @@ __all__ = (
     'general_settings',
     'GeneralSettings',
 )
+
+
+def _load_all_envs() -> None:
+    path = pathlib.Path('env/')
+    for file in path.glob('*.env'):
+        load_dotenv(file)
 
 
 class KafkaSettingsSource(PydanticBaseSettingsSource):
@@ -102,3 +110,4 @@ class GeneralSettings(
 
 # noinspection PyArgumentList
 general_settings = GeneralSettings()
+_load_all_envs()

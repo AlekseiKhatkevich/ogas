@@ -18,3 +18,7 @@ class CommonSettings(BaseSettings):
         AfterValidator(lambda v: v.lower()),
         Field(description='Наименование сервиса.'),
     ]
+    ENVIRONMENT: Annotated[
+        str,
+        Field(description='Наименование текущего окружения.')
+    ]

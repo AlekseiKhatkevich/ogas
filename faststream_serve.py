@@ -16,7 +16,7 @@ from prometheus_client import CollectorRegistry, make_asgi_app, multiprocess
 from center.faststream import (capabilities, operative_data, organization, organization_stock)
 from common import settings
 from common.faststream import product, settings as settings_routes
-
+from utils.logfire_related import logfire_configure
 from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
 
 __all__ = (
@@ -24,9 +24,7 @@ __all__ = (
     'app',
 )
 
-import logfire
-
-logfire.configure()
+logfire_configure()
 
 
 resource = Resource.create(attributes={'service.name': 'faststream'})
