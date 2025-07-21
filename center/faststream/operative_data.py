@@ -2,7 +2,6 @@ from faststream.kafka import KafkaRouter
 
 from center.faststream.dependencies import CurrentOrganizationDepBatch
 from common.faststream.filters import contentype_json
-from common.resources.database.prometheus.instrumenting import handler_latency
 from ..serializers import OperativeDataIn
 from ..usecases.operative_data import OperativeDataInSaveUseCase
 
@@ -23,7 +22,6 @@ router = KafkaRouter(prefix='operative_data_', )
     auto_commit_interval_ms=1000 * 1,
     group_id='operative_data_in_group',
 )
-@handler_latency.labels('receive_operative_data', ).time()
 async def receive_operative_data(op_info: list[OperativeDataIn],
                                  organizations: CurrentOrganizationDepBatch,
                                  ) -> None:

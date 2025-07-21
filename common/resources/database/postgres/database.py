@@ -1,6 +1,8 @@
 from contextlib import aclosing, asynccontextmanager
+from functools import cache
 from typing import AsyncGenerator
 
+import logfire
 import pydantic_core
 import ulid
 from prometheus_client import Counter, Histogram
@@ -16,6 +18,9 @@ from sqlalchemy.ext.asyncio import (
 
 from common import settings
 from common.resources.interfaces import HealthCheckable
+from utils.logfire_related import logfire_configure
+
+logfire_configure()
 
 
 class Database(HealthCheckable):
@@ -47,9 +52,17 @@ class Database(HealthCheckable):
         # noinspection PyUnresolvedReferences
         return cls.instance
 
+    @cache
+    def _instrument_logfire(self, engine):
+        logfire.instrument_sqlalchemy(
+            engine=engine,
+            enable_commenter=True,
+            enable_attribute_commenter=True,
+        )
+
     @property
     def engine(self) -> AsyncEngine:
-        return create_async_engine(
+        engine = create_async_engine(
             **dict(
                 url=settings.POSTGRES_DSN.unicode_string(),
                 execution_options={},
@@ -66,6 +79,8 @@ class Database(HealthCheckable):
                 },
             ) | self._kwargs,
         )
+        self._instrument_logfire(engine)
+        return engine
 
     @property
     def async_sessionmaker(self) -> async_sessionmaker:

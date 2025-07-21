@@ -5,19 +5,13 @@ from typing import Callable, Never
 from faststream import Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
-from faststream.kafka.prometheus import KafkaPrometheusMiddleware
-from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
 from prometheus_client import CollectorRegistry, make_asgi_app, multiprocess
 
 from center.faststream import (capabilities, operative_data, organization, organization_stock)
 from common import settings
 from common.faststream import product, settings as settings_routes
 from utils.logfire_related import logfire_configure
-from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
 
 __all__ = (
     'broker',
@@ -26,21 +20,13 @@ __all__ = (
 
 logfire_configure()
 
-
-resource = Resource.create(attributes={'service.name': 'faststream'})
-tracer_provider = TracerProvider(resource=resource)
-trace.set_tracer_provider(tracer_provider)
-exporter = OTLPSpanExporter(endpoint='http://localhost:4317')
-processor = BatchSpanProcessor(exporter)
-tracer_provider.add_span_processor(processor)
-
 registry = CollectorRegistry()
 
 broker = KafkaBroker(
     settings.KAFKA_DSN,
     middlewares=(
         # KafkaPrometheusMiddleware(registry=registry),
-        KafkaTelemetryMiddleware(),
+        # KafkaTelemetryMiddleware(),
     )
 )
 broker.include_router(capabilities.router)
@@ -112,7 +98,6 @@ async def sanity_check(logger: Logger) -> None:
 
 @app.on_startup
 async def distributed_settings_handle(logger: Logger) -> None:
-    from distributed_settings.usecases.settings_change import DistributedSettingsHandlingUseCase
     # use_case = DistributedSettingsHandlingUseCase()
     logger.info('Starting distributed settings handling.')
     # await use_case.execute()
