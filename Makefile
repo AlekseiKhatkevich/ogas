@@ -84,5 +84,8 @@ prometheus_ui: ## Prometheus UI browser
 raven_ui: ## RavenDB user interface
 	xdg-open http://127.0.0.1:8081/studio/index.html
 
+logfire_ui:  ## Logfire web UI
+	xdg-open https://logfire-eu.pydantic.dev/alekseikhatkevich/ogas
+
 
 
