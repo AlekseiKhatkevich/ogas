@@ -2,10 +2,12 @@ import asyncio
 import os
 from typing import Callable, Never
 
+import logfire
 from faststream import Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
 from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
+from faststream.kafka.prometheus import KafkaPrometheusMiddleware
 from prometheus_client import CollectorRegistry, make_asgi_app, multiprocess
 
 from center.faststream import (capabilities, operative_data, organization, organization_stock)
@@ -19,14 +21,15 @@ __all__ = (
 )
 
 logfire_configure()
+logfire.instrument_pydantic()
 
 registry = CollectorRegistry()
 
 broker = KafkaBroker(
     settings.KAFKA_DSN,
     middlewares=(
-        # KafkaPrometheusMiddleware(registry=registry),
-        # KafkaTelemetryMiddleware(),
+        KafkaPrometheusMiddleware(registry=registry),
+        KafkaTelemetryMiddleware(),
     )
 )
 broker.include_router(capabilities.router)
@@ -46,8 +49,9 @@ def make_metrics_app() -> Callable:
     return make_asgi_app(registry=registry)
 
 
-metrics_app = make_metrics_app()
+metrics_app = logfire.instrument_asgi(make_metrics_app(), )
 
+# noinspection PyTypeChecker
 app = AsgiFastStream(
     broker,
     asyncapi_path='/docs/asyncapi',

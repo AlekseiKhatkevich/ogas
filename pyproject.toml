@@ -12,7 +12,7 @@ dependencies = [
     "asyncstdlib>=3.13.1",
     "dishka>=1.6.0",
     "faststream[cli,kafka,otel,prometheus]>=0.5.40",
-    "logfire[sqlalchemy]>=3.25.0",
+    "logfire[asgi,sqlalchemy]>=3.25.0",
     "more-itertools>=10.7.0",
     "opentelemetry-exporter-otlp>=1.33.1",
     "prefect>=3.4.1",
@@ -47,4 +47,7 @@ filterwarnings = [
     "ignore:pytest-asyncio detected an unclosed event loop:DeprecationWarning",
     'ignore: asyncio_default_fixture_loop_scope:DeprecationWarning',
 ]
+
+[tool.logfire]
+pydantic_plugin_record = "all"
 

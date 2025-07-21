@@ -8,5 +8,9 @@ __all__ = (
     'logfire_configure',
 )
 
-logfire_configure = partial(logfire.configure, environment=settings.ENVIRONMENT)
+logfire_configure = partial(
+    logfire.configure,
+    environment=settings.ENVIRONMENT,
+    service_name=settings.APP_NAME,
+)
 

@@ -5,6 +5,7 @@ from typing import AsyncGenerator
 import logfire
 import pydantic_core
 import ulid
+from logfire.integrations.sqlalchemy import CommenterOptions
 from prometheus_client import Counter, Histogram
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -57,6 +58,7 @@ class Database(HealthCheckable):
         logfire.instrument_sqlalchemy(
             engine=engine,
             enable_commenter=True,
+            commenter_options=CommenterOptions(opentelemetry_values=True),
             enable_attribute_commenter=True,
         )
 
