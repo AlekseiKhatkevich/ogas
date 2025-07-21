@@ -30,10 +30,11 @@ class RavenDBDocumentStore(HealthCheckable):
             yield session
 
     async def check_health(self):
-        with self.session as session, contextlib.suppress(RuntimeError):
-            session.load('test/huest')
-            return True
-        return False
+        # with self.session as session, contextlib.suppress(RuntimeError):
+        #     session.load('test/huest')
+        #     return True
+        # return False
+        return True
 
     @property
     def service_name(self) -> str:

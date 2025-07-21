@@ -74,7 +74,7 @@ class GeneralSettings(
             'env/ravendb.env',
         ),
         env_file_encoding='utf-8',
-        extra='allow',
+        extra='ignore',
         env_ignore_empty=True,
     )
     _no_kafka_source: bool = PrivateAttr(default=False)

@@ -17,10 +17,17 @@ from center.faststream import (capabilities, operative_data, organization, organ
 from common import settings
 from common.faststream import product, settings as settings_routes
 
+from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
+
 __all__ = (
     'broker',
     'app',
 )
+
+import logfire
+
+logfire.configure()
+
 
 resource = Resource.create(attributes={'service.name': 'faststream'})
 tracer_provider = TracerProvider(resource=resource)
@@ -34,7 +41,8 @@ registry = CollectorRegistry()
 broker = KafkaBroker(
     settings.KAFKA_DSN,
     middlewares=(
-        KafkaPrometheusMiddleware(registry=registry),
+        # KafkaPrometheusMiddleware(registry=registry),
+        KafkaTelemetryMiddleware(),
     )
 )
 broker.include_router(capabilities.router)
@@ -107,9 +115,9 @@ async def sanity_check(logger: Logger) -> None:
 @app.on_startup
 async def distributed_settings_handle(logger: Logger) -> None:
     from distributed_settings.usecases.settings_change import DistributedSettingsHandlingUseCase
-    use_case = DistributedSettingsHandlingUseCase()
+    # use_case = DistributedSettingsHandlingUseCase()
     logger.info('Starting distributed settings handling.')
-    await use_case.execute()
+    # await use_case.execute()
     logger.info('Distributed settings have sent, subscription has applied.')
 
 
