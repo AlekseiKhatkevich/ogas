@@ -1,9 +1,8 @@
 import asyncio
 import os
 from typing import Callable, Never
-
-import logfire
 import structlog
+import logfire
 from faststream import Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker

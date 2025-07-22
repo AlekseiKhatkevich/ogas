@@ -12,5 +12,7 @@ logfire_configure = partial(
     logfire.configure,
     environment=settings.ENVIRONMENT,
     service_name=settings.APP_NAME,
+    token=settings.LOGFIRE_TOKEN,
+    distributed_tracing=True,
 )
 
