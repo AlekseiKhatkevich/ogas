@@ -110,4 +110,4 @@ class GeneralSettings(
 
 # noinspection PyArgumentList
 general_settings = GeneralSettings()
-_load_all_envs()
+# _load_all_envs()

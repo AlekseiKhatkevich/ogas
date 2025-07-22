@@ -39,16 +39,16 @@ class DistributedSettingsHandlingUseCase(AbstractUseCase):
         return f'{settings.KAFKA_DISTRIBUTED_SETTINGS_TOPIC_PREFIX}_{app.lower()}'
 
     async def on_change(self, change: DocumentChange) -> None:
-        log.info(f'Got change -- {change} from RavenDB')
+        await log.ainfo(f'Got change -- {change} from RavenDB')
         if change.type_of_change in self._tracking_states:
             settings_from_db = self.load_settings(change.key)
-            log.info(f'Fetched settings entry -- {settings_from_db} from RavenDB.')
+            await log.ainfo(f'Fetched settings entry -- {settings_from_db} from RavenDB.')
             topic = self._construct_topic(settings_from_db.app)
             await self.send_settings_to_kafka([KafkaMessage(topic, settings_from_db)])
 
     async def on_startup(self) -> None:
         settings_from_db = self.load_whole_collection()
-        log.info(f'Startup::Fetched settings entry -- {settings_from_db} from RavenDB.')
+        await log.ainfo(f'Startup::Fetched settings entry -- {settings_from_db} from RavenDB.')
         payload = [
             KafkaMessage(self._construct_topic(setting.app), setting)
             for setting in settings_from_db
@@ -66,11 +66,11 @@ class DistributedSettingsHandlingUseCase(AbstractUseCase):
         self.repository.track_changes(self.on_change)
 
     async def send_settings_to_kafka(self, messages: list[KafkaMessage]) -> None:
-        log.info(f'Passing message to kafka, {messages}')
+        await log.ainfo(f'Passing message to kafka, {messages}')
         await self._kafka_broker.send(messages)
 
     async def fetch_last_setting(self) -> 'SettingsSerializer':
-        log.info('Fetching last known settings from Kafka.')
+        await log.ainfo('Fetching last known settings from Kafka.')
         return await self._kafka_broker.fetch_last_message()
 
     @staticmethod

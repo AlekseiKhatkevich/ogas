@@ -106,10 +106,10 @@ class KafkaBroker(HealthCheckable):
         await consumer.stop()
 
     async def send(self, messages: list[KafkaMessage]) -> None:
-        log.info(f'Kafka, got messages {messages}')
+        await log.ainfo(f'Kafka, got messages {messages}')
         async with self._get_running_producer() as producer:
             for message in messages:
-                log.info(f'Kafka, sending message {message}')
+                await log.ainfo(f'Kafka, sending message {message}')
                 await producer.send_and_wait(
                     message.topic,
                     message.content,
@@ -117,25 +117,25 @@ class KafkaBroker(HealthCheckable):
                 )
 
     async def fetch_last_message(self) -> SettingsSerializer | None:
-        log.info(f'Fetching a message in last offset in topic -- {self.topic}.')
+        await log.ainfo(f'Fetching a message in last offset in topic -- {self.topic}.')
         async with kafka_broker._get_running_consumer() as consumer:
             tp = TopicPartition(self.topic, 0)
             try:
                 end_offset = await consumer.end_offsets([tp])
             except (KafkaConnectionError, KafkaTimeoutError) as err:
-                log.error(f'Can not connect to Kafka instance. Exception {err}.')
+                await log.aerror(f'Can not connect to Kafka instance. Exception {err}.')
                 return None
 
             last_message_offset = end_offset[tp] - 1
             if last_message_offset < 0:  # нет сообщений
-                log.error(f'There is no any messages in topic {self.topic}')
+                await log.aerror(f'There is no any messages in topic {self.topic}')
                 return None
             else:
                 consumer.seek(tp, end_offset[tp] - 1)
                 try:
                     record = await consumer.getone()
                 except ValidationError as err:
-                    log.error(f'Can not deserialize record. Exception -- {err.json()}')
+                    await log.aerror(f'Can not deserialize record. Exception -- {err.json()}')
                     return None
                 else:
                     return record.value

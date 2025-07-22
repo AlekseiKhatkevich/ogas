@@ -12,7 +12,7 @@ router = KafkaRouter(prefix=f'{settings.KAFKA_DISTRIBUTED_SETTINGS_TOPIC_PREFIX}
 
 @router.subscriber(settings.APP_NAME, title='settings-in')
 async def fetch_and_apply_settings(settings_in: SettingsSerializer) -> None:
-    log.info(f'Got settings from Kafka --  {settings_in}.')
+    await log.ainfo(f'Got settings from Kafka --  {settings_in}.')
     use_case = DistributedSettingsHandlingUseCase()
     use_case.in_place_reload(settings, settings_in.settings)
-    log.info(f'Settings reloaded -- {settings}')
+    await log.ainfo(f'Settings reloaded -- {settings}')

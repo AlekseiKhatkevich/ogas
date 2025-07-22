@@ -3,6 +3,7 @@ import os
 from typing import Callable, Never
 
 import logfire
+import structlog
 from faststream import Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
@@ -22,6 +23,18 @@ __all__ = (
 
 logfire_configure()
 logfire.instrument_pydantic()
+
+structlog.configure(
+    processors=[
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
+        structlog.processors.StackInfoRenderer(),
+        structlog.dev.set_exc_info,
+        structlog.processors.TimeStamper(fmt='%Y-%m-%d %H:%M:%S', utc=True),
+        logfire.StructlogProcessor(),
+        structlog.dev.ConsoleRenderer(),
+    ],
+)
 
 registry = CollectorRegistry()
 

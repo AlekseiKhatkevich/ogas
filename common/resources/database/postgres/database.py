@@ -1,5 +1,5 @@
 from contextlib import aclosing, asynccontextmanager
-from functools import cache
+from functools import lru_cache
 from typing import AsyncGenerator
 
 import logfire
@@ -53,7 +53,7 @@ class Database(HealthCheckable):
         # noinspection PyUnresolvedReferences
         return cls.instance
 
-    @cache
+    @lru_cache(maxsize=32)
     def _instrument_logfire(self, engine):
         logfire.instrument_sqlalchemy(
             engine=engine,
