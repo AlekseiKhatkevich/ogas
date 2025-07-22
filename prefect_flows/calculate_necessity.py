@@ -1,10 +1,15 @@
-import asyncio
 import functools
 from typing import Callable
-from prefect.concurrency.asyncio import concurrency
+
 import asyncpg
 from prefect import flow, serve, task
+from prefect.concurrency.asyncio import concurrency
 from prefect.logging import get_run_logger
+
+from prefect_flows import prefect_logfire
+
+
+# python -m  prefect_flows.calculate_necessity
 
 
 def retry_on(*exceptions) -> Callable:
@@ -31,6 +36,7 @@ retry_on_db_failures = functools.partial(
     retry_delay_seconds=60 * 5,
     timeout_seconds=60 * 2,
 )
+@prefect_logfire.instrument(span_name='prefect_calculate_necessities')
 async def calculate_necessities() -> None:
     from center.usecases.operative_data import NecessityCalculationUseCase
     use_case = NecessityCalculationUseCase()
@@ -46,6 +52,7 @@ async def calculate_necessities() -> None:
     retry_delay_seconds=60 * 5,
     timeout_seconds=60 * 5,
 )
+@prefect_logfire.instrument(span_name='prefect_calculate_manufacturing_plan')
 async def calculate_manufacturing_plan() -> None:
     from center.usecases.manufacturing_plan import ManufacturingPlanUseCase
     use_case = ManufacturingPlanUseCase()
@@ -56,6 +63,7 @@ async def calculate_manufacturing_plan() -> None:
 
 
 @flow
+@prefect_logfire.instrument(span_name='prefect_calc_necessities_and_plan')
 async def calc_necessities_and_plan() -> None:
     await calculate_necessities()
     await calculate_manufacturing_plan()
