@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, NonNegativeInt
 
 from center.enums import Period, Role
 from utils.pydantic_utils import hashable_model
+from logfire.integrations.pydantic import PluginSettings
 
 __all__ = (
     'CapabilityIn',
@@ -12,7 +13,10 @@ __all__ = (
 
 
 @hashable_model(fields=['organization_name', 'product_id', 'period'])
-class CapabilityIn(BaseModel):
+class CapabilityIn(
+    BaseModel,
+    plugin_settings=PluginSettings(logfire={'record': 'all', 'tags': ['kafka', 'out', 'capability']}),
+):
     """
     Модель для сериализации входящих данный от компании по производительности в единицу времени.
     """

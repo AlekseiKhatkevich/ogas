@@ -3,6 +3,7 @@ import math
 from typing import AsyncIterator, TYPE_CHECKING
 from weakref import WeakKeyDictionary
 
+import logfire
 import ulid
 from asyncstdlib import groupby
 
@@ -53,6 +54,7 @@ class ManufacturingPlanUseCase(AbstractUseCase):
             await self._broker.connect()
         return self._broker
 
+    @logfire.instrument()
     async def send_to_kafka(self, plan: list[PlanORM]) -> None:
         topic_prefix = 'plan_out_'
         for individual_plan in plan:
@@ -65,6 +67,11 @@ class ManufacturingPlanUseCase(AbstractUseCase):
                 serialize_unknown=True,
             )
             broker_inst = await self.get_broker()
+            logfire.info(
+                'Sending plan to kafka...',
+                _tags=['plan', 'kafka', 'out'],
+                message=message,
+            )
             await broker_inst.publish(message, topic)
 
     async def execute(self) -> None:

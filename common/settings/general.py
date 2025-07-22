@@ -38,7 +38,7 @@ class KafkaSettingsSource(PydanticBaseSettingsSource):
 
             try:
                 loop = asyncio.get_event_loop()
-            except RuntimeError as e:
+            except RuntimeError:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
 
@@ -47,7 +47,6 @@ class KafkaSettingsSource(PydanticBaseSettingsSource):
             loop.close()
 
         return settings_ser.settings if settings_ser is not None else {}
-        # return {}
 
     def get_field_value(self, field: FieldInfo, field_name: str) -> tuple[Any, str, bool]:
         return self._last_settings_from_kafka.get(field_name), field_name, False
