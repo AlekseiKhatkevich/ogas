@@ -49,5 +49,5 @@ filterwarnings = [
 ]
 
 [tool.logfire]
-pydantic_plugin_record = "all"
+pydantic_plugin_record = "failure"
 

@@ -34,11 +34,20 @@ class KafkaSettingsSource(PydanticBaseSettingsSource):
     @cached_property
     def _last_settings_from_kafka(self) -> dict[str, str]:
         from common.resources.database.kafka.aio import kafka_broker
+        try:
 
-        loop = asyncio.get_event_loop()
-        settings_ser = loop.run_until_complete(kafka_broker.fetch_last_message())
+            try:
+                loop = asyncio.get_event_loop()
+            except RuntimeError as e:
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+
+            settings_ser = loop.run_until_complete(kafka_broker.fetch_last_message())
+        finally:
+            loop.close()
 
         return settings_ser.settings if settings_ser is not None else {}
+        # return {}
 
     def get_field_value(self, field: FieldInfo, field_name: str) -> tuple[Any, str, bool]:
         return self._last_settings_from_kafka.get(field_name), field_name, False

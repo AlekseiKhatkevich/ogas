@@ -1,8 +1,11 @@
 from prefect import flow, serve
 from sqlalchemy import text
 
+from prefect_flows import prefect_logfire
+
 
 @flow(retries=12, retry_delay_seconds=60)
+@prefect_logfire.instrument(span_name='import_gosts')
 async def import_gosts() -> None:
     """
     Импорт данных из внешнего CSV файла в модель standard.
