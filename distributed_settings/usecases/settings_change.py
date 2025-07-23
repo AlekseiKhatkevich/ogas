@@ -48,7 +48,7 @@ class DistributedSettingsHandlingUseCase(AbstractUseCase):
 
     async def on_startup(self) -> None:
         settings_from_db = self.load_whole_collection()
-        await log.ainfo(f'Startup::Fetched settings entry -- {settings_from_db} from RavenDB.')
+        await log.ainfo(f'Startup::Fetched settings entry from RavenDB.', settings=settings_from_db)
         payload = [
             KafkaMessage(self._construct_topic(setting.app), setting)
             for setting in settings_from_db

@@ -3,6 +3,7 @@ import datetime
 import math
 import random
 
+import logfire
 import sqlalchemy as sa
 
 from center.orm_models import OrganizationORM
@@ -11,6 +12,8 @@ from common.orm_models import ProductORM
 from common.resources.database.postgres import db
 from constants import ORGANIZATION_TEST_TOKEN
 from faststream_serve import broker
+
+operative_data_generated = logfire.metric_counter('operative_data_generated')
 
 
 def random_without_zero() -> int:
@@ -56,3 +59,4 @@ async def generate(limit: int = math.inf, sleep: float = 0.05) -> None:
             ))
 
         counter += 1
+        operative_data_generated.add(1)

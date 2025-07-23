@@ -1,5 +1,6 @@
 import contextlib
 
+import logfire
 from ravendb import DocumentStore
 
 from common import settings
@@ -25,6 +26,7 @@ class RavenDBDocumentStore(HealthCheckable):
 
     @property
     @contextlib.contextmanager
+    @logfire.instrument('ravendb_session', allow_generator=True, record_return=True)
     def session(self):
         with self.store.open_session() as session:
             yield session

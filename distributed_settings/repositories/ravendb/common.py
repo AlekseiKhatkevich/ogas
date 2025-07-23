@@ -1,7 +1,7 @@
 import asyncio
 from abc import ABC, abstractmethod
 from typing import Callable, TYPE_CHECKING
-
+import logfire
 from common.resources.database.ravendb.store import RavenDBDocumentStore, raven_db_store
 
 if TYPE_CHECKING:
@@ -31,6 +31,7 @@ class AbstractRavenDBRepository(ABC):
 class CommonRavenDBRepository[OT](AbstractRavenDBRepository):
     _collection: str
     _object_type: OT = OT
+    _tags = ['ravenDB', 'in', 'distributed_settings', ]
 
     def load(self, key: str) -> OT:
         with self.store.session as session:
@@ -38,7 +39,9 @@ class CommonRavenDBRepository[OT](AbstractRavenDBRepository):
 
     def query_collection(self) -> 'DocumentQuery[OT]':
         with self.store.session as session:
-            return session.query_collection(self._collection, self._object_type)
+            settings_from_db = session.query_collection(self._collection, self._object_type)
+            logfire.info('Got settings from ravenDB', settings=settings_from_db, _tags=self._tags)
+            return settings_from_db
 
     def track_changes(self, callback_f: Callable[['DocumentChange'], None]) -> None:
         self.store.store.changes().for_documents_in_collection(
