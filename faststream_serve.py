@@ -40,7 +40,7 @@ registry = CollectorRegistry()
 broker = KafkaBroker(
     settings.KAFKA_DSN,
     middlewares=(
-        KafkaPrometheusMiddleware(registry=registry),
+        # KafkaPrometheusMiddleware(registry=registry),
         KafkaTelemetryMiddleware(),
     )
 )
