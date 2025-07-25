@@ -15,6 +15,8 @@ from common import settings
 from common.faststream import product, settings as settings_routes
 from utils.logfire_related import logfire_configure
 
+from faststream.nats import NatsBroker
+
 __all__ = (
     'broker',
     'app',
@@ -50,6 +52,9 @@ broker.include_router(organization.router)
 broker.include_router(operative_data.router)
 broker.include_router(organization_stock.router)
 broker.include_router(settings_routes.router)
+
+
+nc_broker = NatsBroker(settings.NATS_DSN)
 
 
 def make_metrics_app() -> Callable:

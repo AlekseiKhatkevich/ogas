@@ -11,6 +11,7 @@ from common.settings.common import CommonSettings
 from common.settings.distributed_settings import DistributedSettings
 from common.settings.kafka import KafkaSettings
 from common.settings.logfire import LogfireSettings
+from common.settings.nats import NatsSettings
 from common.settings.postgres import PostgresSettings
 from common.settings.prometheus import PrometheusSettings
 from common.settings.ravendb import RavenDBSettings
@@ -77,6 +78,7 @@ class GeneralSettings(
     PrometheusSettings,
     DistributedSettings,
     LogfireSettings,
+    NatsSettings,
     BaseSettings,
 ):
     model_config = SettingsConfigDict(
@@ -88,6 +90,7 @@ class GeneralSettings(
             'env/prometheus.env',
             'env/ravendb.env',
             'env/logfire.env',
+            'env/nats.env',
         ),
         env_file_encoding='utf-8',
         extra='ignore',

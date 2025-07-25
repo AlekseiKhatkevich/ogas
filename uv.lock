@@ -441,6 +441,9 @@ cli = [
 kafka = [
     { name = "aiokafka" },
 ]
+nats = [
+    { name = "nats-py" },
+]
 otel = [
     { name = "opentelemetry-sdk" },
 ]
@@ -847,6 +850,12 @@ wheels = [
 ]
 
 [[package]]
+name = "nats-py"
+version = "2.11.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/65/be/757c8af63596453daaa42cc21be51aa42fc6b23cc9d4347784f99c8357b5/nats_py-2.11.0.tar.gz", hash = "sha256:fb1097db8b520bb4c8f5ad51340ca54d9fa54dbfc4ecc81c3625ef80994b6100", size = 114186, upload-time = "2025-07-22T08:41:08.589Z" }
+
+[[package]]
 name = "oauthlib"
 version = "3.3.1"
 source = { registry = "https://pypi.org/simple" }
@@ -866,7 +875,7 @@ dependencies = [
     { name = "asyncpg" },
     { name = "asyncstdlib" },
     { name = "dishka" },
-    { name = "faststream", extra = ["cli", "kafka", "otel", "prometheus"] },
+    { name = "faststream", extra = ["cli", "kafka", "nats", "otel", "prometheus"] },
     { name = "logfire", extra = ["asgi", "sqlalchemy"] },
     { name = "more-itertools" },
     { name = "opentelemetry-exporter-otlp" },
@@ -898,7 +907,7 @@ requires-dist = [
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "asyncstdlib", specifier = ">=3.13.1" },
     { name = "dishka", specifier = ">=1.6.0" },
-    { name = "faststream", extras = ["cli", "kafka", "otel", "prometheus"], specifier = ">=0.5.40" },
+    { name = "faststream", extras = ["cli", "kafka", "nats", "otel", "prometheus"], specifier = ">=0.5.40" },
     { name = "logfire", extras = ["asgi", "sqlalchemy"], specifier = ">=3.25.0" },
     { name = "more-itertools", specifier = ">=10.7.0" },
     { name = "opentelemetry-exporter-otlp", specifier = ">=1.33.1" },
