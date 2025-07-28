@@ -2,7 +2,7 @@ import datetime
 from typing import Annotated
 
 import ulid
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveFloat, NonNegativeFloat
 
 __all__ = (
     'OrganizationCurrentInfoOut',
@@ -17,15 +17,15 @@ class ProductionUnitCurrentInfo(BaseModel):
         Field(description='Id продукта.'),
     ]
     plan_value: Annotated[
-        float,
-        Field(description='Производственный план на сегодня.'),
+        NonNegativeFloat,
+        Field(description='Производственный план на сегодня.', ),
     ]
     fact_value: Annotated[
-        float,
+        NonNegativeFloat,
         Field(description='Факт на сегодня.'),
     ] = 0
     instant_performance_value: Annotated[
-        float,
+        NonNegativeFloat,
         Field(description='Мгновенная текущая производительность',)
     ]
     instant_performance_period: Annotated[

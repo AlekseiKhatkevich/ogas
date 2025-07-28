@@ -7,6 +7,7 @@ from faststream import FastStream, Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
 from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
+from faststream.nats.opentelemetry import NatsTelemetryMiddleware
 from faststream.kafka.prometheus import KafkaPrometheusMiddleware
 from prometheus_client import CollectorRegistry, make_asgi_app, multiprocess
 
@@ -62,7 +63,10 @@ broker.include_router(organization_stock.router)
 broker.include_router(settings_routes.router)
 
 #  NATS HERE !!!
-nc_broker = NatsBroker(settings.NATS_DSN.unicode_string())
+nc_broker = NatsBroker(
+    settings.NATS_DSN.unicode_string(),
+    middlewares=(NatsTelemetryMiddleware(),),
+)
 nc_broker.include_router(current_info.router)
 nc_app = FastStream(nc_broker)
 

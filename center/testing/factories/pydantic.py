@@ -10,7 +10,7 @@ from pydantic.types import SecretStr
 from center.serializers import (
     CapabilityIn,
     OperativeDataIn,
-    OrganizationStockIn,
+    OrganizationCurrentInfoOut, OrganizationStockIn,
     OrganizationUpdateIn,
 )
 
@@ -19,6 +19,7 @@ __all__ = (
     'OrganizationUpdateInFactory',
     'OperativeDataInFactory',
     'OrganizationStockInFactory',
+    'OrganizationCurrentInfoOutFactory',
 )
 
 
@@ -61,3 +62,8 @@ class OperativeDataInFactory(CustomFactory[OperativeDataIn]):
 class OrganizationStockInFactory(CustomFactory[OrganizationStockIn]):
     min_level = max_level = necessity = None
     is_active = True
+
+
+class OrganizationCurrentInfoOutFactory(CustomFactory[OrganizationCurrentInfoOut]):
+    __min_collection_length__ = 1
+    __max_collection_length__ = 15
