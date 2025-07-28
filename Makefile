@@ -8,6 +8,9 @@ test: path =
 test: args = -vv
 faststream: reload =
 faststream: workers = 1
+faststream_nats: reload =
+faststream_nats: workers = 1
+
 
 OS := $(shell uname)
 CPU_CORES := $(shell nproc)
@@ -74,6 +77,9 @@ kafka_ui_server_stop: ## Stop Kafka UI server
 
 faststream: ## Run faststream
 	uv run faststream run faststream_serve:app $(reload) --workers $(workers)
+
+faststream_nats: ## Run faststream with NATS
+	uv run faststream run faststream_serve:nc_app --reload --workers $(workers)
 
 prometheus_metrics_endpoint: ## Prometheus metric`s endpoint
 	xdg-open http://localhost:8000/metrics

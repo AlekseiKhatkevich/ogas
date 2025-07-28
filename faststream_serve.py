@@ -3,14 +3,20 @@ import os
 from typing import Callable, Never
 import structlog
 import logfire
-from faststream import Logger
+from faststream import FastStream, Logger
 from faststream.asgi import AsgiFastStream
 from faststream.kafka import KafkaBroker
 from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
 from faststream.kafka.prometheus import KafkaPrometheusMiddleware
 from prometheus_client import CollectorRegistry, make_asgi_app, multiprocess
 
-from center.faststream import (capabilities, operative_data, organization, organization_stock)
+from center.faststream import (
+    capabilities,
+    operative_data,
+    organization,
+    organization_stock,
+    current_info,
+)
 from common import settings
 from common.faststream import product, settings as settings_routes
 from utils.logfire_related import logfire_configure
@@ -20,6 +26,8 @@ from faststream.nats import NatsBroker
 __all__ = (
     'broker',
     'app',
+    'nc_broker',
+    'nc_app',
 )
 
 logfire_configure()
@@ -53,8 +61,10 @@ broker.include_router(operative_data.router)
 broker.include_router(organization_stock.router)
 broker.include_router(settings_routes.router)
 
-
-nc_broker = NatsBroker(settings.NATS_DSN)
+#  NATS HERE !!!
+nc_broker = NatsBroker(settings.NATS_DSN.unicode_string())
+nc_broker.include_router(current_info.router)
+nc_app = FastStream(nc_broker)
 
 
 def make_metrics_app() -> Callable:
