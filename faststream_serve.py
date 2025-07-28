@@ -17,6 +17,7 @@ from center.faststream import (
     organization,
     organization_stock,
     current_info,
+    files,
 )
 from common import settings
 from common.faststream import product, settings as settings_routes
@@ -68,6 +69,7 @@ nc_broker = NatsBroker(
     middlewares=(NatsTelemetryMiddleware(),),
 )
 nc_broker.include_router(current_info.router)
+nc_broker.include_router(files.router)
 nc_app = FastStream(nc_broker)
 
 

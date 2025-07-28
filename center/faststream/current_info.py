@@ -29,4 +29,3 @@ async def factory_responder(
         body=data,
         headers={'token': constants.ORGANIZATION_TEST_TOKEN},
     )
-
