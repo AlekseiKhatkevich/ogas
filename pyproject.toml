@@ -9,6 +9,7 @@ dependencies = [
     "alembic-postgresql-enum>=1.7.0",
     "alembic-utils>=0.8.8",
     "asyncpg>=0.30.0",
+    "asyncssh>=2.21.0",
     "asyncstdlib>=3.13.1",
     "dishka>=1.6.0",
     "faststream[cli,kafka,nats,otel,prometheus]>=0.5.40",

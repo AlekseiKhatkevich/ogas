@@ -162,6 +162,19 @@ wheels = [
 ]
 
 [[package]]
+name = "asyncssh"
+version = "2.21.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/e8/d6/823ed5a227f7da70b33681e49eec4a36fae31b9296b27a8d6aead2bd3f77/asyncssh-2.21.0.tar.gz", hash = "sha256:450fe13bb8d86a8f4e7d7b5fafce7791181ca3e7c92e15bbc45dfb25866e48b3", size = 539740, upload-time = "2025-05-03T13:42:05.945Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/99/56/db25216aa7f385ec71fdc489af80812171515cddbe68c0e515e98a291390/asyncssh-2.21.0-py3-none-any.whl", hash = "sha256:cf7f3dfa52b2cb4ad31f0d77ff0d0a8fdd850203da84a0e72e62c36fdd4daf4b", size = 374919, upload-time = "2025-05-03T13:42:04.539Z" },
+]
+
+[[package]]
 name = "asyncstdlib"
 version = "3.13.1"
 source = { registry = "https://pypi.org/simple" }
@@ -873,6 +886,7 @@ dependencies = [
     { name = "alembic-postgresql-enum" },
     { name = "alembic-utils" },
     { name = "asyncpg" },
+    { name = "asyncssh" },
     { name = "asyncstdlib" },
     { name = "dishka" },
     { name = "faststream", extra = ["cli", "kafka", "nats", "otel", "prometheus"] },
@@ -905,6 +919,7 @@ requires-dist = [
     { name = "alembic-postgresql-enum", specifier = ">=1.7.0" },
     { name = "alembic-utils", specifier = ">=0.8.8" },
     { name = "asyncpg", specifier = ">=0.30.0" },
+    { name = "asyncssh", specifier = ">=2.21.0" },
     { name = "asyncstdlib", specifier = ">=3.13.1" },
     { name = "dishka", specifier = ">=1.6.0" },
     { name = "faststream", extras = ["cli", "kafka", "nats", "otel", "prometheus"], specifier = ">=0.5.40" },
