@@ -1,7 +1,7 @@
 import aiofiles
-import asyncssh
 from nats.js.object_store import ObjectStore
 
+from common.resources.ssh.sftp import ssh_repository
 from common.usecases.common import AbstractUseCase
 
 
@@ -14,12 +14,9 @@ class UploadFileViaSFTPUseCase(AbstractUseCase):
             await temp_file.write(self.file_obj.data)
             await temp_file.flush()
 
-            async with asyncssh.connect('localhost', username='sftpuser', password='1q2w3e') as conn:
-                async with conn.start_sftp_client() as sftp:
-                    await sftp.put(
-                        temp_file.name,
-                        remotepath=self.file_obj.info.name,
-                        preserve=True,
-                    )
-
-
+            async with ssh_repository.sftp_client as sftp:
+                await sftp.put(
+                    temp_file.name,
+                    remotepath=self.file_obj.info.name,
+                    preserve=True,
+                )

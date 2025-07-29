@@ -26,7 +26,7 @@ class SSHRepository:
     @asynccontextmanager
     async def connection(self) -> AsyncGenerator['SSHClientConnection']:
         async with asyncssh.connect(self.host, username=self.username, password=self.password) as conn:
-            yield conn.connection_lost()
+            yield conn
 
     @property
     @asynccontextmanager
@@ -40,8 +40,8 @@ ssh_repository: SSHRepository
 
 
 @cache
-def _get_ssh_repository():
-    return SSHRepository(settings.SFTP_HOST, settings.SFTP_USERNAME, settings.SFTP_PASSWORD)
+def _get_ssh_repository() -> SSHRepository:
+    return SSHRepository(settings.SFTP_HOST, settings.SFTP_USERNAME, settings.SFTP_PASSWORD.get_secret_value())
 
 
 def __getattr__(name: str) -> Any:
