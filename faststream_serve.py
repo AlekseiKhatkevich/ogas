@@ -9,6 +9,7 @@ from faststream.kafka import KafkaBroker
 from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
 from faststream.nats.opentelemetry import NatsTelemetryMiddleware
 from faststream.kafka.prometheus import KafkaPrometheusMiddleware
+from nats.js.api import StorageType
 from prometheus_client import CollectorRegistry, make_asgi_app, multiprocess
 
 from center.faststream import (
@@ -140,6 +141,17 @@ async def distributed_settings_handle(logger: Logger) -> None:
     # logger.info('Starting distributed settings handling.')
     # await use_case.execute()
     # logger.info('Distributed settings have sent, subscription has applied.')
+
+
+@app.after_startup
+async def create_nats_object_storage() -> None:
+    """Создаем бакет для получения файлов от организаций."""
+    await nc_broker.object_storage(
+        'file_upload',
+        description='File upload bucket.',
+        storage=StorageType.FILE,
+        ttl=60 * 60 * 24,
+    )
 
 
 async def main() -> Never:

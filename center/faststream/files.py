@@ -14,7 +14,7 @@ router = NatsRouter(prefix='file_', )
 
 @router.subscriber(
     'upload',
-    obj_watch=ObjWatch(declare=True, ignore_deletes=True),
+    obj_watch=ObjWatch(ignore_deletes=True),
 )
 async def handler(
         filename: str,
