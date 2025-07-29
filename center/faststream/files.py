@@ -1,6 +1,7 @@
 import logfire
 from faststream.nats import NatsRouter, ObjWatch
 from faststream.nats.annotations import ObjectStorage
+from nats.js.object_store import ObjectStore
 
 from center.usecases.upload_file_via_sftp import UploadFileViaSFTPUseCase
 
@@ -20,11 +21,18 @@ async def handler(
         filename: str,
         storage: ObjectStorage,
 ) -> None:
-    file = await storage.get(filename)
-    logfire.info('Got a file', data=file.data)
+    file: ObjectStore.ObjectResult = await storage.get(filename)
+    logfire.info(
+        'Got a file',
+        filename=filename,
+        size=file.info.size,
+        bucket=file.info.bucket,
+        description=file.info.description,
+    )
 
     use_case = UploadFileViaSFTPUseCase(file)
     await use_case.execute()
     await storage.delete(filename)
+    logfire.info('File deleted', filename=filename)
 
 

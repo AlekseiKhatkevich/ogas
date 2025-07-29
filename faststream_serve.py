@@ -146,12 +146,14 @@ async def distributed_settings_handle(logger: Logger) -> None:
 @app.after_startup
 async def create_nats_object_storage() -> None:
     """Создаем бакет для получения файлов от организаций."""
+    bucket = 'file_upload'
     await nc_broker.object_storage(
-        'file_upload',
+        bucket,
         description='File upload bucket.',
         storage=StorageType.FILE,
         ttl=60 * 60 * 24,
     )
+    logfire.info('Created object storage after faststream app startup', bucket=bucket)
 
 
 async def main() -> Never:
