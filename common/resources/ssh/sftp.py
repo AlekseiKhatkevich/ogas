@@ -47,5 +47,9 @@ def _get_ssh_repository() -> SSHRepository:
 def __getattr__(name: str) -> Any:
     if name == 'ssh_repository':
         return _get_ssh_repository()
-    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+    elif name in __all__:
+        import importlib
+        return importlib.import_module('.' + name, __name__)
+    else:
+        raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
 
