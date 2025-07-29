@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
-from typing import AsyncGenerator, TYPE_CHECKING
+from functools import cache
+from typing import Any, AsyncGenerator, TYPE_CHECKING
 
 import asyncssh
 
@@ -35,4 +36,16 @@ class SSHRepository:
                 yield sftp
 
 
-ssh_repository = SSHRepository(settings.SFTP_HOST, settings.SFTP_USERNAME, settings.SFTP_PASSWORD)
+ssh_repository: SSHRepository
+
+
+@cache
+def _get_ssh_repository():
+    return SSHRepository(settings.SFTP_HOST, settings.SFTP_USERNAME, settings.SFTP_PASSWORD)
+
+
+def __getattr__(name: str) -> Any:
+    if name == 'ssh_repository':
+        return _get_ssh_repository()
+    raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+
