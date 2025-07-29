@@ -5,6 +5,7 @@ description = "OGAS"
 readme = "README.md"
 requires-python = ">=3.13,<3.14"
 dependencies = [
+    "aiofiles>=24.1.0",
     "alembic>=1.15.2",
     "alembic-postgresql-enum>=1.7.0",
     "alembic-utils>=0.8.8",

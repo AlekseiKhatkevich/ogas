@@ -16,6 +16,7 @@ from common.settings.postgres import PostgresSettings
 from common.settings.prometheus import PrometheusSettings
 from common.settings.ravendb import RavenDBSettings
 from common.settings.redis import RedisSettings
+from common.settings.sftp import SFTPSettings
 
 __all__ = (
     'general_settings',
@@ -79,6 +80,7 @@ class GeneralSettings(
     DistributedSettings,
     LogfireSettings,
     NatsSettings,
+    SFTPSettings,
     BaseSettings,
 ):
     model_config = SettingsConfigDict(
@@ -91,6 +93,7 @@ class GeneralSettings(
             'env/ravendb.env',
             'env/logfire.env',
             'env/nats.env',
+            'env/sftp.env',
         ),
         env_file_encoding='utf-8',
         extra='ignore',
