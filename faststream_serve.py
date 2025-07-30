@@ -10,6 +10,7 @@ from faststream.kafka.opentelemetry import KafkaTelemetryMiddleware
 from faststream.nats.opentelemetry import NatsTelemetryMiddleware
 from faststream.kafka.prometheus import KafkaPrometheusMiddleware
 from nats.js.api import StorageType
+from nats.js.errors import BadRequestError
 from prometheus_client import CollectorRegistry, make_asgi_app, multiprocess
 
 from center.faststream import (
@@ -147,19 +148,26 @@ async def distributed_settings_handle(logger: Logger) -> None:
 async def create_nats_object_storage() -> None:
     """Создаем бакет для получения файлов от организаций."""
     bucket = 'file_upload'
-    await nc_broker.object_storage(
-        bucket,
-        description='File upload bucket.',
-        storage=StorageType.FILE,
-        ttl=60 * 60 * 24,
-    )
-    logfire.info('Created object storage after faststream app startup', bucket=bucket)
+    try:
+        await nc_broker.object_storage(
+            bucket,
+            description='File upload bucket.',
+            storage=StorageType.FILE,
+            ttl=60 * 60 * 24,
+        )
+        logfire.info('Created object storage after faststream app startup', bucket=bucket)
+    except BadRequestError:
+        logfire.warn('Bucket already exists, skipping creation...', bucket=bucket)
 
 
 async def main() -> Never:
     await app.run()
 
 
+async def main_nc() -> Never:
+    await nc_app.run()
+
+
 if __name__ == '__main__':  # дебаг запускать отсюда
     # noinspection PyUnreachableCode
-    asyncio.run(main())
+    asyncio.run(main_nc())

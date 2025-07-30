@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import aiofiles
 import logfire
 from nats.js.object_store import ObjectStore
@@ -20,7 +22,7 @@ class UploadFileViaSFTPUseCase(AbstractUseCase):
             async with ssh_repository.sftp_client as sftp:
                 await sftp.put(
                     temp_file.name,
-                    remotepath=self.file_obj.info.name,
+                    remotepath=Path(self.file_obj.info.name).name,
                     preserve=True,
                 )
                 logfire.info('File was sent via SFTP', _tags=['sftp'])
