@@ -170,4 +170,4 @@ async def main_nc() -> Never:
 
 if __name__ == '__main__':  # дебаг запускать отсюда
     # noinspection PyUnreachableCode
-    asyncio.run(main_nc())
+    asyncio.run(main())

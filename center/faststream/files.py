@@ -35,4 +35,3 @@ async def file_upload_handler(
     await storage.delete(filename)
     logfire.info('File deleted', filename=filename)
 
-
