@@ -14,7 +14,7 @@ A brief description of your project, what it does, and its purpose.
 
 ## Introduction
 
-Provide a more detailed introduction to your project. Explain the problem it solves and why it is useful.
+Это прототип системы ОГАС созданный при помощи фреймворка Faststream.
 
 ## Features
 
